@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where py:*)",
+      "Bash(where node:*)",
+      "Bash(where npx:*)",
+      "Bash(where php:*)",
+      "Bash(where ruby:*)",
+      "Bash(where dotnet:*)",
+      "Bash(where powershell:*)",
+      "Bash(where pwsh:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -Command \"Write-Host ''test''; exit 0\")",
+      "Bash(netstat -ano)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(cp nappan-app.html index.html)",
+      "Bash(sed -i '8,1297d' index.html)",
+      "Bash(sed -i '1380,1570d' index.html)",
+      "Bash(rm -f index.html)",
+      "Bash(sed -i '7a<link rel=\"\"stylesheet\"\" href=\"\"styles.css\"\">' index.html)",
+      "Bash(sed -i '$ s|</body>|<script src=\"\"script.js\"\"></script>\\\\n</body>|' index.html)",
+      "Bash(sed -i '/<script/d' index.html)",
+      "Bash(sed -i '/<\\\\/script/d' index.html)",
+      "Bash(sed -n '10,20p' index.html)",
+      "Bash(echo \"=== BEFORE </body> ===\")",
+      "Bash(sed -i ':a;N;$!ba;s/<script>.*<\\\\/script>//gs' index.html)",
+      "Bash(sed -i '/<\\\\/body>/i<script src=\"\"script.js\"\"></script>' index.html)",
+      "Bash(rm index.html)",
+      "Bash(cp nappan-app.html temp.html)",
+      "Bash(perl -i -0pe 's/<script>.*?<\\\\/script>//gs' temp.html)",
+      "Bash(perl -i -0pe 's/<style>.*?<\\\\/style>//gs' temp.html)",
+      "Bash(mv temp.html index.html)",
+      "Bash(taskkill /PID 4 /F)",
+      "Bash(kill -9 4)",
+      "Bash(sed -i '65d' index.html)",
+      "Bash(sed -n '60,70p' index.html)"
+    ]
+  }
+}

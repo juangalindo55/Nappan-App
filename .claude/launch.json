@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static HTML Server",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\Users\\Surface\\OneDrive\\Desktop\\Nappan App\\.claude\\serve.bat"],
+      "port": 8080,
+      "autoPort": true
+    }
+  ]
+}

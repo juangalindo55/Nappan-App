@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protein Fit Bar — Nappan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Lora', serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .back-btn {
+      background: rgba(218, 165, 32, 0.2);
+      color: #DAA520;
+      border: 1px solid #DAA520;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #DAA520;
+      color: #1a1a1a;
+    }
+
+    header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      flex: 1;
+      text-align: center;
+    }
+
+    .spacer {
+      width: 46px;
+    }
+
+    /* MAIN CONTENT */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* HERO SECTION */
+    .pfb-hero {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      border-bottom: 3px solid #DAA520;
+      margin-bottom: 40px;
+      margin: 0 -15px 40px -15px;
+    }
+
+    .pfb-tag {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #DAA520;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      font-style: italic;
+    }
+
+    .pfb-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 900;
+      margin: 15px 0;
+      letter-spacing: -1px;
+    }
+
+    .pfb-hero h1 span {
+      color: #DAA520;
+      display: block;
+      font-size: 36px;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .pfb-hero p {
+      font-size: 16px;
+      color: #ccc;
+      margin-top: 15px;
+      font-style: italic;
+    }
+
+    /* SECTION HEADERS */
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section-icon {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    .section-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0;
+      color: #1a1a1a;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-top: 8px;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    /* PRODUCT SECTION */
+    .product-section {
+      margin-bottom: 50px;
+      padding: 0 0px;
+    }
+
+    /* PRODUCTS GRID */
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* PRODUCT CARD */
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #f0f0f0;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+      height: 200px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      font-weight: bold;
+    }
+
+    .product-info {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-info h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin: 0 0 8px 0;
+      color: #1a1a1a;
+    }
+
+    .product-desc {
+      font-size: 13px;
+      color: #888;
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    .product-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #DAA520;
+      margin: 10px 0;
+    }
+
+    .product-note {
+      font-size: 12px;
+      color: #DAA520;
+      margin: 8px 0 0 0;
+    }
+
+    .add-btn {
+      margin-top: auto;
+      padding: 12px 16px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .add-btn:hover {
+      background: #DAA520;
+      color: #1a1a1a;
+    }
+
+    .add-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* COMBOS SECTION */
+    .combos-section {
+      background: #f9f9f9;
+      padding: 40px 15px;
+      margin: 50px -15px 0 -15px;
+      border-top: 3px solid #DAA520;
+    }
+
+    .combos-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .combos-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* COMBO CARD */
+    .combo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .combo-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .combo-fit {
+      border-color: #C7A17A;
+    }
+
+    .combo-fit:hover {
+      background: #FFF8F0;
+    }
+
+    .combo-shots {
+      border-color: #7BC043;
+    }
+
+    .combo-shots:hover {
+      background: #F0FFF0;
+    }
+
+    .combo-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .combo-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      margin: 0 0 12px 0;
+      color: #1a1a1a;
+    }
+
+    .combo-items {
+      font-size: 14px;
+      color: #888;
+      margin: 0 0 15px 0;
+      line-height: 1.6;
+    }
+
+    .combo-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 900;
+      color: #DAA520;
+      margin: 15px 0;
+    }
+
+    .combo-btn {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    /* ORDER SUMMARY */
+    .order-summary {
+      margin: 50px 0;
+      padding: 30px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border-left: 5px solid #DAA520;
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .summary-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      margin: 0;
+      color: #1a1a1a;
+    }
+
+    .clear-cart-btn {
+      padding: 8px 16px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .clear-cart-btn:hover {
+      background: #ff5252;
+    }
+
+    .cart-items {
+      margin-bottom: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .empty-cart {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item-name {
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .cart-item-price {
+      color: #DAA520;
+      font-weight: 600;
+    }
+
+    .cart-item-remove {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .cart-item-remove:hover {
+      background: #ff5252;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 15px;
+      border-top: 2px solid #DAA520;
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .cart-total span:last-child {
+      color: #DAA520;
+    }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 40px 0 20px 0;
+      color: #1a1a1a;
+    }
+
+    /* DATE SECTION */
+    .date-section {
+      padding: 0 0px 30px 0px;
+    }
+
+    .date-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    @media (min-width: 768px) {
+      .date-card {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .date-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .date-field label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+      font-size: 14px;
+    }
+
+    .date-field input,
+    .date-field textarea {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .date-field input:focus,
+    .date-field textarea:focus {
+      outline: none;
+      border-color: #DAA520;
+      box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+    }
+
+    .date-field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* SUBMIT BUTTON */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 40px 0;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #DAA520 0%, #F0E68C 100%);
+      color: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* TOAST */
+    .pfb-toast {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 9999;
+      transition: bottom 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .pfb-toast.show {
+      bottom: 20px;
+    }
+
+    .pfb-toast.success {
+      background: #4CAF50;
+    }
+
+    .pfb-toast.warning {
+      background: #FF9800;
+    }
+
+    .pfb-toast.error {
+      background: #f44336;
+    }
+
+    .pfb-toast.info {
+      background: #2196F3;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .pfb-hero h1 {
+        font-size: 36px;
+      }
+
+      .pfb-hero h1 span {
+        font-size: 28px;
+      }
+
+      .section-header h2 {
+        font-size: 28px;
+      }
+
+      .product-info h3 {
+        font-size: 18px;
+      }
+
+      .combo-card h3 {
+        font-size: 24px;
+      }
+
+      .combo-price {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-content">
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+    <h2>Protein Fit Bar</h2>
+    <div class="spacer"></div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- HERO -->
+  <div class="pfb-hero">
+    <div class="pfb-tag">Eat Clean · Feel Strong</div>
+    <h1>Nappan <span>Fit Edition</span></h1>
+    <p>Proteína funcional • Lista para llevar • Hecha con amor</p>
+  </div>
+
+  <!-- COFFEE BAR SECTION -->
+  <section class="product-section">
+    <div class="section-header">
+      <span class="section-icon">☕</span>
+      <h2>Coffee Bar</h2>
+      <p class="section-subtitle">Protein Coffee • Ready to Go</p>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #C7A17A 0%, #D4B5A0 100%);"></div>
+        <div class="product-info">
+          <h3>Cold Protein Latte</h3>
+          <p class="product-desc">Espresso + leche + proteína vainilla</p>
+          <div class="product-price">$75</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Cold Protein Latte', 75, 'coffee')">+ Agregar</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #3D3D3D 0%, #5C4033 100%);"></div>
+        <div class="product-info">
+          <h3>Cold Brew</h3>
+          <p class="product-desc">Cold brew puro</p>
+          <div class="product-price">$75</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Cold Brew', 75, 'coffee')">+ Agregar</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 100%);"></div>
+        <div class="product-info">
+          <h3>Black Coffee</h3>
+          <p class="product-desc">Café negro puro</p>
+          <div class="product-price">$35 c/taza</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Black Coffee', 35, 'coffee')">+ Agregar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOST SHOTS SECTION -->
+  <section class="product-section">
+    <div class="section-header">
+      <span class="section-icon">🍹</span>
+      <h2>Boost Shots</h2>
+      <p class="section-subtitle">Energía natural • Funcional</p>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #7BC043 0%, #A4D45E 100%);"></div>
+        <div class="product-info">
+          <h3>Detox Glow</h3>
+          <p class="product-desc">Desintoxicación natural</p>
+          <div class="product-price">$29</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Detox Glow', 29, 'shots')">+ Agregar</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);"></div>
+        <div class="product-info">
+          <h3>Energy Boost</h3>
+          <p class="product-desc">Energía y vitalidad</p>
+          <div class="product-price">$29</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Energy Boost', 29, 'shots')">+ Agregar</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #DAA520 0%, #F0E68C 100%);"></div>
+        <div class="product-info">
+          <h3>Golden Power</h3>
+          <p class="product-desc">Fuerza y resistencia</p>
+          <div class="product-price">$29</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('Golden Power', 29, 'shots')">+ Agregar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE PANCAKES SECTION -->
+  <section class="product-section">
+    <div class="section-header">
+      <span class="section-icon">🥞</span>
+      <h2>Signature Pancakes</h2>
+      <p class="section-subtitle">Fresh • High Protein • Made to Order</p>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%);"></div>
+        <div class="product-info">
+          <h3>Power Pancakes</h3>
+          <p class="product-desc">Stack de pancakes proteicos</p>
+          <div class="product-price">$90–$110</div>
+          <p class="product-note">✨ Elige toppings</p>
+        </div>
+        <button class="add-btn" onclick="addToCart('Power Pancakes', 90, 'pancakes')">+ Agregar</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);"></div>
+        <div class="product-info">
+          <h3>Protein Minis</h3>
+          <p class="product-desc">Porciones mini de pancakes</p>
+          <div class="product-price">$55</div>
+          <p class="product-note">Perfectas para compartir</p>
+        </div>
+        <button class="add-btn" onclick="addToCart('Protein Minis', 55, 'pancakes')">+ Agregar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMBOS SECTION -->
+  <section class="product-section combos-section">
+    <div class="section-header">
+      <span class="section-icon">🛍️</span>
+      <h2>Combos</h2>
+      <p class="section-subtitle">Ahorra más comprando combo</p>
+    </div>
+
+    <div class="combos-grid">
+      <div class="combo-card combo-fit">
+        <div class="combo-icon">☕</div>
+        <h3>Combo Fit</h3>
+        <p class="combo-items">☕ Coffee + 🥞 Pancakes</p>
+        <div class="combo-price">$135</div>
+        <button class="add-btn combo-btn" onclick="addToCart('Combo Fit', 135, 'combos')">+ Agregar</button>
+      </div>
+
+      <div class="combo-card combo-shots">
+        <div class="combo-icon">🍹</div>
+        <h3>Combo Shots</h3>
+        <p class="combo-items">🍹 Shots + 🥞 Pancakes</p>
+        <div class="combo-price">$75</div>
+        <button class="add-btn combo-btn" onclick="addToCart('Combo Shots', 75, 'combos')">+ Agregar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESUMEN DE PEDIDO -->
+  <div class="order-summary">
+    <div class="summary-header">
+      <h2>📋 Tu Pedido</h2>
+      <button class="clear-cart-btn" onclick="clearCart()" style="display:none;" id="clearCartBtn">Limpiar</button>
+    </div>
+
+    <div id="cart-items" class="cart-items">
+      <p class="empty-cart">Tu carrito está vacío</p>
+    </div>
+
+    <div class="cart-total">
+      <span>Total:</span>
+      <span id="cart-total">$0</span>
+    </div>
+  </div>
+
+  <!-- DATOS DEL CLIENTE -->
+  <div class="section-title">📅 Datos del pedido</div>
+  <div class="date-section">
+    <div class="date-card">
+      <div class="date-field">
+        <label>👤 Tu nombre</label>
+        <input type="text" id="clientName" placeholder="Ej. María García" />
+      </div>
+      <div class="date-field">
+        <label>📅 Fecha de entrega</label>
+        <input type="date" id="deliveryDate" />
+      </div>
+      <div class="date-field">
+        <label>⏰ Hora aproximada</label>
+        <input type="time" id="deliveryTime" />
+      </div>
+      <div class="date-field" style="grid-column: 1 / -1;">
+        <label>📝 Notas especiales (opcional)</label>
+        <textarea id="specialNotes" placeholder="Alergias, preferencias, instrucciones especiales..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENVIAR PEDIDO -->
+  <button class="submit-btn" onclick="sendPFBWhatsApp()">
+    💬 Enviar pedido por WhatsApp
+  </button>
+
+</main>
+
+<!-- TOAST -->
+<div class="pfb-toast" id="pfb-toast"></div>
+
+<script>
+  // ============================================
+  // PROTEIN FIT BAR - FUNCIONES JAVASCRIPT
+  // ============================================
+
+  // CONFIGURACIÓN
+  const WA_NUMBER = '528123509768'; // Número de WhatsApp
+
+  // CARRITO DE COMPRAS
+  let cartPFB = [];
+
+  // Agregar producto al carrito
+  function addToCart(productName, price, category) {
+    cartPFB.push({
+      name: productName,
+      price: price,
+      category: category,
+      id: Date.now()
+    });
+
+    updateCart();
+    showToast(`✅ ${productName} agregado al carrito`, 'success');
+  }
+
+  // Actualizar carrito (UI)
+  function updateCart() {
+    const cartContainer = document.getElementById('cart-items');
+    const totalElement = document.getElementById('cart-total');
+    const clearBtn = document.getElementById('clearCartBtn');
+
+    if (cartPFB.length === 0) {
+      cartContainer.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
+      totalElement.textContent = '$0';
+      clearBtn.style.display = 'none';
+      return;
+    }
+
+    clearBtn.style.display = 'inline-block';
+
+    // Agrupar por producto
+    const groupedCart = {};
+    cartPFB.forEach(item => {
+      if (!groupedCart[item.name]) {
+        groupedCart[item.name] = {
+          name: item.name,
+          price: item.price,
+          quantity: 0,
+          items: []
+        };
+      }
+      groupedCart[item.name].quantity++;
+      groupedCart[item.name].items.push(item);
+    });
+
+    // Renderizar items
+    let html = '';
+    Object.values(groupedCart).forEach(group => {
+      const subtotal = group.price * group.quantity;
+      html += `
+        <div class="cart-item">
+          <div>
+            <div class="cart-item-name">${group.name}</div>
+            <small style="color: #888;">x${group.quantity}</small>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="cart-item-price">$${subtotal}</span>
+            <button class="cart-item-remove" onclick="removeFromCart('${group.name}')">✕</button>
+          </div>
+        </div>
+      `;
+    });
+
+    cartContainer.innerHTML = html;
+
+    // Calcular total
+    const total = cartPFB.reduce((sum, item) => sum + item.price, 0);
+    totalElement.textContent = `$${total}`;
+  }
+
+  // Eliminar producto del carrito
+  function removeFromCart(productName) {
+    const index = cartPFB.findIndex(item => item.name === productName);
+    if (index !== -1) {
+      cartPFB.splice(index, 1);
+      updateCart();
+      showToast(`❌ Producto removido`, 'info');
+    }
+  }
+
+  // Limpiar carrito
+  function clearCart() {
+    if (cartPFB.length === 0) {
+      showToast('El carrito ya está vacío', 'info');
+      return;
+    }
+
+    if (confirm('¿Estás seguro de que quieres limpiar el carrito?')) {
+      cartPFB = [];
+      updateCart();
+      showToast('🗑️ Carrito vaciado', 'info');
+    }
+  }
+
+  // ENVIAR PEDIDO POR WHATSAPP
+  function sendPFBWhatsApp() {
+    if (cartPFB.length === 0) {
+      showToast('⚠️ Debes agregar al menos un producto', 'warning');
+      return;
+    }
+
+    const clientName = document.getElementById('clientName').value.trim();
+    const deliveryDate = document.getElementById('deliveryDate').value;
+    const deliveryTime = document.getElementById('deliveryTime').value;
+    const specialNotes = document.getElementById('specialNotes').value.trim();
+
+    if (!clientName) {
+      showToast('⚠️ Por favor ingresa tu nombre', 'warning');
+      return;
+    }
+
+    if (!deliveryDate) {
+      showToast('⚠️ Por favor selecciona la fecha de entrega', 'warning');
+      return;
+    }
+
+    // Agrupar carrito
+    const groupedCart = {};
+    cartPFB.forEach(item => {
+      if (!groupedCart[item.name]) {
+        groupedCart[item.name] = {
+          name: item.name,
+          price: item.price,
+          quantity: 0
+        };
+      }
+      groupedCart[item.name].quantity++;
+    });
+
+    // Mensaje para WhatsApp
+    let message = '🎉 *NUEVO PEDIDO - PROTEIN FIT BAR*\n\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━\n';
+    message += `👤 *Cliente:* ${clientName}\n`;
+    message += `📅 *Fecha:* ${deliveryDate}\n`;
+
+    if (deliveryTime) {
+      message += `⏰ *Hora:* ${deliveryTime}\n`;
+    }
+
+    message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    message += '📋 *PRODUCTOS:*\n';
+
+    let total = 0;
+    Object.values(groupedCart).forEach(item => {
+      const subtotal = item.price * item.quantity;
+      total += subtotal;
+      message += `• ${item.name} x${item.quantity} = $${subtotal}\n`;
+    });
+
+    message += '\n━━━━━━━━━━━━━━━━━━━━━━━\n';
+    message += `💰 *TOTAL:* $${total}\n`;
+    message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    if (specialNotes) {
+      message += `📝 *Notas especiales:*\n${specialNotes}\n\n`;
+    }
+
+    message += `✨ Pedido generado desde Nappan Fit Edition`;
+
+    // URL de WhatsApp
+    const whatsappURL = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
+
+    // Abrir WhatsApp
+    window.open(whatsappURL, '_blank');
+
+    // Limpiar formulario
+    setTimeout(() => {
+      document.getElementById('clientName').value = '';
+      document.getElementById('deliveryDate').value = '';
+      document.getElementById('deliveryTime').value = '';
+      document.getElementById('specialNotes').value = '';
+      cartPFB = [];
+      updateCart();
+      showToast('✅ Pedido enviado a WhatsApp', 'success');
+    }, 500);
+  }
+
+  // TOAST NOTIFICATION
+  function showToast(message, type = 'info') {
+    const toast = document.getElementById('pfb-toast');
+    toast.textContent = message;
+    toast.className = `pfb-toast show ${type}`;
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // INICIALIZAR
+  document.addEventListener('DOMContentLoaded', function() {
+    updateCart();
+    
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('deliveryDate').min = today;
+  });
+</script>
+
+</body>
+</html>
