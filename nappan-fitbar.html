@@ -283,11 +283,28 @@
   let cartPFB = [];
 
   // Agregar producto al carrito
-  function addToCart(productName, price, category) {
+  function addToCart(productName, price, category, imagePath = null) {
+    // Mapeo de productos a imágenes
+    const productImages = {
+      'Detox Glow': 'detox-glow.png',
+      'Energy Boost': 'energy-boost.png',
+      'Golden Power': 'golden-power.png',
+      'Cold Protein Latte': null,
+      'Cold Brew': null,
+      'Black Coffee': null,
+      'Power Pancakes': null,
+      'Protein Minis': null,
+      'Combo Fit': null,
+      'Combo Shots': null
+    };
+
+    const image = imagePath || productImages[productName] || null;
+
     cartPFB.push({
       name: productName,
       price: price,
       category: category,
+      image: image,
       id: Date.now()
     });
 
@@ -296,15 +313,32 @@
   }
 
   // Agregar producto con cantidad (para Boost Shots)
-  function addToCartShot(productName, price, qtyInputId) {
+  function addToCartShot(productName, price, qtyInputId, imagePath = null) {
     const qtyInput = document.getElementById(qtyInputId);
     const quantity = parseInt(qtyInput.value) || 1;
+
+    // Mapeo de productos a imágenes
+    const productImages = {
+      'Detox Glow': 'detox-glow.png',
+      'Energy Boost': 'energy-boost.png',
+      'Golden Power': 'golden-power.png',
+      'Cold Protein Latte': null,
+      'Cold Brew': null,
+      'Black Coffee': null,
+      'Power Pancakes': null,
+      'Protein Minis': null,
+      'Combo Fit': null,
+      'Combo Shots': null
+    };
+
+    const image = imagePath || productImages[productName] || null;
 
     for (let i = 0; i < quantity; i++) {
       cartPFB.push({
         name: productName,
         price: price,
         category: 'shots',
+        image: image,
         id: Date.now() + i
       });
     }
@@ -348,11 +382,15 @@
     let html = '';
     Object.values(groupedCart).forEach(group => {
       const subtotal = group.price * group.quantity;
+      const thumbnail = group.items[0].image ? `<img src="${group.items[0].image}" alt="${group.name}" class="cart-item-thumbnail">` : '';
       html += `
         <div class="cart-item">
-          <div>
-            <div class="cart-item-name">${group.name}</div>
-            <small style="color: #888;">x${group.quantity}</small>
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            ${thumbnail}
+            <div>
+              <div class="cart-item-name">${group.name}</div>
+              <small style="color: #888;">x${group.quantity}</small>
+            </div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <span class="cart-item-price">$${subtotal}</span>

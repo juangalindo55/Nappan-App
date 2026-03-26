@@ -1817,6 +1817,16 @@ body.page-fitbar .cart-item-remove:hover {
       background: #ff5252;
     }
 
+body.page-fitbar .cart-item-thumbnail {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid #DAA520;
+      object-fit: cover;
+      object-position: center;
+      flex-shrink: 0;
+    }
+
 body.page-fitbar .cart-total {
       display: flex;
       justify-content: space-between;
