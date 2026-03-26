@@ -46,7 +46,10 @@
           <p class="product-desc">Espresso + leche + proteína vainilla</p>
           <div class="product-price">$75</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Cold Protein Latte', 75, 'coffee')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-cold-protein-latte" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Cold Protein Latte', 75, 'qty-cold-protein-latte')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="product-card">
@@ -56,7 +59,10 @@
           <p class="product-desc">Cold brew puro</p>
           <div class="product-price">$75</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Cold Brew', 75, 'coffee')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-cold-brew" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Cold Brew', 75, 'qty-cold-brew')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="product-card">
@@ -66,7 +72,10 @@
           <p class="product-desc">Café negro puro</p>
           <div class="product-price">$35 c/taza</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Black Coffee', 35, 'coffee')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-black-coffee" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Black Coffee', 35, 'qty-black-coffee')">+ Agregar</button>
+        </div>
       </div>
     </div>
   </section>
@@ -81,33 +90,42 @@
 
     <div class="products-grid">
       <div class="product-card">
-        <div class="product-image" style="background: linear-gradient(135deg, #7BC043 0%, #A4D45E 100%);"></div>
+        <div class="product-image"><img src="Green%20Shot%20Detox%20Glow.png" alt="Detox Glow" class="product-img"></div>
         <div class="product-info">
           <h3>Detox Glow</h3>
           <p class="product-desc">Desintoxicación natural</p>
           <div class="product-price">$29</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Detox Glow', 29, 'shots')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-detox-glow" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Detox Glow', 29, 'qty-detox-glow')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="product-card">
-        <div class="product-image" style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);"></div>
+        <div class="product-image"><img src="Red%20Energy%20Boost.png" alt="Energy Boost" class="product-img"></div>
         <div class="product-info">
           <h3>Energy Boost</h3>
           <p class="product-desc">Energía y vitalidad</p>
           <div class="product-price">$29</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Energy Boost', 29, 'shots')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-energy-boost" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Energy Boost', 29, 'qty-energy-boost')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="product-card">
-        <div class="product-image" style="background: linear-gradient(135deg, #DAA520 0%, #F0E68C 100%);"></div>
+        <div class="product-image"><img src="Golden%20Power.png" alt="Golden Power" class="product-img"></div>
         <div class="product-info">
           <h3>Golden Power</h3>
           <p class="product-desc">Fuerza y resistencia</p>
           <div class="product-price">$29</div>
         </div>
-        <button class="add-btn" onclick="addToCart('Golden Power', 29, 'shots')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-golden-power" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Golden Power', 29, 'qty-golden-power')">+ Agregar</button>
+        </div>
       </div>
     </div>
   </section>
@@ -129,7 +147,10 @@
           <div class="product-price">$90–$110</div>
           <p class="product-note">✨ Elige toppings</p>
         </div>
-        <button class="add-btn" onclick="addToCart('Power Pancakes', 90, 'pancakes')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-power-pancakes" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Power Pancakes', 90, 'qty-power-pancakes')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="product-card">
@@ -140,7 +161,10 @@
           <div class="product-price">$55</div>
           <p class="product-note">Perfectas para compartir</p>
         </div>
-        <button class="add-btn" onclick="addToCart('Protein Minis', 55, 'pancakes')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-protein-minis" class="qty-input" value="1" min="1">
+          <button class="add-btn" onclick="addToCartShot('Protein Minis', 55, 'qty-protein-minis')">+ Agregar</button>
+        </div>
       </div>
     </div>
   </section>
@@ -159,7 +183,10 @@
         <h3>Combo Fit</h3>
         <p class="combo-items">☕ Coffee + 🥞 Pancakes</p>
         <div class="combo-price">$135</div>
-        <button class="add-btn combo-btn" onclick="addToCart('Combo Fit', 135, 'combos')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-combo-fit" class="qty-input" value="1" min="1">
+          <button class="add-btn combo-btn" onclick="addToCartShot('Combo Fit', 135, 'qty-combo-fit')">+ Agregar</button>
+        </div>
       </div>
 
       <div class="combo-card combo-shots">
@@ -167,7 +194,10 @@
         <h3>Combo Shots</h3>
         <p class="combo-items">🍹 Shots + 🥞 Pancakes</p>
         <div class="combo-price">$75</div>
-        <button class="add-btn combo-btn" onclick="addToCart('Combo Shots', 75, 'combos')">+ Agregar</button>
+        <div class="product-footer">
+          <input type="number" id="qty-combo-shots" class="qty-input" value="1" min="1">
+          <button class="add-btn combo-btn" onclick="addToCartShot('Combo Shots', 75, 'qty-combo-shots')">+ Agregar</button>
+        </div>
       </div>
     </div>
   </section>
@@ -244,6 +274,25 @@
 
     updateCart();
     showToast(`✅ ${productName} agregado al carrito`, 'success');
+  }
+
+  // Agregar producto con cantidad (para Boost Shots)
+  function addToCartShot(productName, price, qtyInputId) {
+    const qtyInput = document.getElementById(qtyInputId);
+    const quantity = parseInt(qtyInput.value) || 1;
+
+    for (let i = 0; i < quantity; i++) {
+      cartPFB.push({
+        name: productName,
+        price: price,
+        category: 'shots',
+        id: Date.now() + i
+      });
+    }
+
+    updateCart();
+    showToast(`✅ ${quantity}x ${productName} agregado al carrito`, 'success');
+    qtyInput.value = 1; // Reset input
   }
 
   // Actualizar carrito (UI)
