@@ -34,7 +34,8 @@
       "Bash(taskkill /PID 4 /F)",
       "Bash(kill -9 4)",
       "Bash(sed -i '65d' index.html)",
-      "Bash(sed -n '60,70p' index.html)"
+      "Bash(sed -n '60,70p' index.html)",
+      "Bash(gh pr:*)"
     ]
   }
 }

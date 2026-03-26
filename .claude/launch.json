@@ -3,10 +3,10 @@
   "configurations": [
     {
       "name": "Static HTML Server",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "C:\\Users\\Surface\\OneDrive\\Desktop\\Nappan App\\.claude\\serve.bat"],
-      "port": 8080,
-      "autoPort": true
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8081", "--directory", "."],
+      "port": 8081,
+      "autoPort": false
     }
   ]
 }
