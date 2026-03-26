@@ -1351,8 +1351,9 @@ body.page-nappanbox .form-field label {
 body.page-nappanbox .form-field input, body.page-nappanbox .form-field textarea, body.page-nappanbox .form-field select {
     background:rgba(255,255,255,0.05);
     border:1.5px solid rgba(255,255,255,0.1);
-    border-radius:12px; padding:12px 16px;
-    font-family:'Lora',serif; font-size:14px;
+    border-radius:12px; padding:16px 16px;
+    font-family:var(--font-sans); font-size:14px;
+    line-height: 1.5;
     color:var(--cream); outline:none;
     transition:border-color 0.2s;
   }
