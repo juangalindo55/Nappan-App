@@ -1538,7 +1538,7 @@ body.page-fitbar .product-card:hover {
     }
 
 body.page-fitbar .product-image {
-      height: 280px;
+      height: 350px;
       width: 100%;
       display: flex;
       align-items: center;
