@@ -1,75 +1,64 @@
-# CLAUDE.md
+# CLAUDE.md - Nappan App Architecture & Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with the **Nappan** repository.
 
 ## Project Overview
-
-**Nappan** is a lifestyle brand app (Coffee & Fitbar) built with pure HTML5, CSS3, and Vanilla JavaScript — no build tools, no frameworks, no package manager.
+**Nappan** is a lifestyle brand app (Coffee, Lunch Box & Fitbar) built with pure HTML5, CSS3, and Vanilla JavaScript. 
+**Status:** Recently refactored to a modular multi-page architecture for better maintenance.
 
 ## Running Locally
-
 Start the local static server on port 8080:
 
 ```bash
 # From project root (Windows)
 .claude/serve.bat
-```
+Then open http://localhost:8080 in the browser.
 
-Or directly with PowerShell:
+Architecture & File Structure
+The project has moved from a monolithic file to a Modular Multi-page structure.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File ".claude/serve.ps1"
-```
+index.html: Main landing page (Entry Point). Contains the navigation hub to all sections.
 
-Then open `http://localhost:8080` in the browser.
+styles.css: Cleaned & Optimized. Contains global variables (colors, fonts) and shared layout rules. (Refactored: -300+ redundant lines removed).
 
-There are no tests, no build step, and no lint commands.
+script.js: Global logic handler.
 
-## Architecture
+goTo(page): Navigation router that points to independent HTML files.
 
-All logic is self-contained in a small set of large files:
+initNappanBox(): Core cart and WhatsApp logic.
 
-- **`index.html`** — Main landing page (entry point). Contains the full homepage UI inline.
-- **`script.js`** — Global JS shared across pages. Includes:
-  - `goTo(page)` — navigation router; routes to `nappan-lunchbox.html` or `nappan-fitbar.html`, shows a "Próximamente" toast for all other pages.
-  - `initNappanBox()` — cart and WhatsApp order logic for the Lunchbox section.
-- **`styles.css`** — Global styles shared across pages.
-- **`nappan-fitbar.html`** — Fitbar page; fully self-contained (inline CSS + JS), no external dependencies.
-- **`nappan-app.html`** — Coffee page (in progress).
+Section Pages (Independent Modules)
+Each section is now a standalone file to simplify maintenance:
 
-### Page pattern
-Each section page (fitbar, lunchbox, etc.) is a **standalone HTML file** with its own inline `<style>` and `<script>` blocks. This keeps pages independent and avoids external dependencies.
+lunch-box.html: Dedicated section for Lunch Box products.
 
-### WhatsApp integration
-Orders are submitted by opening a WhatsApp URL. The business phone number is hardcoded as:
-```javascript
-const WA_NUMBER = '528123509768'; // Format: 52 + number without leading 0
-```
-This constant appears in both `script.js` (NappanBox) and `nappan-fitbar.html` (Fitbar cart).
+nappan-box.html: Dedicated section for Nappan Box curated selections.
 
-## Design System
+protein-fit-bar.html: Dedicated section for Fit Bar and protein products.
 
-- **Fonts:** Playfair Display (headings) + Lora (body/italic) — loaded from Google Fonts
-- **Colors:** `#DAA520` gold (primary), `#1a1a1a` dark background, `#FFF8ED` warm white, `#2D1B0E` deep brown
-- **Principle:** Lightweight and minimalist — avoid heavy libraries or large images
+nappan-app.html: Coffee & Experience section (In progress).
 
-## Adding a Product
+Page Pattern
+Each section page is independent. To keep things fast and prevent "breaking the whole site," styles and scripts specific to a section can stay within their respective HTML, while sharing the global styles.css.
 
-In any section page, duplicate an existing `.product-card` and update:
+Design System (NAPPAN Brand)
+Fonts: Playfair Display (Headings) + Lora (Body/Italic).
 
-```html
-<h3>PRODUCT NAME</h3>
-<p class="product-desc">DESCRIPTION</p>
-<div class="product-price">PRICE</div>
-<button class="add-btn" onclick="addToCart('NAME', PRICE, 'category')">+ Agregar</button>
-```
+Colors: - Primary: #DAA520 (Gold)
 
-## Enabling a New Page
+Background: #1a1a1a (Dark)
 
-To make a page accessible from the home menu, add a branch in `goTo()` in `script.js`:
+Accents: #FFF8ED (Warm White), #2D1B0E (Deep Brown).
 
-```javascript
-} else if (page === 'nappan-newpage.html') {
-  window.location.href = page;
-}
-```
+Principle: Minimalist, high-end "boutique" feel. Optimized for mobile 
+
+WhatsApp Integration
+The business phone number for orders is:
+528123509768 (Format: 52 + number).
+
+Development Rules
+Clean CSS: Do not add redundant styles. Always check styles.css before adding new classes.
+
+Modular Growth: If adding a new business line (e.g., "Bakery"), create a new bakery.html instead of adding it to index.html.
+
+Navigation: Always update the goTo() function in script.js when adding new pages.
