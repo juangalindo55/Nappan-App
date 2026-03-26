@@ -35,7 +35,9 @@
       "Bash(kill -9 4)",
       "Bash(sed -i '65d' index.html)",
       "Bash(sed -n '60,70p' index.html)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(convert --version)",
+      "Bash(python -m pip install Pillow --quiet)"
     ]
   }
 }
