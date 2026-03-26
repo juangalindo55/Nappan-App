@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Preload images for faster LCP -->
+  <link rel="preload" href="detox-glow.webp" as="image" type="image/webp">
+  <link rel="preload" href="energy-boost.webp" as="image" type="image/webp">
+  <link rel="preload" href="golden-power.webp" as="image" type="image/webp">
 </head>
 <body class="page-fitbar">
 
@@ -90,7 +94,12 @@
 
     <div class="products-grid">
       <div class="product-card">
-        <div class="product-image"><img src="Green%20Shot%20Detox%20Glow.png" alt="Detox Glow" class="product-img"></div>
+        <div class="product-image">
+          <picture>
+            <source srcset="detox-glow.webp" type="image/webp">
+            <img src="detox-glow.png" alt="Detox Glow" class="product-img" loading="lazy">
+          </picture>
+        </div>
         <div class="product-info">
           <h3>Detox Glow</h3>
           <p class="product-desc">Desintoxicación natural</p>
@@ -103,7 +112,12 @@
       </div>
 
       <div class="product-card">
-        <div class="product-image"><img src="Red%20Energy%20Boost.png" alt="Energy Boost" class="product-img"></div>
+        <div class="product-image">
+          <picture>
+            <source srcset="energy-boost.webp" type="image/webp">
+            <img src="energy-boost.png" alt="Energy Boost" class="product-img" loading="lazy">
+          </picture>
+        </div>
         <div class="product-info">
           <h3>Energy Boost</h3>
           <p class="product-desc">Energía y vitalidad</p>
@@ -116,7 +130,12 @@
       </div>
 
       <div class="product-card">
-        <div class="product-image"><img src="Golden%20Power.png" alt="Golden Power" class="product-img"></div>
+        <div class="product-image">
+          <picture>
+            <source srcset="golden-power.webp" type="image/webp">
+            <img src="golden-power.png" alt="Golden Power" class="product-img" loading="lazy">
+          </picture>
+        </div>
         <div class="product-info">
           <h3>Golden Power</h3>
           <p class="product-desc">Fuerza y resistencia</p>
