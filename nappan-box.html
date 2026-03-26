@@ -156,10 +156,10 @@
         <textarea id="pr-design" placeholder="Describe en detalle el diseño que quieres. Ej: retrato de persona, personaje específico, escena, colores predominantes..."></textarea>
       </div>
       <div class="form-field full premium">
-        <label>🖼️ Adjuntar imagen de referencia</label>
-        <input type="file" id="pr-ref" accept=".jpg,.jpeg,.png,.pdf,.img" />
+        <label>📸 Imagen de referencia</label>
+        <input type="text" id="pr-ref" placeholder="Sube tu imagen a Google Drive o Instagram y pega el link aquí"/>
         <small style="display:block; margin-top:8px; color: rgba(255,248,237,0.6); font-size: 12px; font-style: italic;">
-          La imagen será sujeta a revisión por parte de la artista. Formatos: JPG, PNG, PDF, IMG
+          La imagen será sujeta a revisión por parte de la artista.
         </small>
       </div>
       <div class="form-field premium">
@@ -310,8 +310,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       const name = document.getElementById('pr-name').value.trim();
       const phone = document.getElementById('pr-phone').value.trim();
       const design = document.getElementById('pr-design').value.trim();
-      const refInput = document.getElementById('pr-ref');
-      const ref = refInput.files.length > 0 ? refInput.files[0].name : '';
+      const ref = document.getElementById('pr-ref').value.trim();
       const date = document.getElementById('pr-date').value;
       const forWho = document.getElementById('pr-for').value.trim();
       const notes = document.getElementById('pr-notes').value.trim();
