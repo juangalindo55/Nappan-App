@@ -1,227 +1,162 @@
-# 🎉 PROTEIN FIT BAR - ARCHIVO LISTO PARA USAR
+# 📋 Guía de Referencia Rápida — Nappan App
 
-## ✅ LO QUE SE GENERÓ
-
-He creado **1 archivo nuevo** completamente listo para producción:
-
-### **nappan-fitbar.html**
-- ✅ HTML completo de la página
-- ✅ CSS integrado (todo en `<style>`)
-- ✅ JavaScript integrado (todo en `<script>`)
-- ✅ Sistema de carrito funcional
-- ✅ Integración con WhatsApp
-- ✅ Formulario de pedido con validaciones
-- ✅ Diseño responsivo
-- ✅ Colores y tipografía consistentes
+**Última actualización:** Marzo 2026
+**Estado:** Producción (3 secciones live, 1 planeada)
 
 ---
 
-## 📂 ESTRUCTURA FINAL
-
-Tu carpeta quedará así:
+## 📂 Estructura del proyecto
 
 ```
-📁 tu-proyecto/
-├── index.html              ← Archivo principal (NO cambios)
-├── nappan-fitbar.html      ← ✨ ARCHIVO NUEVO (copia)
-├── nappan-lunchbox.html    ← Archivo existente
-├── script.js               ← (Ya tiene reconocimiento de nappan-fitbar.html)
-├── styles.css              ← (Sin cambios)
-└── [otras carpetas/archivos]
+📁 Nappan App/
+├── index.html              ← Landing / Hub de navegación
+├── nappan-lunchbox.html    ← Lunch Box (eventos/cumpleaños)
+├── nappan-box.html         ← Nappan Box + Premium Box
+├── nappan-fitbar.html      ← Protein Fit Bar
+├── styles.css              ← Design system global
+├── script.js               ← Router goTo() + toasts
+├── utils.js                ← WA_NUMBER compartido
+├── images/                 ← Logo, backgrounds, galería
+└── .claude/                ← Scripts de dev local
 ```
 
 ---
 
-## 🚀 PASOS PARA IMPLEMENTAR
+## 🚀 Cómo correr localmente
 
-### **PASO 1: Descargar nappan-fitbar.html**
-1. Descarga el archivo `nappan-fitbar.html`
-2. Colócalo en la **misma carpeta** que tu `index.html`
-3. ¡Listo! El archivo ya está completamente funcional
+```bash
+# Opción 1: Script incluido (Windows)
+.claude\serve.bat
 
-### **PASO 2: Actualizar número de WhatsApp (IMPORTANTE)**
+# Opción 2: Python
+python -m http.server 8080
 
-En `nappan-fitbar.html`, busca esta línea (aproximadamente línea 436):
+# Opción 3: Node.js
+npx -y serve -p 8080
+```
+
+Abrir: **http://localhost:8080**
+
+---
+
+## 📱 WhatsApp — Cambiar número
+
+El número está centralizado en **un solo archivo**:
 
 ```javascript
-const WA_NUMBER = '528123509768'; // Número de WhatsApp
+// utils.js
+const WA_NUMBER = '528123509768';
 ```
 
-**Reemplazala con tu número:**
+**Formato:** `52` + número sin `01`
 
-```javascript
-const WA_NUMBER = '528181234567'; // Tu número aquí
+Ejemplo: Si tu número es `81 2345 6789` → usa `528123456789`
+
+> ⚠️ **No** edites el número directamente en las páginas HTML. Todas importan `utils.js`.
+
+---
+
+## 🎨 Cambiar colores de marca
+
+Edita las variables CSS en `styles.css`, sección `:root`:
+
+```css
+:root {
+  --yellow:  #FFD93D;   /* Acentos, CTAs */
+  --gold:    #DAA520;   /* Color primario */
+  --cream:   #FFF8ED;   /* Fondos claros */
+  --dark:    #1A1008;   /* Fondos oscuros */
+  --brown:   #2D1B0E;   /* Texto principal */
+}
 ```
 
-Formato: `52` + tu número sin `01`
-
-### **PASO 3: Nada más**
-
-¡Ya está! Tu `script.js` ya tiene la línea que redirige a `nappan-fitbar.html`, así que cuando hagas click en el botón "Protein Fit Bar", automáticamente abre la página nueva.
-
 ---
 
-## 🧪 CÓMO PROBAR
+## ➕ Agregar productos
 
-1. **Abre** `index.html` en Chrome
-2. **Haz click** en el botón "Ver menú" → **Protein Fit Bar**
-3. **Deberías ver** la página completa con:
-   - ☕ Coffee Bar
-   - 🍹 Boost Shots
-   - 🥞 Signature Pancakes
-   - 🛍️ Combos
+### En Protein Fit Bar (`nappan-fitbar.html`)
 
-4. **Prueba:**
-   - ✅ Agregar productos al carrito
-   - ✅ Eliminar productos
-   - ✅ Limpiar carrito
-   - ✅ Llenar datos del cliente
-   - ✅ Enviar pedido a WhatsApp (se abre en pestaña nueva)
-   - ✅ Botón atrás para volver a index.html
-
----
-
-## 📋 CHECKLIST DE VERIFICACIÓN
-
-Después de copiar el archivo, verifica:
-
-✅ **Archivo copiado:**
-- [ ] `nappan-fitbar.html` está en la misma carpeta que `index.html`
-
-✅ **Número de WhatsApp actualizado:**
-- [ ] Buscaste `const WA_NUMBER = '528123509768'`
-- [ ] Reemplazaste con tu número correcto
-
-✅ **Navegación funciona:**
-- [ ] Click en botón "Protein Fit Bar" abre la página
-- [ ] Botón atrás (←) regresa a index.html
-
-✅ **Carrito funciona:**
-- [ ] Puedes agregar productos
-- [ ] Puedes eliminar productos
-- [ ] El total se calcula correctamente
-
-✅ **WhatsApp funciona:**
-- [ ] Llenar formulario
-- [ ] Click en "Enviar pedido por WhatsApp"
-- [ ] Se abre WhatsApp con mensaje formateado
-
----
-
-## 🎨 CARACTERÍSTICAS DE LA PÁGINA
-
-### **Secciones:**
-- ☕ Coffee Bar (3 productos)
-- 🍹 Boost Shots (3 productos)
-- 🥞 Signature Pancakes (2 productos)
-- 🛍️ Combos (2 combos)
-
-### **Funcionalidades:**
-- ✅ Carrito de compras con contador
-- ✅ Cálculo automático de totales
-- ✅ Validaciones de formulario
-- ✅ Eliminación de items individuales
-- ✅ Limpiar carrito completo
-- ✅ Notificaciones (toasts) visuales
-- ✅ Mensaje formateado para WhatsApp
-- ✅ Diseño responsivo (mobile, tablet, desktop)
-
-### **Diseño:**
-- 🎨 Colores coordinados con tu marca
-- 🎨 Tipografía Playfair + Lora (consistente)
-- 🎨 Gradientes y sombras modernas
-- 🎨 Animaciones suaves
-- 🎨 Emojis como elementos visuales
-
----
-
-## 🔧 PERSONALIZACIONES (OPCIONAL)
-
-Si quieres hacer cambios después:
-
-### **Cambiar número de WhatsApp:**
-Busca en `nappan-fitbar.html`:
-```javascript
-const WA_NUMBER = 'TU_NÚMERO';
-```
-
-### **Cambiar colores:**
-Busca en la sección `<style>`:
-- `#DAA520` = Dorado (color principal)
-- `#1a1a1a` = Negro (backgrounds)
-- `#f9f9f9` = Gris claro
-
-### **Agregar productos:**
 Duplica un `.product-card` y modifica:
+
 ```html
-<h3>NOMBRE PRODUCTO</h3>
-<p class="product-desc">DESCRIPCIÓN</p>
-<div class="product-price">PRECIO</div>
-<button class="add-btn" onclick="addToCart('NOMBRE', PRECIO, 'categoria')">...
+<div class="product-card">
+  <div class="product-image img-NOMBRE"></div>
+  <div class="product-info">
+    <h3>NOMBRE DEL PRODUCTO</h3>
+    <p class="product-desc">DESCRIPCIÓN</p>
+    <div class="product-price">$PRECIO</div>
+  </div>
+  <div class="product-footer">
+    <input type="number" id="qty-NOMBRE" class="qty-input" value="1" min="1">
+    <button class="add-btn" onclick="addToCartShot('NOMBRE', PRECIO, 'qty-NOMBRE')">+ Agregar</button>
+  </div>
+</div>
 ```
 
-### **Cambiar textos:**
-Busca en la sección `<main>` cualquier texto que quieras cambiar.
+### En Lunch Box (`nappan-lunchbox.html`)
+
+Agrega un nuevo box al objeto `products` en el `<script>`:
+
+```javascript
+const products = {
+  1: { name: 'Lunch Box 1', basePrice: 125, icon: '🐣', extras: {...} },
+  2: { name: 'Lunch Box 2', basePrice: 130, icon: '🥐', extras: {...} },
+  // Nuevo:
+  3: { name: 'Lunch Box 3', basePrice: 150, icon: '🎉', extras: {...} }
+};
+```
 
 ---
 
-## 🆘 TROUBLESHOOTING
+## ➕ Agregar una nueva sección al sitio
 
-**P: Cuando hago click en "Protein Fit Bar" no se abre la página**
-- R: Verifica que `nappan-fitbar.html` está en la MISMA carpeta que `index.html`
-- R: Verifica que el nombre del archivo es exactamente `nappan-fitbar.html` (sin espacios)
-
-**P: WhatsApp no se abre**
-- R: Verifica que actualizaste el número con el formato correcto: `52` + número sin `01`
-- R: Prueba en otro navegador (Chrome, Firefox, Safari)
-
-**P: Los estilos se ven mal**
-- R: Limpia el cache del navegador (Ctrl+Shift+R en Windows/Linux o Cmd+Shift+R en Mac)
-- R: Verifica que el archivo se descargó correctamente
-
-**P: El carrito no funciona**
-- R: Abre la consola (F12) y busca errores en rojo
-- R: Verifica que JavaScript está habilitado en el navegador
+1. Crea `nappan-[seccion].html` en la raíz
+2. Importa los recursos compartidos:
+   ```html
+   <link rel="stylesheet" href="styles.css">
+   <script src="utils.js"></script>
+   ```
+3. Agrega la ruta en `script.js`:
+   ```javascript
+   page === 'nappan-[seccion].html'
+   ```
+4. Agrega una card en `index.html` dentro de `.cards-grid`
+5. Sigue el sistema tipográfico: Inter para todo, Playfair solo para H1
 
 ---
 
-## 📱 VERSIÓN MOBILE
+## 🧪 Checklist de verificación
 
-El archivo es **100% responsive**:
-- ✅ Se ve bien en teléfono
-- ✅ Se ve bien en tablet
-- ✅ Se ve bien en desktop
+Después de hacer cambios, verifica:
 
-Prueba reduciéndolo a 375px de ancho en DevTools (F12).
-
----
-
-## ✨ LISTO PARA PRODUCCIÓN
-
-El archivo `nappan-fitbar.html` está:
-- ✅ Completamente funcional
-- ✅ Sin dependencias externas
-- ✅ Optimizado para carga rápida
-- ✅ Compatible con todos los navegadores modernos
-- ✅ Listo para compartir con clientes
-
-**Solo cópialo a tu carpeta y ¡listo!** 🎉
+- [ ] La navegación desde `index.html` funciona
+- [ ] El botón ← regresa al inicio
+- [ ] El carrito agrega/elimina productos correctamente
+- [ ] El total se calcula bien
+- [ ] WhatsApp abre con el mensaje formateado
+- [ ] Se ve bien en móvil (375px en DevTools)
+- [ ] No hay errores en consola (F12)
 
 ---
 
-## 📞 DATOS IMPORTANTES
+## 🆘 Troubleshooting
 
-**Número de WhatsApp (por defecto):** `528123509768`
-**Formato esperado:** `52` + número sin `01`
-
-Ejemplo:
-- Si tu número es: `81 2345 6789`
-- Usa: `528123456789`
+| Problema | Solución |
+|---|---|
+| Click en card no abre la página | Verifica que el archivo `.html` está en la misma carpeta que `index.html` |
+| WhatsApp no abre | Verifica formato en `utils.js`: `52` + número sin `01` |
+| Estilos rotos | Limpia cache: `Ctrl+Shift+R` (Windows) o `Cmd+Shift+R` (Mac) |
+| Carrito no funciona | Abre consola (F12) y busca errores en rojo |
+| Toast "Próximamente" en vez de abrir sección | La página aún no tiene archivo HTML, agrega la ruta en `goTo()` |
 
 ---
 
-**Juan, ¡tu página Protein Fit Bar está lista para usar!** 💪
+## 📚 Documentación relacionada
 
-Descarga `nappan-fitbar.html`, cópialo a tu carpeta, actualiza el número de WhatsApp, y ¡a probar!
+- [`README.md`](README.md) — Overview general del proyecto
+- [`CLAUDE.md`](CLAUDE.md) — Guía técnica para Claude Code
+- [`TYPOGRAPHY_SYSTEM.md`](TYPOGRAPHY_SYSTEM.md) — Sistema tipográfico completo
 
-¿Necesitas ayuda con algo? 👇
+---
+
+*Nappan Pancake & Art · Monterrey, NL · Desarrollado con 🥞 y Vibe Coding*

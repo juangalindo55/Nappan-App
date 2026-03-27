@@ -1,64 +1,95 @@
-# CLAUDE.md - Nappan App Architecture & Guidelines
+# CLAUDE.md — Nappan App Architecture & Guidelines
 
 This file provides guidance to Claude Code when working with the **Nappan** repository.
 
 ## Project Overview
-**Nappan** is a lifestyle brand app (Coffee, Lunch Box & Fitbar) built with pure HTML5, CSS3, and Vanilla JavaScript. 
-**Status:** Recently refactored to a modular multi-page architecture for better maintenance.
+
+**Nappan** is a lifestyle brand app (Lunch Box, Nappan Box & Protein Fit Bar) built with pure HTML5, CSS3, and Vanilla JavaScript.
+**Status:** Modular multi-page architecture. 3 sections fully functional, 1 planned (Eventos en Vivo).
 
 ## Running Locally
+
 Start the local static server on port 8080:
 
 ```bash
 # From project root (Windows)
-.claude/serve.bat
+.claude\serve.bat
+```
+
 Then open http://localhost:8080 in the browser.
 
-Architecture & File Structure
-The project has moved from a monolithic file to a Modular Multi-page structure.
+## Architecture & File Structure
 
-index.html: Main landing page (Entry Point). Contains the navigation hub to all sections.
+The project uses a **modular multi-page** structure. Each business line is a standalone HTML file.
 
-styles.css: Cleaned & Optimized. Contains global variables (colors, fonts) and shared layout rules. (Refactored: -300+ redundant lines removed).
+### Entry Point
 
-script.js: Global logic handler.
+- `index.html` — Main landing page. Navigation hub to all sections via card grid.
 
-goTo(page): Navigation router that points to independent HTML files.
+### Shared Resources
 
-initNappanBox(): Core cart and WhatsApp logic.
+- `styles.css` — Global design system. CSS variables (colors, fonts), shared layout rules, and page-specific styles scoped via `body.page-*` classes. (~2,100 lines, optimized).
+- `script.js` — Navigation router (`goTo(page)`) and "coming soon" toast.
+- `utils.js` — Shared constants. Currently exports `WA_NUMBER` for WhatsApp integration.
 
-Section Pages (Independent Modules)
-Each section is now a standalone file to simplify maintenance:
+### Section Pages (Independent Modules)
 
-lunch-box.html: Dedicated section for Lunch Box products.
+Each section is a standalone file for isolated maintenance:
 
-nappan-box.html: Dedicated section for Nappan Box curated selections.
+| File | Section | Status |
+|---|---|---|
+| `nappan-lunchbox.html` | Lunch Box — events & birthdays | ✅ Live |
+| `nappan-box.html` | Nappan Box + Premium Box — custom pancake art | ✅ Live |
+| `nappan-fitbar.html` | Protein Fit Bar — coffee, shots, pancakes, combos | ✅ Live |
+| `nappan-eventos.html` | Eventos en Vivo — live pancake art at events | 🔜 Planned |
 
-protein-fit-bar.html: Dedicated section for Fit Bar and protein products.
+### Page Pattern
 
-nappan-app.html: Coffee & Experience section (In progress).
+Each section page is self-contained:
+1. Imports `styles.css` for global design system
+2. Imports `utils.js` for shared constants (WA_NUMBER)
+3. Contains section-specific CSS in `<style>` and JS in `<script>` inline
+4. Has its own back-navigation to `index.html`
+5. Loads Google Fonts (Inter + Playfair Display) independently
 
-Page Pattern
-Each section page is independent. To keep things fast and prevent "breaking the whole site," styles and scripts specific to a section can stay within their respective HTML, while sharing the global styles.css.
+## Design System (NAPPAN Brand)
 
-Design System (NAPPAN Brand)
-Fonts: Playfair Display (Headings) + Lora (Body/Italic).
+### Typography
+- **Playfair Display** (serif) → EXCLUSIVELY for H1 headings
+- **Inter** (sans-serif) → Everything else: H2, H3, body, labels, buttons, prices
 
-Colors: - Primary: #DAA520 (Gold)
+Full spec in `TYPOGRAPHY_SYSTEM.md`.
 
-Background: #1a1a1a (Dark)
+### Colors
 
-Accents: #FFF8ED (Warm White), #2D1B0E (Deep Brown).
+| Variable | Hex | Usage |
+|---|---|---|
+| `--gold` | `#DAA520` | Primary brand color |
+| `--yellow` | `#FFD93D` | Accents, CTAs, prices |
+| `--dark` | `#1A1008` | Dark backgrounds |
+| `--cream` | `#FFF8ED` | Light backgrounds, text on dark |
+| `--brown` | `#2D1B0E` | Primary text |
+| `--green-light` | `#A8E6CF` | Fit Bar accent |
+| `--pink` | `#FFB3C6` | Nappan Box accent |
 
-Principle: Minimalist, high-end "boutique" feel. Optimized for mobile 
+### Principle
+Minimalist, high-end "boutique" feel. Mobile-first responsive design.
 
-WhatsApp Integration
-The business phone number for orders is:
-528123509768 (Format: 52 + number).
+## WhatsApp Integration
 
-Development Rules
-Clean CSS: Do not add redundant styles. Always check styles.css before adding new classes.
+The business phone number for orders is centralized in `utils.js`:
 
-Modular Growth: If adding a new business line (e.g., "Bakery"), create a new bakery.html instead of adding it to index.html.
+```javascript
+const WA_NUMBER = '528123509768'; // Format: 52 + number
+```
 
-Navigation: Always update the goTo() function in script.js when adding new pages.
+All pages import `utils.js` and reference this constant.
+
+## Development Rules
+
+1. **Clean CSS:** Do not add redundant styles. Always check `styles.css` before adding new classes. Page-specific styles go in `body.page-*` scope.
+2. **Modular Growth:** To add a new business line (e.g., "Bakery"), create a new `nappan-bakery.html` instead of modifying `index.html` content.
+3. **Navigation:** Always update the `goTo()` function in `script.js` when adding new pages.
+4. **Typography:** Follow the Inter + Playfair Display system. Never use Playfair for anything below H1. See `TYPOGRAPHY_SYSTEM.md`.
+5. **Images:** Use WebP format with PNG fallback via `<picture>` element for new product images.
+6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.
