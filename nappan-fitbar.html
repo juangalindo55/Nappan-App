@@ -271,46 +271,14 @@
 <!-- TOAST -->
 <div class="pfb-toast" id="pfb-toast"></div>
 
+<script src="utils.js"></script>
 <script>
   // ============================================
   // PROTEIN FIT BAR - FUNCIONES JAVASCRIPT
   // ============================================
 
-  // CONFIGURACIÓN
-  const WA_NUMBER = '528123509768'; // Número de WhatsApp
-
   // CARRITO DE COMPRAS
   let cartPFB = [];
-
-  // Agregar producto al carrito
-  function addToCart(productName, price, category, imagePath = null) {
-    // Mapeo de productos a imágenes
-    const productImages = {
-      'Detox Glow': 'detox-glow.png',
-      'Energy Boost': 'energy-boost.png',
-      'Golden Power': 'golden-power.png',
-      'Cold Protein Latte': null,
-      'Cold Brew': null,
-      'Black Coffee': null,
-      'Power Pancakes': null,
-      'Protein Minis': null,
-      'Combo Fit': null,
-      'Combo Shots': null
-    };
-
-    const image = imagePath || productImages[productName] || null;
-
-    cartPFB.push({
-      name: productName,
-      price: price,
-      category: category,
-      image: image,
-      id: Date.now()
-    });
-
-    updateCart();
-    showToast(`✅ ${productName} agregado al carrito`, 'success');
-  }
 
   // Agregar producto con cantidad (para Boost Shots)
   function addToCartShot(productName, price, qtyInputId, imagePath = null) {

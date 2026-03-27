@@ -248,6 +248,7 @@
 
 
 
+<script src="utils.js"></script>
 <script>
   let cart = [];
   let cartOpen = false;
@@ -469,9 +470,7 @@
     msg += `💰 *TOTAL: $${total} MXN*\n`;
     msg += `\n¡Gracias por tu pedido! 🐻✨`;
 
-    // Replace with actual WhatsApp number
-    const phone = '528123509768';
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   }
 
