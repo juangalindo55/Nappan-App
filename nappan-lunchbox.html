@@ -131,9 +131,9 @@
 
       <div class="card-footer">
         <div class="qty-control">
-          <button class="qty-btn" onclick="changeQty('qty1', -1)">−</button>
+          <button class="qty-btn" onclick="changeQty('qty1', -1)" aria-label="Reducir cantidad">−</button>
           <span class="qty-val" id="qty1">1</span>
-          <button class="qty-btn" onclick="changeQty('qty1', +1)">+</button>
+          <button class="qty-btn" onclick="changeQty('qty1', +1)" aria-label="Aumentar cantidad">+</button>
         </div>
         <button class="add-btn" onclick="addToCart(1)">
           🛒 Agregar al pedido
@@ -198,9 +198,9 @@
 
       <div class="card-footer">
         <div class="qty-control">
-          <button class="qty-btn" onclick="changeQty('qty2', -1)">−</button>
+          <button class="qty-btn" onclick="changeQty('qty2', -1)" aria-label="Reducir cantidad">−</button>
           <span class="qty-val" id="qty2">1</span>
-          <button class="qty-btn" onclick="changeQty('qty2', +1)">+</button>
+          <button class="qty-btn" onclick="changeQty('qty2', +1)" aria-label="Aumentar cantidad">+</button>
         </div>
         <button class="add-btn" onclick="addToCart(2)">
           🛒 Agregar al pedido
@@ -220,7 +220,7 @@
 <div class="cart-panel" id="cartPanel">
   <div class="cart-top">
     <h2>🛒 Mi pedido</h2>
-    <button class="close-btn" onclick="toggleCart()">✕</button>
+    <button class="close-btn" onclick="toggleCart()" aria-label="Cerrar carrito">✕</button>
   </div>
   <div class="cart-items" id="cartItems">
     <div class="cart-empty">
