@@ -1641,6 +1641,14 @@ body.page-fitbar .product-image {
       background: white;
     }
 
+body.page-fitbar .product-image.img-cold-protein-latte { background: linear-gradient(135deg, #C7A17A 0%, #D4B5A0 100%); }
+body.page-fitbar .product-image.img-cold-brew          { background: linear-gradient(135deg, #3D3D3D 0%, #5C4033 100%); }
+body.page-fitbar .product-image.img-black-coffee       { background: linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 100%); }
+body.page-fitbar .product-image.img-power-pancakes     { background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%); }
+body.page-fitbar .product-image.img-protein-minis      { background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); }
+
+body.page-fitbar .field-full { grid-column: 1 / -1; }
+
 body.page-fitbar .product-img {
       height: 100%;
       width: 100%;
@@ -1854,6 +1862,7 @@ body.page-fitbar .summary-header h2 {
     }
 
 body.page-fitbar .clear-cart-btn {
+      display: none;
       padding: 8px 16px;
       background: #ff6b6b;
       color: white;
