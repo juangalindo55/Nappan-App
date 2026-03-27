@@ -1,0 +1,14 @@
+.env
+node_modules/
+.DS_Store
+
+# Logs de errores (por si algo falla al instalar)
+npm-debug.log*
+
+# Carpetas de construcción (donde se guarda tu app lista para subir)
+dist/
+build/
+
+# Archivos temporales de Windows
+Thumbs.db
+.claude/
