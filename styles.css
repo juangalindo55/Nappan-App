@@ -330,7 +330,9 @@ body.page-home .card-lunchbox .card-bg {
     background-position: center;
   }
 body.page-home .card-eventos .card-bg {
-    background: linear-gradient(135deg, #2D1B0E 0%, #FF8C42 60%, #FFD93D 100%);
+    background-image: url('images/nappan-stand.webp');
+    background-size: cover;
+    background-position: center;
   }
 body.page-home .card-fitbar .card-bg {
     background-image: url('images/bg-card-fitbar.jpg');
