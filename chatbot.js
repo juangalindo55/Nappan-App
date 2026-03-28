@@ -183,11 +183,16 @@
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
 
+  // ── CONFIGURACIÓN ──────────────────────────────────────────
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyABmth4kWLdWTnhWp3oDCEhng3FmJ3v-MY';
+  const ORIGIN_ADDRESS = 'Caparroso 5609, Cumbres, Monterrey, 64349';
+
   // ── CLASE CHATBOT ──────────────────────────────────────────
   class NappanChatbot {
     constructor() {
       this.isOpen = false;
       this.messages = [];
+      this.waitingForCP = false; // Estado para esperar código postal
       this.createBubble();
       this.createWidget();
       this.bindEvents();
@@ -229,6 +234,16 @@
       document.getElementById('chat-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') this.sendMessage();
       });
+      this.loadGoogleMapsSDK();
+    }
+
+    loadGoogleMapsSDK() {
+      if (window.google && window.google.maps) return;
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
     }
 
     toggleChat() {
@@ -244,10 +259,11 @@
     showWelcome() {
       this.addMessage('bot', '¡Hola! 👋 Bienvenido a Nappan. ¿En qué te puedo ayudar?');
       this.addQuickReplies([
-        { text: '🥞 Lunch Box',       action: 'lunch'   },
-        { text: '🎨 Nappan Box',      action: 'box'     },
-        { text: '💪 Protein Fit Bar', action: 'fitbar'  },
-        { text: '📞 Contactar',       action: 'contact' },
+        { text: '🥞 Lunch Box',       action: 'lunch'    },
+        { text: '🎨 Nappan Box',      action: 'box'      },
+        { text: '💪 Protein Fit Bar', action: 'fitbar'   },
+        { text: '🚚 Calcular Envío',  action: 'shipping' },
+        { text: '📞 Contactar',       action: 'contact'  },
       ]);
     }
 
@@ -257,7 +273,13 @@
       if (!text) return;
       this.addMessage('user', text);
       input.value = '';
-      setTimeout(() => this.processMessage(text.toLowerCase()), 450);
+
+      if (this.waitingForCP) {
+        this.waitingForCP = false;
+        setTimeout(() => this.handleShipping(text), 450);
+      } else {
+        setTimeout(() => this.processMessage(text.toLowerCase()), 450);
+      }
     }
 
     processMessage(text) {
@@ -285,6 +307,8 @@
           { text: '📞 Cotizar evento', action: 'contact' },
           { text: '← Menú',           action: 'welcome' },
         ]);
+      } else if (text.includes('envío') || text.includes('envio') || text.includes('distancia') || text.includes('domicilio')) {
+        this.handleQuickReply('shipping');
       } else {
         this.addMessage('bot', '👋 Entiendo. ¿Hay algo más en lo que pueda ayudarte? Cuéntame qué buscas hoy.');
         this.addQuickReplies([{ text: '← Volver al menú', action: 'welcome' }]);
@@ -323,8 +347,96 @@
         lunch:   () => this.processMessage('lunch'),
         box:     () => this.processMessage('nappan box'),
         fitbar:  () => this.processMessage('fit'),
+        shipping: () => {
+          this.waitingForCP = true;
+          this.addMessage('bot', '🚚 ¡Claro! Por favor, ingresa tu código postal (CP) de Monterrey para calcular el costo de envío.');
+        }
       };
       (map[action] || map.welcome)();
+    }
+
+    async handleShipping(cp) {
+      if (!/^\d{5}$/.test(cp)) {
+        this.addMessage('bot', '❌ El código postal debe ser de 5 números. Por favor, intenta de nuevo.');
+        this.waitingForCP = true;
+        return;
+      }
+
+      this.addMessage('bot', 'Calculando distancia... 🔄');
+
+      try {
+        const distance = await this.fetchDistance(cp);
+        if (distance === null) throw new Error('No distance');
+
+        const cost = this.calculateShippingCost(distance);
+        if (cost === null) {
+          this.addMessage('bot', `📍 La distancia calculada es de ${distance.toFixed(1)} km. Lamentablemente, queda fuera de nuestra cobertura actual (máximo 45 km).`);
+          this.addQuickReplies([{ text: '← Ver menú', action: 'welcome' }]);
+        } else {
+          this.addMessage('bot', `✅ La distancia es de ${distance.toFixed(1)} km. El costo de envío para tu zona es de: $${cost} MXN.`);
+          this.addQuickReplies([
+            { text: '🛒 Pedir por WhatsApp', action: 'contact' },
+            { text: '← Volver al menú',     action: 'welcome' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error calculando envío:', error);
+        this.addMessage('bot', '⚠️ Hubo un detalle al calcular la distancia. Por favor, asegúrate de que sea un CP válido en Monterrey o intenta más tarde.');
+        this.addQuickReplies([{ text: '← Reintentar', action: 'shipping' }]);
+      }
+    }
+
+    async fetchDistance(destinationCP) {
+      return new Promise((resolve) => {
+        // Fallback de 5 segundos para evitar que el chat se quede colgado
+        const timeout = setTimeout(() => {
+          console.error('Distance Matrix timeout');
+          resolve(null);
+        }, 5000);
+
+        if (!window.google || !window.google.maps) {
+          clearTimeout(timeout);
+          console.error('Google Maps SDK no cargado');
+          return resolve(null);
+        }
+
+        try {
+          const service = new google.maps.DistanceMatrixService();
+          service.getDistanceMatrix({
+            origins: [ORIGIN_ADDRESS],
+            destinations: [`${destinationCP}, Monterrey, NL, Mexico`],
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+          }, (response, status) => {
+            clearTimeout(timeout);
+            try {
+              if (status === 'OK' && response && response.rows && response.rows[0] && response.rows[0].elements && response.rows[0].elements[0].status === 'OK') {
+                const distanceMeters = response.rows[0].elements[0].distance.value;
+                resolve(distanceMeters / 1000);
+              } else {
+                console.error('Error de Distance Matrix:', status, response);
+                resolve(null);
+              }
+            } catch (err) {
+              console.error('Error procesando Matrix:', err);
+              resolve(null);
+            }
+          });
+        } catch (err) {
+          clearTimeout(timeout);
+          console.error('Excepción al instanciar DistanceMatrix:', err);
+          resolve(null);
+        }
+      });
+    }
+
+    calculateShippingCost(km) {
+      if (km <= 3) return 50;
+      if (km <= 8) return 85;
+      if (km <= 15) return 130;
+      if (km <= 20) return 150;
+      if (km <= 45) return 200;
+      return null;
     }
 
     openWhatsApp() {
