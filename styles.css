@@ -498,11 +498,11 @@ body.page-lunchbox {
 
   /* HEADER */
 body.page-lunchbox header {
-    background: var(--yellow);
-    padding: 16px 24px;
-    display: flex;
+    background: #FFD93D;
+    padding: 2px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
-    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -512,25 +512,22 @@ body.page-lunchbox header {
 body.page-lunchbox .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 0;
+    margin-left: auto;
+    margin-right: 100px;
   }
 
 body.page-lunchbox .logo-img {
-    height: 52px;
+    height: 110px;
     width: auto;
-    mix-blend-mode: multiply;
+    mix-blend-mode: darken;
+    filter: brightness(0.85) saturate(1.1);
     border-radius: 6px;
   }
 
 body.page-lunchbox .logo-lunchbox {
-    font-size: 10px;
-    font-weight: 900;
-    color: var(--brown);
-    opacity: 0.65;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    align-self: flex-end;
-    margin-bottom: 4px;
+    display: none;
   }
 
 body.page-lunchbox .cart-btn {
