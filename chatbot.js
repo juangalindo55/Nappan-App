@@ -184,8 +184,8 @@
   document.head.appendChild(styleEl);
 
   // ── CONFIGURACIÓN ──────────────────────────────────────────
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyABmth4kWLdWTnhWp3oDCEhng3FmJ3v-MY';
-  const ORIGIN_ADDRESS = 'Caparroso 5609, Cumbres, Monterrey, 64349';
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA';
+  const ORIGIN_ADDRESS = 'Caparroso 5609, Cumbres, Monterrey, 64349, Mexico';
 
   // ── CLASE CHATBOT ──────────────────────────────────────────
   class NappanChatbot {
@@ -259,11 +259,11 @@
     showWelcome() {
       this.addMessage('bot', '¡Hola! 👋 Bienvenido a Nappan. ¿En qué te puedo ayudar?');
       this.addQuickReplies([
-        { text: '🥞 Lunch Box',       action: 'lunch'    },
-        { text: '🎨 Nappan Box',      action: 'box'      },
-        { text: '💪 Protein Fit Bar', action: 'fitbar'   },
-        { text: '🚚 Calcular Envío',  action: 'shipping' },
-        { text: '📞 Contactar',       action: 'contact'  },
+        { text: '🥞 Lunch Box', action: 'lunch' },
+        { text: '🎨 Nappan Box', action: 'box' },
+        { text: '💪 Protein Fit Bar', action: 'fitbar' },
+        { text: '🚚 Calcular Envío', action: 'shipping' },
+        { text: '📞 Contactar', action: 'contact' },
       ]);
     }
 
@@ -287,25 +287,25 @@
         this.addMessage('bot', '💰 Los precios varían según el producto. Te recomiendo contactar directamente por WhatsApp para una cotización exacta.');
         this.addQuickReplies([
           { text: '📞 Hablar por WhatsApp', action: 'contact' },
-          { text: '← Volver al menú',      action: 'welcome' },
+          { text: '← Volver al menú', action: 'welcome' },
         ]);
       } else if (text.includes('personal') || text.includes('custom') || text.includes('nappan box')) {
         this.addMessage('bot', '🎨 Nappan Box es nuestro servicio de ultra personalización. Hacemos pancakes con arte realista de lo que tú elijas.');
         this.addQuickReplies([
           { text: '📞 Pedir mi Nappan Box', action: 'contact' },
-          { text: '← Menú',                action: 'welcome' },
+          { text: '← Menú', action: 'welcome' },
         ]);
       } else if (text.includes('fit') || text.includes('proteína') || text.includes('proteina') || text.includes('saludable')) {
         this.addMessage('bot', '💪 Nuestro Protein Fit Bar tiene opciones fit: Power Pancakes, Protein Minis, Boost Shots y Coffee proteico.');
         this.addQuickReplies([
           { text: '🏋️ Ver menú Fit Bar', action: 'contact' },
-          { text: '← Menú',             action: 'welcome' },
+          { text: '← Menú', action: 'welcome' },
         ]);
       } else if (text.includes('evento') || text.includes('vivo') || text.includes('lunch')) {
         this.addMessage('bot', '🎪 En Eventos en Vivo hacemos pancakes artísticos directamente en tu evento. Cada invitado recibe uno hecho al momento.');
         this.addQuickReplies([
           { text: '📞 Cotizar evento', action: 'contact' },
-          { text: '← Menú',           action: 'welcome' },
+          { text: '← Menú', action: 'welcome' },
         ]);
       } else if (text.includes('envío') || text.includes('envio') || text.includes('distancia') || text.includes('domicilio')) {
         this.handleQuickReply('shipping');
@@ -344,9 +344,9 @@
       const map = {
         welcome: () => { document.getElementById('chat-messages').innerHTML = ''; this.messages = []; this.showWelcome(); },
         contact: () => this.openWhatsApp(),
-        lunch:   () => this.processMessage('lunch'),
-        box:     () => this.processMessage('nappan box'),
-        fitbar:  () => this.processMessage('fit'),
+        lunch: () => this.processMessage('lunch'),
+        box: () => this.processMessage('nappan box'),
+        fitbar: () => this.processMessage('fit'),
         shipping: () => {
           this.waitingForCP = true;
           this.addMessage('bot', '🚚 ¡Claro! Por favor, ingresa tu código postal (CP) de Monterrey para calcular el costo de envío.');
@@ -376,7 +376,7 @@
           this.addMessage('bot', `✅ La distancia es de ${distance.toFixed(1)} km. El costo de envío para tu zona es de: $${cost} MXN.`);
           this.addQuickReplies([
             { text: '🛒 Pedir por WhatsApp', action: 'contact' },
-            { text: '← Volver al menú',     action: 'welcome' },
+            { text: '← Volver al menú', action: 'welcome' },
           ]);
         }
       } catch (error) {

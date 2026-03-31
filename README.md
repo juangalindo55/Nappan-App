@@ -17,6 +17,7 @@ Sitio web oficial de **Nappan**, una marca de lifestyle basada en Monterrey, Mé
 | **Lógica** | Vanilla JavaScript (zero dependencies) |
 | **Tipografía** | Inter (UI) + Playfair Display (títulos) vía Google Fonts |
 | **Pedidos** | Integración directa con WhatsApp Business API |
+| **Chatbot** | Chatbot embebido con calculadora de envío vía Google Maps Distance Matrix API |
 | **Deploy** | GitHub Pages |
 | **Control de versiones** | Git & GitHub |
 | **IA Partner** | Claude Code (Anthropic) — Vibe Coding methodology |
@@ -39,12 +40,16 @@ Arquitectura **multi-página modular** — cada línea de negocio es una página
 ├── styles.css              ← Design system global (variables, tipografía, layouts)
 ├── script.js               ← Router de navegación goTo() + toast notifications
 ├── utils.js                ← Constantes compartidas (WA_NUMBER)
+├── chatbot.js              ← Chatbot embebido con calculadora de envío (Google Maps API)
 │
-├── images/                 ← Assets de imágenes (logo, backgrounds, galería)
+├── images/                 ← Assets de imágenes (logo, backgrounds, galería, productos)
 │   ├── logo.jpg
 │   ├── bg-*.jpg            ← Backgrounds de secciones
 │   ├── nappanbox-gallery-*.jpg
-│   └── pancakeart-capibara.png
+│   ├── pancakeart-capibara.png
+│   ├── cold-protein-latte.webp
+│   ├── cold-brew.webp
+│   └── black-coffee.webp
 │
 ├── *.webp / *.png          ← Imágenes de productos (Boost Shots con WebP + fallback)
 │
@@ -109,7 +114,7 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 - Fecha mínima: 1 semana de anticipación
 
 ### 💪 Protein Fit Bar (`nappan-fitbar.html`)
-- **Coffee Bar:** Cold Protein Latte, Cold Brew, Black Coffee
+- **Coffee Bar:** Cold Protein Latte, Cold Brew, Black Coffee (con imágenes WebP reales)
 - **Boost Shots:** Detox Glow, Energy Boost, Golden Power (con imágenes WebP)
 - **Signature Pancakes:** Power Pancakes, Protein Minis
 - **Combos:** Combo Fit, Combo Shots
@@ -166,10 +171,11 @@ Luego abre: **http://localhost:8080**
 - [x] Sección Protein Fit Bar con carrito completo + WhatsApp
 - [x] Design system global unificado (`styles.css`)
 - [x] Sistema tipográfico Inter + Playfair Display
-- [x] Optimización de imágenes (WebP + fallback PNG)
+- [x] Optimización de imágenes (WebP + fallback PNG) — Coffee Bar con fotos reales
 - [x] Diseño responsive (mobile, tablet, desktop)
 - [x] Accesibilidad WCAG AAA (contraste tipográfico)
 - [x] Centralización del número WhatsApp en `utils.js`
+- [x] Chatbot embebido con menú interactivo y calculadora de envío (Google Maps)
 - [x] Deploy en GitHub Pages
 - [ ] Sección Eventos en Vivo (planeada)
 - [ ] PWA / Service Worker (futuro)

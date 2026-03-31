@@ -1643,9 +1643,9 @@ body.page-fitbar .product-image {
       background: white;
     }
 
-body.page-fitbar .product-image.img-cold-protein-latte { background: linear-gradient(135deg, #C7A17A 0%, #D4B5A0 100%); }
-body.page-fitbar .product-image.img-cold-brew          { background: linear-gradient(135deg, #3D3D3D 0%, #5C4033 100%); }
-body.page-fitbar .product-image.img-black-coffee       { background: linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 100%); }
+body.page-fitbar .product-image.img-cold-protein-latte { background-image: url('images/cold-protein-latte.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-cold-brew          { background-image: url('images/cold-brew.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-black-coffee       { background-image: url('images/black-coffee.webp'); background-size: cover; background-position: center; }
 body.page-fitbar .product-image.img-power-pancakes     { background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%); }
 body.page-fitbar .product-image.img-protein-minis      { background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); }
 
