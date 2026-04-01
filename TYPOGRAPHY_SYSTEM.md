@@ -35,6 +35,8 @@ letter-spacing: -1px
 ```
 **Ejemplos**: "El arte que se come" (Home), "Tu Pedido" (Carrito)
 
+> **⚠️ Excepción — Fit Bar Hero:** La sección `nappan-fitbar.html` reemplaza el `<h1>` de texto por el logo blanco (`logo-white-solo.webp`) usando `<img class="pfb-hero-logo">`. El logo actúa visualmente como el h1 de la página.
+
 ---
 
 ### **H2 - Subtítulos de Sección**
@@ -213,6 +215,7 @@ text-transform: uppercase
 - [x] WCAG compliance verificado
 - [x] Migración de Playfair Display → Fraunces (v2.0, Abril 2026)
 - [x] Migración de Fraunces → Montserrat (v3.0, Abril 2026)
+- [x] Excepción documentada: Fit Bar hero usa logo imagen en lugar de H1 texto
 
 ---
 

@@ -4,8 +4,8 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 
 ## Project Overview
 
-**Nappan** is a lifestyle brand app (Lunch Box, Nappan Box & Protein Fit Bar) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page architecture. 3 sections fully functional, 1 planned (Eventos en Vivo).
+**Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
+**Status:** Modular multi-page architecture. 4 sections fully functional.
 
 ## Running Locally
 
@@ -41,7 +41,7 @@ Each section is a standalone file for isolated maintenance:
 | `nappan-lunchbox.html` | Lunch Box — events & birthdays | ✅ Live |
 | `nappan-box.html` | Nappan Box + Premium Box — custom pancake art | ✅ Live |
 | `nappan-fitbar.html` | Protein Fit Bar — coffee, shots, pancakes, combos | ✅ Live |
-| `nappan-eventos.html` | Eventos en Vivo — live pancake art at events | 🔜 Planned |
+| `nappan-eventos.html` | Eventos en Vivo — live pancake art at events | ✅ Live |
 
 ### Page Pattern
 
@@ -49,8 +49,21 @@ Each section page is self-contained:
 1. Imports `styles.css` for global design system
 2. Imports `utils.js` for shared constants (WA_NUMBER)
 3. Contains section-specific CSS in `<style>` and JS in `<script>` inline
-4. Has its own back-navigation to `index.html`
+4. Has its own back-navigation to `index.html` (button inside the unified header)
 5. Loads Google Fonts (Inter + Montserrat) independently
+
+### Header Pattern (unified across all pages)
+
+All section pages use an identical header structure:
+```html
+<header>
+  <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
+  <img src="images/logo-dorado.webp" alt="Nappan" class="logo-img"/>
+  <div><!-- right slot: cart button or empty spacer --></div>
+</header>
+```
+- CSS: `display: grid; grid-template-columns: 1fr auto 1fr` keeps logo perfectly centered.
+- Background: `#1A1008` (dark), height `130px`, `position: fixed`.
 
 ## Design System (NAPPAN Brand)
 
@@ -91,5 +104,6 @@ All pages import `utils.js` and reference this constant.
 2. **Modular Growth:** To add a new business line (e.g., "Bakery"), create a new `nappan-bakery.html` instead of modifying `index.html` content.
 3. **Navigation:** Always update the `goTo()` function in `script.js` when adding new pages.
 4. **Typography:** Follow the Inter + Montserrat system. Never use Montserrat for anything below H1. See `TYPOGRAPHY_SYSTEM.md`.
-5. **Images:** Use WebP format with PNG fallback via `<picture>` element for new product images.
+5. **Images:** Use WebP format. Convert with `sharp -i input.png -o output.webp` (sharp-cli installed globally).
 6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.
+7. **Header:** All section pages must use the unified header pattern (logo-dorado.webp, dark background, 3-column grid). Never diverge from this pattern.

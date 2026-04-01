@@ -36,25 +36,26 @@ Arquitectura **multi-página modular** — cada línea de negocio es una página
 ├── nappan-lunchbox.html    ← Lunch Box (eventos y cumpleaños)
 ├── nappan-box.html         ← Nappan Box + Premium Box (arte personalizado)
 ├── nappan-fitbar.html      ← Protein Fit Bar (coffee, shots, pancakes, combos)
+├── nappan-eventos.html     ← Eventos en Vivo (pancake art en tu evento)
 │
-├── styles.css              ← Design system global (variables, tipografía, layouts)
+├── styles.css              ← Design system global (~2,680 líneas)
 ├── script.js               ← Router de navegación goTo() + toast notifications
 ├── utils.js                ← Constantes compartidas (WA_NUMBER)
 ├── chatbot.js              ← Chatbot embebido con calculadora de envío (Google Maps API)
 │
-├── images/                 ← Assets de imágenes (logo, backgrounds, galería, productos)
-│   ├── logo.jpg
-│   ├── bg-*.jpg            ← Backgrounds de secciones
+├── images/
+│   ├── logo-dorado.webp        ← Logo principal (usado en headers dark)
+│   ├── logo-white-solo.webp    ← Logo blanco (hero Fit Bar)
+│   ├── logo.png                ← Logo negro (referencia)
+│   ├── bg-*.jpg                ← Backgrounds de secciones
 │   ├── nappanbox-gallery-*.jpg
-│   ├── pancakeart-capibara.png
 │   ├── cold-protein-latte.webp
 │   ├── cold-brew.webp
 │   └── black-coffee.webp
 │
-├── *.webp / *.png          ← Imágenes de productos (Boost Shots con WebP + fallback)
-│
-├── CLAUDE.md               ← Guía arquitectónica para Claude Code
+├── CLAUDE.md               ← Guía arquitectónica para Claude Code / Antigravity
 ├── TYPOGRAPHY_SYSTEM.md    ← Documentación del sistema tipográfico
+├── plan.md                 ← Roadmap y backlog de funcionalidades
 └── .claude/                ← Scripts de desarrollo local
     └── serve.bat / serve.ps1
 ```
@@ -122,8 +123,15 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 - Formulario con nombre, fecha, hora y notas
 
 ### 🎪 Eventos en Vivo (`nappan-eventos.html`)
-- **Estado:** En desarrollo (planeada)
-- Actualmente muestra toast "Próximamente disponible"
+- **Estado:** ✅ Live
+- Hero con logo dorado centrado y header unificado con landing
+- Pills interactivos de tipo de evento (Cumpleaños, Bodas, Corporativos…)
+  - Al hacer clic → auto-completa el `select` del formulario
+  - Despliega galería dinámica de 2 fotos entre pills y formulario
+- Formulario de cotización en grid de 2 columnas (8 campos)
+- Validación de fecha mínima (14 días de anticipación)
+- Envío de cotización pre-formateado a WhatsApp
+- Chatbot integrado con opción "🎪 Eventos en Vivo"
 
 ---
 
@@ -169,15 +177,19 @@ Luego abre: **http://localhost:8080**
 - [x] Sección Lunch Box funcional con carrito + WhatsApp
 - [x] Sección Nappan Box (Normal + Premium) con formularios + WhatsApp
 - [x] Sección Protein Fit Bar con carrito completo + WhatsApp
+- [x] **Sección Eventos en Vivo** con pills interactivos, galería dinámica y formulario de cotización
 - [x] Design system global unificado (`styles.css`)
 - [x] Sistema tipográfico Inter + Montserrat
-- [x] Optimización de imágenes (WebP + fallback PNG) — Coffee Bar con fotos reales
+- [x] Header unificado en todas las páginas (logo-dorado.webp, fondo oscuro, grid 3 columnas)
+- [x] Optimización de imágenes (WebP + fallback PNG) — Coffee Bar y logos con fotos reales
+- [x] Chatbot actualizado con Eventos en Vivo en el menú
 - [x] Diseño responsive (mobile, tablet, desktop)
 - [x] Accesibilidad WCAG AAA (contraste tipográfico)
 - [x] Centralización del número WhatsApp en `utils.js`
 - [x] Chatbot embebido con menú interactivo y calculadora de envío (Google Maps)
 - [x] Deploy en GitHub Pages
-- [ ] Sección Eventos en Vivo (planeada)
+- [x] `sharp-cli` instalado globalmente para conversión PNG → WebP
+- [ ] Galería de fotos reales en Eventos en Vivo (fotos por tipo de evento)
 - [ ] PWA / Service Worker (futuro)
 - [ ] Analytics / tracking (futuro)
 
