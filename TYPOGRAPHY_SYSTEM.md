@@ -1,8 +1,8 @@
 # 📚 Sistema Tipográfico Unificado - NAPPAN
 
-**Fecha de implementación**: Marzo 2026
-**Versión**: 1.0
-**Objetivo**: Proyectar formalidad, limpieza extrema, elegancia moderna y claridad visual
+**Fecha de implementación**: Abril 2026
+**Versión**: 3.0
+**Objetivo**: Proyectar modernidad geométrica, legibilidad móvil excepcional, elegancia limpia y claridad visual
 
 ---
 
@@ -14,10 +14,12 @@
 - **Pesos disponibles**: 300 (Light), 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold), 800 (ExtraBold)
 - **Alineación**: Tendencias de diseño 2024+ (Apple, Stripe, Netflix)
 
-### **2. Playfair Display** (Serif Sofisticada)
+### **2. Montserrat** (Sans-serif Geométrica)
 - **Uso**: EXCLUSIVAMENTE para H1 (títulos principales)
-- **Razón**: Añade toque artístico, mantiene elegancia sin contaminar el resto
-- **Pesos**: 700 (Bold), 900 (ExtraBold)
+- **Razón**: Sans-serif geométrica con personalidad visual fuerte. Inspirada en la tipografía del barrio de Montserrat en Buenos Aires. Transmite modernidad, claridad y robustez. Mayor contraste visual que Inter en tamaños grandes, mantiene legibilidad perfecta en móvil.
+- **Pesos**: Variable 100–900 (recomendado: 600-700 para H1)
+- **Reemplaza a**: Fraunces (v2.0) — migrado para una identidad más modern/geométrica, menos artesanal-serif
+- **Historia**: Playfair Display (v1.0) → Fraunces (v2.0) → Montserrat (v3.0)
 
 ---
 
@@ -25,9 +27,9 @@
 
 ### **H1 - Encabezados Principales**
 ```css
-font-family: 'Playfair Display', serif
+font-family: 'Montserrat', sans-serif
 font-size: clamp(42px, 10vw, 80px)
-font-weight: 700
+font-weight: 600
 line-height: 1.1
 letter-spacing: -1px
 ```
@@ -143,13 +145,14 @@ text-transform: uppercase
 - ✅ Letter-spacing para etiquetas en mayúsculas (0.5px)
 - ✅ Font-weight diferenciado por propósito (no solo tamaño)
 - ✅ Responsive tipografía con `clamp()` para escalado fluido
+- ✅ Montserrat sans-serif optimizada para legibilidad móvil (sin trazos finos)
 
 ---
 
 ## 🛠 Variables CSS
 
 ```css
---font-display: 'Playfair Display', serif;
+--font-display: 'Montserrat', sans-serif;
 --font-sans: 'Inter', sans-serif;
 
 --font-light: 300;
@@ -187,8 +190,8 @@ text-transform: uppercase
 ## 🚫 Lo que NO hacer
 
 ❌ Mezclar múltiples familias sans-serif
-❌ Usar Playfair Display para H2, H3 o body
-❌ Usar font-weight < 300 o > 900 (no existen en Inter)
+❌ Usar Montserrat para H2, H3 o body
+❌ Usar font-weight < 300 o > 900
 ❌ Reducir line-height < 1.1 (afecta legibilidad)
 ❌ Usar serifs para descripciones de productos
 ❌ Olvidar letter-spacing en mayúsculas
@@ -198,6 +201,7 @@ text-transform: uppercase
 ## 📋 Checklist de Implementación
 
 - [x] Inter importada en Google Fonts
+- [x] Montserrat importada en Google Fonts (variable, pesos 100-900)
 - [x] Variables CSS definidas en :root
 - [x] Clases tipográficas base creadas (.h1, .h2, .h3, .body-text, etc.)
 - [x] Todos los font-family reemplazados con variables
@@ -207,6 +211,8 @@ text-transform: uppercase
 - [x] Body text optimizado para legibilidad
 - [x] Labels y buttons estilizados correctamente
 - [x] WCAG compliance verificado
+- [x] Migración de Playfair Display → Fraunces (v2.0, Abril 2026)
+- [x] Migración de Fraunces → Montserrat (v3.0, Abril 2026)
 
 ---
 

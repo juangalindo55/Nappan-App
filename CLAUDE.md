@@ -50,12 +50,12 @@ Each section page is self-contained:
 2. Imports `utils.js` for shared constants (WA_NUMBER)
 3. Contains section-specific CSS in `<style>` and JS in `<script>` inline
 4. Has its own back-navigation to `index.html`
-5. Loads Google Fonts (Inter + Playfair Display) independently
+5. Loads Google Fonts (Inter + Montserrat) independently
 
 ## Design System (NAPPAN Brand)
 
 ### Typography
-- **Playfair Display** (serif) → EXCLUSIVELY for H1 headings
+- **Montserrat** (sans-serif geométrica) → EXCLUSIVELY for H1 headings
 - **Inter** (sans-serif) → Everything else: H2, H3, body, labels, buttons, prices
 
 Full spec in `TYPOGRAPHY_SYSTEM.md`.
@@ -90,6 +90,6 @@ All pages import `utils.js` and reference this constant.
 1. **Clean CSS:** Do not add redundant styles. Always check `styles.css` before adding new classes. Page-specific styles go in `body.page-*` scope.
 2. **Modular Growth:** To add a new business line (e.g., "Bakery"), create a new `nappan-bakery.html` instead of modifying `index.html` content.
 3. **Navigation:** Always update the `goTo()` function in `script.js` when adding new pages.
-4. **Typography:** Follow the Inter + Playfair Display system. Never use Playfair for anything below H1. See `TYPOGRAPHY_SYSTEM.md`.
+4. **Typography:** Follow the Inter + Montserrat system. Never use Montserrat for anything below H1. See `TYPOGRAPHY_SYSTEM.md`.
 5. **Images:** Use WebP format with PNG fallback via `<picture>` element for new product images.
 6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.

@@ -4,7 +4,7 @@
 
 :root {
   /* Tipografías - Sistema unificado */
-  --font-display: 'Playfair Display', serif; /* Solo H1 */
+  --font-display: 'Montserrat', sans-serif; /* Solo H1 — Sans-serif geométrica moderna */
   --font-sans: 'Inter', sans-serif; /* Base: H2, H3, Body, Labels, UI */
 
   /* Pesos disponibles en Inter */
@@ -38,7 +38,7 @@
    SISTEMA TIPOGRÁFICO UNIFICADO
    ============================================================ */
 
-/* H1 - Títulos principales (Playfair Display para "arte") */
+/* H1 - Títulos principales (Montserrat geométrica) */
 h1, .h1 {
   font-family: var(--font-display);
   font-size: clamp(42px, 10vw, 80px);
@@ -149,7 +149,7 @@ body.page-home #page-home header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ffde59;
+    background: #1A1008;
   }
 
 body.page-home #page-home .logo-img {
@@ -381,6 +381,7 @@ body.page-home .card-tag {
 body.page-home .card-title {
     font-family: var(--font-display);
     font-style: italic;
+    font-weight: 700;
     font-size: 28px;
     color: var(--cream);
     margin-bottom: 8px;
@@ -490,44 +491,43 @@ body.page-lunchbox {
     background: var(--cream);
     color: var(--text);
     min-height: 100vh;
+    padding-top: 130px;
     background-image: 
       radial-gradient(circle at 10% 20%, rgba(255,217,61,0.25) 0%, transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(255,140,66,0.2) 0%, transparent 40%),
       radial-gradient(circle at 50% 50%, rgba(255,179,198,0.1) 0%, transparent 60%);
   }
 
-  /* HEADER */
+  /* HEADER — copia exacta del landing */
 body.page-lunchbox header {
-    background: #FFD93D;
-    padding: 2px 24px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(45,27,14,0.15);
+    height: 130px;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    background: #1A1008;
   }
 
-body.page-lunchbox .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    margin-left: auto;
-    margin-right: 100px;
+body.page-lunchbox .back-btn {
+    justify-self: start;
+  }
+
+body.page-lunchbox .cart-btn {
+    justify-self: end;
   }
 
 body.page-lunchbox .logo-img {
-    height: 110px;
+    height: 120px;
     width: auto;
-    mix-blend-mode: darken;
-    filter: brightness(0.85) saturate(1.1);
-    border-radius: 6px;
-  }
-
-body.page-lunchbox .logo-lunchbox {
-    display: none;
+    mix-blend-mode: normal;
+    border-radius: 0;
+    display: block;
+    filter: none;
   }
 
 body.page-lunchbox .cart-btn {
@@ -1157,27 +1157,19 @@ body.page-lunchbox .lock-msg {
 
 /* BACK BUTTON */
 body.page-lunchbox .back-btn {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 1000;
-  background: rgba(45,27,14,0.9);
-  color: #FFF8ED;
+  background: none;
   border: none;
-  border-radius: 50px;
-  padding: 10px 18px;
+  color: rgba(255,248,237,0.7);
   font-family: var(--font-sans);
   font-style: italic;
   font-size: 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,248,237,0.15);
-  transition: background 0.2s, transform 0.2s;
+  padding: 8px 12px;
+  border-radius: 50px;
+  transition: color 0.2s;
+  justify-self: start;
 }
-.back-btn:hover { background: rgba(45,27,14,1); transform: translateX(-3px); }
+body.page-lunchbox .back-btn:hover { color: var(--cream); transform: translateX(-3px); }
 
 
 /* ============================================================
@@ -1245,7 +1237,7 @@ body.page-nappanbox .nb-tag {
     border-radius:50px; margin-bottom:20px;
   }
 body.page-nappanbox .nb-hero h1 {
-    font-family:'Playfair Display',serif; font-style:italic;
+    font-family:'Montserrat',serif; font-style:italic;
     font-size:clamp(36px,9vw,64px); line-height:1.05;
     color:var(--cream); margin-bottom:12px;
   }
@@ -1266,7 +1258,7 @@ body.page-nappanbox .tab-btn {
     flex:1; padding:14px 20px;
     background:rgba(255,255,255,0.04);
     border:none; cursor:pointer;
-    font-family:'Playfair Display',serif; font-style:italic;
+    font-family:'Montserrat',serif; font-style:italic;
     font-size:16px; color:rgba(255,248,237,0.45);
     transition:all 0.25s;
   }
@@ -1307,11 +1299,11 @@ body.page-nappanbox .price-card {
   .price-card.premium { border-color:rgba(255,217,61,0.3); }
   .price-info { flex:1; min-width:200px; }
 body.page-nappanbox .price-name {
-    font-family:'Playfair Display',serif; font-style:italic;
+    font-family:'Montserrat',serif; font-style:italic;
     font-size:26px; color:var(--cream); margin-bottom:8px;
   }
 body.page-nappanbox .price-amount {
-    font-family:'Playfair Display',serif; font-style:italic;
+    font-family:'Montserrat',serif; font-style:italic;
     font-size:44px; color:var(--purple); line-height:1;
     margin-bottom:16px;
   }
@@ -1335,7 +1327,7 @@ body.page-nappanbox .form-section {
     border-radius:24px; padding:28px;
   }
 body.page-nappanbox .form-title {
-    font-family:'Playfair Display',serif; font-style:italic;
+    font-family:'Montserrat',serif; font-style:italic;
     font-size:22px; color:var(--cream); margin-bottom:24px;
     display:flex; align-items:center; gap:10px;
   }
@@ -1414,7 +1406,7 @@ body.page-nappanbox .submit-btn {
     width:100%; margin-top:24px;
     background:linear-gradient(135deg,#25D366,#128C7E);
     color:white; border:none; border-radius:18px;
-    padding:18px; font-family:'Playfair Display',serif;
+    padding:18px; font-family:'Montserrat',serif;
     font-style:italic; font-size:20px; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:10px;
     transition:transform 0.2s, box-shadow 0.2s;
@@ -1532,20 +1524,11 @@ body.page-fitbar .pfb-tag {
       font-style: italic;
     }
 
-body.page-fitbar .pfb-hero h1 {
-      font-family: var(--font-display);
-      font-size: 48px;
-      font-weight: 900;
-      margin: 15px 0;
-      letter-spacing: -1px;
-    }
-
-body.page-fitbar .pfb-hero h1 span {
-      color: #DAA520;
+body.page-fitbar .pfb-hero-logo {
+      width: clamp(160px, 40vw, 280px);
+      height: auto;
       display: block;
-      font-size: 36px;
-      margin-top: 5px;
-      font-style: italic;
+      margin: 8px auto 0;
     }
 
 body.page-fitbar .pfb-hero p {
@@ -2341,4 +2324,347 @@ body.page-fitbar .combo-price {
     bottom: 80px;
     right: 16px;
   }
+}
+
+/* ===== EVENTOS EN VIVO STYLES ===== */
+
+body.page-eventos {
+  font-family: var(--font-sans);
+  background: var(--dark);
+  color: var(--cream);
+  min-height: 100vh;
+  padding-top: 130px;
+}
+
+/* HEADER — copia exacta del landing */
+body.page-eventos header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 130px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: #1A1008;
+}
+
+body.page-eventos .back-btn {
+  justify-self: start;
+  background: none;
+  border: none;
+  color: rgba(255,248,237,0.7);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-style: italic;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 50px;
+  transition: color 0.2s;
+}
+body.page-eventos .back-btn:hover {
+  color: var(--cream);
+}
+
+body.page-eventos .logo-img {
+  height: 120px;
+  width: auto;
+  mix-blend-mode: normal;
+  border-radius: 0;
+  display: block;
+  filter: none;
+}
+
+/* HERO */
+body.page-eventos .ev-hero {
+  text-align: center;
+  padding: 80px 24px 48px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(218,165,32,0.15) 0%, transparent 60%), var(--dark);
+  position: relative;
+}
+body.page-eventos .ev-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(218,165,32,0.3), transparent);
+}
+body.page-eventos .ev-tag {
+  display: inline-block;
+  border: 1.5px solid rgba(218,165,32,0.4);
+  color: var(--gold);
+  font-size: 11px; font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; padding: 6px 18px;
+  border-radius: 50px; margin-bottom: 20px;
+}
+body.page-eventos .ev-hero h1 {
+  font-family: 'Montserrat', serif; font-style: italic;
+  font-size: clamp(36px, 9vw, 64px); line-height: 1.05;
+  color: var(--cream); margin-bottom: 12px;
+}
+body.page-eventos .ev-hero h1 span { color: var(--gold); }
+body.page-eventos .ev-hero p {
+  font-size: 15px; color: rgba(255,248,237,0.6);
+  font-style: italic; max-width: 400px; margin: 0 auto; line-height: 1.8;
+}
+
+/* CONTENT WRAPPER */
+body.page-eventos .ev-content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+/* SERVICE CARD */
+body.page-eventos .ev-service-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(218,165,32,0.25);
+  border-radius: 24px; padding: 28px;
+  margin-bottom: 40px;
+}
+body.page-eventos .ev-service-title {
+  font-family: 'Montserrat', serif; font-style: italic;
+  font-size: 22px; color: var(--cream); margin-bottom: 18px;
+}
+body.page-eventos .ev-includes {
+  list-style: none;
+}
+body.page-eventos .ev-includes li {
+  font-size: 13px; color: rgba(255,248,237,0.75);
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; gap: 10px; align-items: center;
+}
+body.page-eventos .ev-includes li:last-child { border: none; }
+body.page-eventos .ev-service-note {
+  font-size: 11px; color: rgba(255,248,237,0.4);
+  font-style: italic; margin-top: 14px;
+}
+
+/* HOW IT WORKS */
+body.page-eventos .ev-steps-title {
+  font-family: 'Montserrat', serif; font-style: italic;
+  font-size: 20px; color: var(--cream);
+  text-align: center; margin-bottom: 20px;
+}
+body.page-eventos .ev-steps {
+  display: flex; gap: 16px;
+  margin-bottom: 36px;
+}
+body.page-eventos .ev-step {
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(218,165,32,0.15);
+  border-radius: 18px; padding: 20px 16px;
+  text-align: center;
+  position: relative;
+}
+body.page-eventos .ev-step-num {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: var(--dark);
+  width: 24px; height: 24px; border-radius: 50%;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+body.page-eventos .ev-step-icon {
+  font-size: 28px; margin-bottom: 8px; margin-top: 4px;
+}
+body.page-eventos .ev-step-name {
+  font-size: 13px; font-weight: 700;
+  color: var(--cream); margin-bottom: 6px;
+}
+body.page-eventos .ev-step-desc {
+  font-size: 11px; color: rgba(255,248,237,0.5);
+  font-style: italic; line-height: 1.5;
+}
+
+/* EVENT TYPE PILLS */
+body.page-eventos .ev-types {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-bottom: 24px;
+}
+body.page-eventos .ev-type-pill {
+  background: rgba(218,165,32,0.08);
+  border: 1px solid rgba(218,165,32,0.2);
+  color: rgba(255,248,237,0.7);
+  font-size: 12px; font-weight: 600;
+  padding: 8px 18px; border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+body.page-eventos .ev-type-pill:hover {
+  background: rgba(218,165,32,0.18);
+  border-color: rgba(218,165,32,0.5);
+  color: var(--cream);
+  transform: translateY(-2px);
+}
+body.page-eventos .ev-type-pill.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--dark);
+  font-weight: 800;
+  box-shadow: 0 4px 16px rgba(218,165,32,0.35);
+  transform: translateY(-2px);
+}
+
+/* GALERÍA DINÁMICA */
+body.page-eventos .ev-gallery {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.4s ease;
+  margin-bottom: 0;
+}
+body.page-eventos .ev-gallery.visible {
+  max-height: 400px;
+  opacity: 1;
+  margin-bottom: 32px;
+}
+body.page-eventos .ev-gallery-label {
+  font-family: 'Montserrat', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+body.page-eventos .ev-gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+body.page-eventos .ev-gallery-img {
+  aspect-ratio: 4/3;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(218,165,32,0.2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s;
+}
+body.page-eventos .ev-gallery-img:hover {
+  border-color: rgba(218,165,32,0.5);
+}
+body.page-eventos .ev-gallery-placeholder {
+  text-align: center;
+  color: rgba(255,248,237,0.25);
+  font-size: 28px;
+  line-height: 1.8;
+}
+body.page-eventos .ev-gallery-placeholder span {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 4px;
+}
+
+/* Flash de confirmación en el campo select */
+body.page-eventos .form-field select.field-flash {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(218,165,32,0.25);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+/* FORM */
+body.page-eventos .form-section {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px; padding: 28px;
+}
+body.page-eventos .form-title {
+  font-family: 'Montserrat', serif; font-style: italic;
+  font-size: 22px; color: var(--cream); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 10px;
+}
+body.page-eventos .form-field label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); opacity: 0.85;
+}
+body.page-eventos .form-field input,
+body.page-eventos .form-field textarea,
+body.page-eventos .form-field select {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 16px;
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.5;
+  color: var(--cream); outline: none;
+  transition: border-color 0.2s;
+}
+body.page-eventos .form-field input:focus,
+body.page-eventos .form-field textarea:focus,
+body.page-eventos .form-field select:focus {
+  border-color: var(--gold);
+}
+body.page-eventos .form-field input[type="date"] { color-scheme: dark; }
+
+body.page-eventos .note-box {
+  background: rgba(218,165,32,0.05);
+  border: 1px solid rgba(218,165,32,0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: rgba(255,248,237,0.5);
+  font-style: italic;
+  line-height: 1.8;
+}
+
+/* GRID DEL FORMULARIO */
+body.page-eventos .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 24px;
+}
+
+body.page-eventos .form-field.full {
+  grid-column: span 2;
+}
+
+body.page-eventos .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+body.page-eventos .submit-btn {
+  width: 100%; margin-top: 24px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white; border: none; border-radius: 18px;
+  padding: 18px; font-family: 'Montserrat', serif;
+  font-style: italic; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+}
+body.page-eventos .submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(37,211,102,0.45);
+}
+
+/* TOAST */
+body.page-eventos .ev-toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--brown); color: var(--cream);
+  padding: 12px 24px; border-radius: 50px;
+  font-weight: 700; font-size: 14px; z-index: 9999;
+  transition: transform 0.3s; white-space: nowrap;
+  font-style: italic;
+}
+body.page-eventos .ev-toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  body.page-eventos .ev-steps { flex-direction: column; }
+  body.page-eventos .form-grid { grid-template-columns: 1fr; }
+  body.page-eventos .form-field.full { grid-column: 1; }
 }

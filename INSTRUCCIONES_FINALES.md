@@ -121,7 +121,7 @@ const products = {
    page === 'nappan-[seccion].html'
    ```
 4. Agrega una card en `index.html` dentro de `.cards-grid`
-5. Sigue el sistema tipográfico: Inter para todo, Playfair solo para H1
+5. Sigue el sistema tipográfico: Inter para todo, Montserrat solo para H1
 
 ---
 

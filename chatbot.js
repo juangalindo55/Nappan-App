@@ -262,6 +262,7 @@
         { text: '🥞 Lunch Box', action: 'lunch' },
         { text: '🎨 Nappan Box', action: 'box' },
         { text: '💪 Protein Fit Bar', action: 'fitbar' },
+        { text: '🎪 Eventos en Vivo', action: 'eventos' },
         { text: '🚚 Calcular Envío', action: 'shipping' },
         { text: '📞 Contactar', action: 'contact' },
       ]);
@@ -289,6 +290,12 @@
           { text: '📞 Hablar por WhatsApp', action: 'contact' },
           { text: '← Volver al menú', action: 'welcome' },
         ]);
+      } else if (text.includes('lunch')) {
+        this.addMessage('bot', '🥞 Lunch Box es nuestro servicio de cajas con pancakes artísticos para eventos y cumpleaños. Mínimo 20 piezas, completamente personalizables.');
+        this.addQuickReplies([
+          { text: '📞 Pedir mi Lunch Box', action: 'contact' },
+          { text: '← Menú', action: 'welcome' },
+        ]);
       } else if (text.includes('personal') || text.includes('custom') || text.includes('nappan box')) {
         this.addMessage('bot', '🎨 Nappan Box es nuestro servicio de ultra personalización. Hacemos pancakes con arte realista de lo que tú elijas.');
         this.addQuickReplies([
@@ -301,8 +308,8 @@
           { text: '🏋️ Ver menú Fit Bar', action: 'contact' },
           { text: '← Menú', action: 'welcome' },
         ]);
-      } else if (text.includes('evento') || text.includes('vivo') || text.includes('lunch')) {
-        this.addMessage('bot', '🎪 En Eventos en Vivo hacemos pancakes artísticos directamente en tu evento. Cada invitado recibe uno hecho al momento.');
+      } else if (text.includes('evento') || text.includes('vivo')) {
+        this.addMessage('bot', '🎪 En Eventos en Vivo llevamos nuestros artistas pancake a tu evento. Cada invitado recibe un pancake artístico hecho en vivo frente a ellos.');
         this.addQuickReplies([
           { text: '📞 Cotizar evento', action: 'contact' },
           { text: '← Menú', action: 'welcome' },
@@ -347,6 +354,7 @@
         lunch: () => this.processMessage('lunch'),
         box: () => this.processMessage('nappan box'),
         fitbar: () => this.processMessage('fit'),
+        eventos: () => this.processMessage('evento'),
         shipping: () => {
           this.waitingForCP = true;
           this.addMessage('bot', '🚚 ¡Claro! Por favor, ingresa tu código postal (CP) de Monterrey para calcular el costo de envío.');

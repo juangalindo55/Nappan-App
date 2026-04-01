@@ -15,7 +15,7 @@ Sitio web oficial de **Nappan**, una marca de lifestyle basada en Monterrey, Mé
 | **Estructura** | HTML5 semántico |
 | **Estilos** | CSS3 con variables, `clamp()`, responsive design |
 | **Lógica** | Vanilla JavaScript (zero dependencies) |
-| **Tipografía** | Inter (UI) + Playfair Display (títulos) vía Google Fonts |
+| **Tipografía** | Inter (UI) + Montserrat (títulos) vía Google Fonts |
 | **Pedidos** | Integración directa con WhatsApp Business API |
 | **Chatbot** | Chatbot embebido con calculadora de envío vía Google Maps Distance Matrix API |
 | **Deploy** | GitHub Pages |
@@ -85,7 +85,7 @@ Cada sección es un archivo HTML autónomo que:
 
 ### Tipografía
 
-- **Playfair Display** (serif) → exclusivamente H1
+- **Montserrat** (sans-serif geométrica) → exclusivamente H1
 - **Inter** (sans-serif) → H2, H3, body, labels, botones, precios
 
 📚 Detalle completo en [`TYPOGRAPHY_SYSTEM.md`](TYPOGRAPHY_SYSTEM.md)
@@ -170,7 +170,7 @@ Luego abre: **http://localhost:8080**
 - [x] Sección Nappan Box (Normal + Premium) con formularios + WhatsApp
 - [x] Sección Protein Fit Bar con carrito completo + WhatsApp
 - [x] Design system global unificado (`styles.css`)
-- [x] Sistema tipográfico Inter + Playfair Display
+- [x] Sistema tipográfico Inter + Montserrat
 - [x] Optimización de imágenes (WebP + fallback PNG) — Coffee Bar con fotos reales
 - [x] Diseño responsive (mobile, tablet, desktop)
 - [x] Accesibilidad WCAG AAA (contraste tipográfico)
