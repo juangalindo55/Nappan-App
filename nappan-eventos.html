@@ -215,9 +215,9 @@
     // 4. Mostrar galería con animación
     gallery.classList.add('visible');
 
-    // 5. Scroll suave al formulario
+    // 5. Scroll suave a la galería
     setTimeout(() => {
-      document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('ev-gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 350);
   }
 </script>
