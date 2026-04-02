@@ -417,17 +417,17 @@ body.page-home .card-cta {
   .card-cta .arrow { font-style: normal; transition: transform 0.2s; }
   .card-cta:hover .arrow { transform: translateX(4px); }
 
-  /* Lunch box card keeps original yellow CTA */
-  .card-lunchbox .card-cta { background: var(--yellow); color: var(--brown); }
-  .card-lunchbox .card-cta:hover { background: var(--orange); }
+/* Lunch box card keeps original yellow CTA */
+body.page-home .card-lunchbox .card-cta { background: var(--yellow); color: var(--brown); }
+body.page-home .card-lunchbox .card-cta:hover { background: var(--orange); }
 
-  /* Fit bar card gets green CTA */
-  .card-fitbar .card-cta { background: #A8E6CF; }
-  .card-fitbar .card-cta:hover { background: #7DD4B0; }
+/* Fit bar card gets green CTA */
+body.page-home .card-fitbar .card-cta { background: #A8E6CF; }
+body.page-home .card-fitbar .card-cta:hover { background: #7DD4B0; }
 
-  /* Nappanbox card gets pink CTA */
-  .card-nappanbox .card-cta { background: #FFB3C6; }
-  .card-nappanbox .card-cta:hover { background: #FF8FAE; }
+/* Nappanbox card gets pink CTA */
+body.page-home .card-nappanbox .card-cta { background: #FFB3C6; }
+body.page-home .card-nappanbox .card-cta:hover { background: #FF8FAE; }
 
   /* COMING SOON BADGE */
 body.page-home .coming-soon {
