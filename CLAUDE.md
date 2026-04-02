@@ -107,3 +107,4 @@ All pages import `utils.js` and reference this constant.
 5. **Images:** Use WebP format. Convert with `sharp -i input.png -o output.webp` (sharp-cli installed globally).
 6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.
 7. **Header:** All section pages must use the unified header pattern (logo-dorado.webp, dark background, 3-column grid). Never diverge from this pattern.
+8. **Custom Form Controls:** Radio buttons and checkboxes use custom styling (appearance: none) with color scheme #8B5E3C for brown boxes. See `styles.css` for `input[name="fruitType*"]` patterns. Validation with toast notifications for required selections.

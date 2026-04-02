@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body class="page-lunchbox">
 <!-- HEADER -->
@@ -84,14 +84,25 @@
       <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
       <span class="price-badge" style="z-index:2;">$125</span>
       <div style="position:relative;z-index:1;padding-top:24px;">
-        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);">Lunch Box 1</div>
+        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 1</div>
       </div>
     </div>
     <div class="card-body">
       <ul class="items-list">
-        <li>🥞 Mini pancakes + 1 PancakeART</li>
-        <li>🍯 Miel o mermelada</li>
-        <li>🍓 Fruta (Uva, Durazno, Fresa) / Gelatina</li>
+        <li>🥞 PancakeART + miel / Upgrade a <a href="https://www.instagram.com/nucolato/" target="_blank" style="color:#DAA520;text-decoration:none;font-weight:bold;">Nucolato</a></li>
+        <li style="display:flex;flex-direction:column;gap:8px;">
+          <span>🍓 Elige tu Fruta o Gelatina:</span>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType1" value="Fruta" id="fruit1" />
+              Fruta (Uva, Durazno, Fresa)
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType1" value="Gelatina" id="gelatin1" />
+              Gelatina
+            </label>
+          </div>
+        </li>
         <li>🧃 Juguito Kool-Aid americano (−70% azúcar)</li>
         <li>🍴 Cubierto y servilleta</li>
         <li>📦 Se entrega en cajita</li>
@@ -122,12 +133,17 @@
           <span class="extra-label">🐙 Salchipulpos + catsup</span>
           <span class="extra-price">+$25</span>
         </div>
+        <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+          <div class="check-box">✓</div>
+          <span class="extra-label">🍫 Upgrade a Nucolato</span>
+          <span class="extra-price">+$5</span>
+        </div>
       </div>
 
       <div class="card-footer">
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty('qty1', -1)" aria-label="Reducir cantidad">−</button>
-          <span class="qty-val" id="qty1">1</span>
+          <span class="qty-val" id="qty1">20</span>
           <button class="qty-btn" onclick="changeQty('qty1', +1)" aria-label="Aumentar cantidad">+</button>
         </div>
         <button class="add-btn" onclick="addToCart(1)">
@@ -150,18 +166,30 @@
       <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
       <span class="price-badge" style="z-index:2;">$130</span>
       <div style="position:relative;z-index:1;padding-top:24px;">
-        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);">Lunch Box 2</div>
+        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 2</div>
       </div>
     </div>
     <div class="card-body">
       <ul class="items-list">
-        <li>🥐 ½ Croissant (jamón, queso, tomate, lechuga)</li>
-        <li>🥞 PancakeART de osito o capibara + miel</li>
-        <li>🍓 Fruta (Uva, Durazno, Fresa) / Gelatina</li>
+        <li>🥐 ½ Croissant (jamón, queso)</li>
+        <li>🥞 PancakeART + miel / Upgrade a <a href="https://www.instagram.com/nucolato/" target="_blank" style="color:#DAA520;text-decoration:none;font-weight:bold;">Nucolato</a></li>
+        <li style="display:flex;flex-direction:column;gap:8px;">
+          <span>🍓 Elige tu Fruta o Gelatina:</span>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType2" value="Fruta" id="fruit2" />
+              Fruta (Uva, Durazno, Fresa)
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType2" value="Gelatina" id="gelatin2" />
+              Gelatina
+            </label>
+          </div>
+        </li>
         <li>🧃 Juguito Kool-Aid (−70% azúcar)</li>
         <li>🥔 Bolsa chica papitas Kirkland (−% sodio)</li>
         <li>🍴 Cubierto y servilleta</li>
-        <li>🛍️ Se entrega en bolsa</li>
+        <li>🛍️ Se entrega en cajita</li>
       </ul>
 
       <div class="extras-title">🎨 Elige tu PancakeART</div>
@@ -189,12 +217,17 @@
           <span class="extra-label">🥐 Upgrade a croissant completo</span>
           <span class="extra-price">+$20</span>
         </div>
+        <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+          <div class="check-box">✓</div>
+          <span class="extra-label">🍫 Upgrade a Nucolato</span>
+          <span class="extra-price">+$5</span>
+        </div>
       </div>
 
       <div class="card-footer">
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty('qty2', -1)" aria-label="Reducir cantidad">−</button>
-          <span class="qty-val" id="qty2">1</span>
+          <span class="qty-val" id="qty2">20</span>
           <button class="qty-btn" onclick="changeQty('qty2', +1)" aria-label="Aumentar cantidad">+</button>
         </div>
         <button class="add-btn" onclick="addToCart(2)">
@@ -257,7 +290,7 @@
   function changeQty(id, delta) {
     const el = document.getElementById(id);
     let val = parseInt(el.textContent) + delta;
-    if (val < 1) val = 1;
+    if (val < 20) val = 20;
     el.textContent = val;
   }
 
@@ -280,6 +313,13 @@
 
     const p = products[boxId];
     const qty = parseInt(document.getElementById(`qty${boxId}`).textContent);
+
+    // Check if fruit type is selected
+    const selectedFruit = document.querySelector(`input[name="fruitType${boxId}"]:checked`);
+    if (!selectedFruit) {
+      showToast(`⚠️ Por favor selecciona Fruta o Gelatina`);
+      return;
+    }
 
     // Get selected art
     const activeArt = document.querySelector(`#art${boxId} .art-opt.active`);
@@ -313,6 +353,7 @@
       name: p.name,
       icon: p.icon,
       art: artName,
+      fruitType: selectedFruit.value,
       qty,
       unitPrice,
       totalPrice,
@@ -407,7 +448,7 @@
                 item.art === 'Capibara' ? `<img src="${capybaraImg}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;border-radius:50%;margin-right:4px;">` :
                 item.art === 'Osito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐻</span>` :
                 item.art === 'Pollito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐥</span>` : ''
-              }${item.art} · ${extrasText}
+              }${item.art} · 🍓 ${item.fruitType} · ${extrasText}
             </div>
             <div class="item-bottom">
               <div class="item-price">$${item.totalPrice}</div>

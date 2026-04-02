@@ -27,6 +27,15 @@ Este archivo sirve para organizar las próximas funcionalidades, mejoras y lanza
 - [x] Integración de imágenes reales en Nappan Fit Bar (Coffee Section).
 - [x] Refactorización del Header de Lunchbox con el nuevo estilo de logo.
 - [x] Definición del sistema tipográfico (Montserrat + Inter).
+- [x] **Custom checkboxes** para selección de Fruta/Gelatina en Lunch Box 1 y 2
+  - Color marrón #8B5E3C con palomilla blanca visible al seleccionar
+  - Validación obligatoria con toast visual
+  - Aplicado a ambos Lunch Boxes con mismo estilo
+- [x] **Actualización de texto PancakeART** en ambos Lunch Boxes
+  - Cambio de "o" a "/" entre "miel" y "Upgrade a Nucolato"
+  - Link a Instagram mantenido en color dorado
+- [x] **Reducción de tamaño de "ARTÍSTICOS!"** en hero (0.75em)
+  - Mantiene jerarquía visual clara con "¡Lunch Boxes"
 
 ---
 *Nota: Este archivo es dinámico y se actualiza a medida que el "vibe coding" nos lleva a nuevas ideas.*

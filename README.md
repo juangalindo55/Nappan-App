@@ -101,6 +101,9 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 ### 📦 Lunch Box (`nappan-lunchbox.html`)
 - **2 opciones** de Lunch Box ($125 y $130)
 - Selector de PancakeART (Osito, Capibara, Pollito)
+- **Selector de Fruta o Gelatina** con custom checkboxes marrón (#8B5E3C)
+  - Validación obligatoria (toast si no se selecciona)
+  - Palomilla blanca visible solo cuando está seleccionado
 - Extras seleccionables con precio dinámico
 - Carrito lateral con panel deslizante
 - Restricción: un tipo de box y una figura por pedido
@@ -189,6 +192,10 @@ Luego abre: **http://localhost:8080**
 - [x] Chatbot embebido con menú interactivo y calculadora de envío (Google Maps)
 - [x] Deploy en GitHub Pages
 - [x] `sharp-cli` instalado globalmente para conversión PNG → WebP
+- [x] Custom checkboxes para selección de Fruta/Gelatina en Lunch Box (color marrón #8B5E3C)
+- [x] Validación de selección obligatoria con toast visual
+- [x] Texto de PancakeART actualizado (miel / Upgrade a Nucolato)
+- [x] Reducción de tamaño de "ARTÍSTICOS!" en hero (0.75em)
 - [ ] Galería de fotos reales en Eventos en Vivo (fotos por tipo de evento)
 - [ ] PWA / Service Worker (futuro)
 - [ ] Analytics / tracking (futuro)

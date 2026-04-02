@@ -595,6 +595,11 @@ body.page-lunchbox .hero-content h1 span {
     color: var(--yellow);
   }
 
+body.page-lunchbox .hero-content h1 strong {
+    font-size: 0.75em;
+    display: block;
+  }
+
 body.page-lunchbox .hero-content p {
     font-size: 16px;
     color: rgba(255,255,255,0.92);
@@ -1087,6 +1092,40 @@ body.page-lunchbox .whatsapp-btn {
 
   .wa-icon { font-size: 24px; }
 
+  /* CUSTOM RADIO BUTTONS (Lunch Box 1 & 2 - Fruta/Gelatina) */
+  body.page-lunchbox input[name="fruitType1"],
+  body.page-lunchbox input[name="fruitType2"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #8B5E3C;
+    border-radius: 3px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  body.page-lunchbox input[name="fruitType1"]:checked,
+  body.page-lunchbox input[name="fruitType2"]:checked {
+    background: #8B5E3C;
+    border-color: #8B5E3C;
+  }
+
+  body.page-lunchbox input[name="fruitType1"]:checked::before,
+  body.page-lunchbox input[name="fruitType2"]:checked::before {
+    content: '✓';
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    display: block;
+  }
+
   /* TOAST */
 body.page-lunchbox .toast {
     position: fixed;
@@ -1104,7 +1143,7 @@ body.page-lunchbox .toast {
     white-space: nowrap;
   }
 
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  body.page-lunchbox .toast.show { transform: translateX(-50%) translateY(0); }
 
   /* BIRTHDAY NOTE */
 body.page-lunchbox .birthday-banner {
@@ -1525,7 +1564,7 @@ body.page-fitbar .pfb-tag {
     }
 
 body.page-fitbar .pfb-hero-logo {
-      width: clamp(160px, 40vw, 280px);
+      width: clamp(200px, 50vw, 360px);
       height: auto;
       display: block;
       margin: 8px auto 0;
