@@ -737,7 +737,8 @@ body.page-lunchbox .check-box {
     justify-content: center;
     font-size: 12px;
     flex-shrink: 0;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
+    color: transparent;
   }
 
   .extra-option.selected .check-box { background: var(--orange); color: white; }
@@ -1545,13 +1546,13 @@ body.page-fitbar main {
 
     /* HERO SECTION */
 body.page-fitbar .pfb-hero {
+      width: 100%;
       text-align: center;
       padding: 40px 20px;
       background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
       color: white;
       border-bottom: 3px solid #DAA520;
-      margin-bottom: 40px;
-      margin: 0 -15px 40px -15px;
+      margin: 0 0 40px 0;
     }
 
 body.page-fitbar .pfb-tag {
@@ -1564,7 +1565,7 @@ body.page-fitbar .pfb-tag {
     }
 
 body.page-fitbar .pfb-hero-logo {
-      width: clamp(200px, 50vw, 360px);
+      width: clamp(280px, 65vw, 480px);
       height: auto;
       display: block;
       margin: 8px auto 0;
