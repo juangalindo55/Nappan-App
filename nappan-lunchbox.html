@@ -497,6 +497,7 @@
     cart.forEach(item => {
       msg += `\n🎁 ${item.qty}x ${item.name} — $${item.totalPrice}\n`;
       msg += `   🎨 PancakeART: ${item.art}\n`;
+      msg += `   🍓 Fruta/Gelatina: ${item.fruitType}\n`;
       if (item.extras.length) {
         msg += `   ➕ Extras: ${item.extras.map(e => e.label).join(', ')}\n`;
       }
