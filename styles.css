@@ -400,8 +400,8 @@ body.page-home .card-cta {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: var(--yellow);
-    color: var(--brown);
+    background: #93e6f8;
+    color: #1a1a1a;
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 700;
@@ -413,9 +413,13 @@ body.page-home .card-cta {
     cursor: pointer;
   }
 
-  .card-cta:hover { background: var(--orange); transform: translateX(4px); }
+  .card-cta:hover { background: #5dd9f0; transform: translateX(4px); }
   .card-cta .arrow { font-style: normal; transition: transform 0.2s; }
   .card-cta:hover .arrow { transform: translateX(4px); }
+
+  /* Lunch box card keeps original yellow CTA */
+  .card-lunchbox .card-cta { background: var(--yellow); color: var(--brown); }
+  .card-lunchbox .card-cta:hover { background: var(--orange); }
 
   /* Fit bar card gets green CTA */
   .card-fitbar .card-cta { background: #A8E6CF; }
