@@ -281,5 +281,31 @@
 </script>
 
 <script src="chatbot.js"></script>
+
+<!-- FLOATING NAV -->
+<div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>
+<div class="nav-modal" id="navModal">
+  <div class="nav-modal-title">Ir a</div>
+  <a class="nav-item nav-lunchbox" href="nappan-lunchbox.html">
+    <span class="nav-item-icon">🎂</span> Lunch Box
+  </a>
+  <a class="nav-item nav-nappanbox" href="nappan-box.html">
+    <span class="nav-item-icon">📦</span> Nappan Box
+  </a>
+  <a class="nav-item nav-fitbar" href="nappan-fitbar.html">
+    <span class="nav-item-icon">💪</span> Fit Bar
+  </a>
+  <a class="nav-item nav-eventos" href="nappan-eventos.html">
+    <span class="nav-item-icon">🎉</span> Eventos en Vivo
+  </a>
+</div>
+<button class="nav-float-btn" id="navFloatBtn" onclick="toggleNavModal()" aria-label="Navegación">☰</button>
+<script>
+  function toggleNavModal() {
+    document.getElementById('navModal').classList.toggle('open');
+    document.getElementById('navOverlay').classList.toggle('open');
+    document.getElementById('navFloatBtn').classList.toggle('open');
+  }
+</script>
 </body>
 </html>

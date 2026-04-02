@@ -2712,3 +2712,116 @@ body.page-eventos .ev-toast.show {
   body.page-eventos .form-grid { grid-template-columns: 1fr; }
   body.page-eventos .form-field.full { grid-column: 1; }
 }
+
+/* ===== FLOATING NAV ===== */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 298;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.nav-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.nav-modal {
+  position: fixed;
+  bottom: 88px;
+  left: 24px;
+  background: #111;
+  border-radius: 18px;
+  padding: 14px 12px;
+  z-index: 299;
+  min-width: 210px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  border: 1px solid rgba(218,165,32,0.22);
+  opacity: 0;
+  transform: translateY(14px) scale(0.94);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  transform-origin: bottom left;
+}
+.nav-modal.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.nav-modal-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,248,237,0.35);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding-left: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: rgba(255,248,237,0.82);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+}
+.nav-item:hover {
+  background: rgba(218,165,32,0.14);
+  color: #FFD93D;
+}
+.nav-item-icon { font-size: 20px; width: 28px; text-align: center; }
+
+/* Resaltar página activa */
+body.page-lunchbox  .nav-item.nav-lunchbox,
+body.page-nappanbox .nav-item.nav-nappanbox,
+body.page-fitbar    .nav-item.nav-fitbar,
+body.page-eventos   .nav-item.nav-eventos {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.nav-float-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #DAA520;
+  color: #1A1008;
+  border: none;
+  cursor: pointer;
+  z-index: 299;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  transition: transform 0.25s, background 0.25s;
+  line-height: 1;
+}
+.nav-float-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+}
+.nav-float-btn.open {
+  background: #444;
+  color: #fff;
+  transform: rotate(90deg);
+}
+.nav-float-btn.open:hover {
+  transform: rotate(90deg) scale(1.08);
+}
