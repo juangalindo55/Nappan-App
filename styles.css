@@ -149,7 +149,7 @@ body.page-home #page-home header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1A1008;
+    background: #000000;
   }
 
 body.page-home #page-home .logo-img {
@@ -514,7 +514,7 @@ body.page-lunchbox header {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    background: #1A1008;
+    background: #000000;
   }
 
 body.page-lunchbox .back-btn {
@@ -2392,7 +2392,7 @@ body.page-eventos header {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  background: #1A1008;
+  background: #000000;
 }
 
 body.page-eventos .back-btn {
