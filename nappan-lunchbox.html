@@ -54,8 +54,8 @@
       <input type="text" id="clientName" placeholder="Ej. María García" />
     </div>
     <div class="date-field">
-      <label>📱 Tu teléfono (opcional)</label>
-      <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomerLB(this.value)"/>
+      <label>📱 Tu teléfono</label>
+      <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomerLB(this.value)"/>
     </div>
     <div class="date-field">
       <label>📅 Fecha de entrega</label>
@@ -732,7 +732,7 @@
     if (customer) {
       currentCustomer = customer;
       const nameInput = document.getElementById('clientName');
-      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+      if (nameInput) nameInput.value = customer.name;
       await applyTierDiscount(customer.membership_tier);
       showWelcomeBadge(customer);
     }
@@ -783,6 +783,7 @@
 
     if (cart.length === 0) { showToast('⚠️ Tu carrito está vacío'); return; }
     if (!name) { showToast('⚠️ Ingresa tu nombre por favor'); return; }
+    if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
     if (!date) { showToast('⚠️ Selecciona una fecha de entrega'); return; }
 
     let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);

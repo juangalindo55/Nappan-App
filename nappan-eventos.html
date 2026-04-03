@@ -99,7 +99,7 @@
       </div>
       <div class="form-field">
         <label>📱 Tu teléfono</label>
-        <input type="tel" id="ev-phone" placeholder="Ej. 81 1234 5678"/>
+        <input type="tel" id="ev-phone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomerEvenso(this.value)"/>
       </div>
       <div class="form-field">
         <label>🎉 Tipo de evento</label>
@@ -261,6 +261,24 @@
     return `${day} ${months[parseInt(m)-1]} ${y}`;
   }
 
+  async function lookupCustomerEvenso(phoneValue) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      const nameInput = document.getElementById('ev-name');
+      if (nameInput) nameInput.value = customer.name;
+    }
+  }
+
   function sendEventoWhatsApp() {
     const name     = document.getElementById('ev-name').value.trim();
     const phone    = document.getElementById('ev-phone').value.trim();
@@ -273,6 +291,7 @@
     const notes    = document.getElementById('ev-notes').value.trim();
 
     if (!name)     { showToast('⚠️ Ingresa tu nombre'); return; }
+    if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
     if (!type)     { showToast('⚠️ Selecciona el tipo de evento'); return; }
     if (!guests)   { showToast('⚠️ Indica el número de invitados'); return; }
     if (!date)     { showToast('⚠️ Selecciona la fecha del evento'); return; }

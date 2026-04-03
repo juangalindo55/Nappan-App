@@ -57,6 +57,46 @@ async function saveOrder(orderPayload) {
     }
 
     console.log('✓ Order saved:', order.order_number);
+
+    // Auto-create/update customer if phone provided
+    if (orderPayload.customer_phone) {
+      const cleanPhone = orderPayload.customer_phone.replace(/\D/g, '');
+      if (cleanPhone) {
+        const { data: existing, error: checkError } = await supabaseClient
+          .from('customers')
+          .select('id, name')
+          .eq('phone', cleanPhone)
+          .maybeSingle();
+
+        if (!checkError && !existing) {
+          // Customer doesn't exist, create it
+          const { error: insertError } = await supabaseClient
+            .from('customers')
+            .insert([{
+              phone: cleanPhone,
+              name: orderPayload.customer_name || 'Cliente',
+              membership_tier: 'individual'
+            }]);
+          if (insertError) {
+            console.warn('⚠️ Customer auto-create failed:', insertError);
+          } else {
+            console.log('✓ Cliente registrado automáticamente:', cleanPhone);
+          }
+        } else if (!checkError && existing) {
+          // Customer exists, update name if different
+          if (existing.name !== orderPayload.customer_name) {
+            const { error: updateError } = await supabaseClient
+              .from('customers')
+              .update({ name: orderPayload.customer_name })
+              .eq('phone', cleanPhone);
+            if (updateError) {
+              console.warn('⚠️ Customer name update failed:', updateError);
+            }
+          }
+        }
+      }
+    }
+
     return { order_id: order.id, order_number: order.order_number };
   } catch (error) {
     console.error('❌ saveOrder error:', error);

@@ -1038,10 +1038,10 @@
         allOrders = await window.NappanDB.loadAllOrders({});
       }
 
-      // Agrupar órdenes por teléfono del cliente
+      // Agrupar órdenes por teléfono del cliente (normalizado)
       const ordersByPhone = {};
       allOrders.forEach(order => {
-        const phone = order.customer_phone || '';
+        const phone = (order.customer_phone || '').replace(/\D/g, '');
         if (!phone) return;
         if (!ordersByPhone[phone]) {
           ordersByPhone[phone] = [];
@@ -1051,7 +1051,7 @@
 
       // Enriquecer cada cliente
       allCustomers.forEach(customer => {
-        const phone = customer.phone || '';
+        const phone = (customer.phone || '').replace(/\D/g, '');
         const customerOrders = ordersByPhone[phone] || [];
 
         customer.order_count = customerOrders.length;

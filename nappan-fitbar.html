@@ -250,8 +250,8 @@
         <input type="text" id="clientName" placeholder="Ej. María García" />
       </div>
       <div class="date-field">
-        <label>📱 Tu teléfono (opcional)</label>
-        <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value)"/>
+        <label>📱 Tu teléfono</label>
+        <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomer(this.value)"/>
       </div>
       <div class="date-field">
         <label>📅 Fecha de entrega</label>
@@ -471,7 +471,7 @@
     if (customer) {
       currentCustomer = customer;
       const nameInput = document.getElementById('clientName');
-      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+      if (nameInput) nameInput.value = customer.name;
       await applyTierDiscount(customer.membership_tier);
       showWelcomeBadge(customer);
     }
@@ -552,6 +552,11 @@
 
     if (!clientName) {
       showToast('⚠️ Por favor ingresa tu nombre', 'warning');
+      return;
+    }
+
+    if (!clientPhone || clientPhone.replace(/\D/g, '').length < 8) {
+      showToast('⚠️ Por favor ingresa un teléfono válido', 'warning');
       return;
     }
 

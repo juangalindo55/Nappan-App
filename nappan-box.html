@@ -65,7 +65,7 @@
       </div>
       <div class="form-field">
         <label>📱 Tu teléfono</label>
-        <input type="tel" id="nb-phone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value, 'normal')"/>
+        <input type="tel" id="nb-phone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomer(this.value, 'normal')"/>
       </div>
       <div class="form-field full">
         <label>🎨 ¿Qué personaje quieres?</label>
@@ -152,7 +152,7 @@
       </div>
       <div class="form-field premium">
         <label>📱 Tu teléfono</label>
-        <input type="tel" id="pr-phone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value, 'premium')"/>
+        <input type="tel" id="pr-phone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomer(this.value, 'premium')"/>
       </div>
       <div class="form-field full premium">
         <label>🎨 Describe tu diseño</label>
@@ -239,8 +239,8 @@
     if (customer) {
       currentCustomer = customer;
       const nameInput = document.getElementById(type === 'normal' ? 'nb-name' : 'pr-name');
-      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
-      
+      if (nameInput) nameInput.value = customer.name;
+
       const config = await window.NappanDB.loadAppConfig();
       if (customer.membership_tier === 'premium') tierDiscount = parseFloat(config.tier_premium_discount || 0);
       else if (customer.membership_tier === 'business') tierDiscount = parseFloat(config.tier_business_discount || 0);
@@ -379,6 +379,7 @@
       const extraQty = parseInt(document.getElementById('nb-extra-qty').textContent);
 
       if (!name) { showToast('⚠️ Ingresa tu nombre'); return; }
+      if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
       if (!character) { showToast('⚠️ Dinos qué personaje quieres'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
@@ -458,6 +459,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       const extraQty = parseInt(document.getElementById('pr-extra-qty').textContent);
 
       if (!name) { showToast('⚠️ Ingresa tu nombre'); return; }
+      if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
       if (!design) { showToast('⚠️ Describe tu diseño'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
