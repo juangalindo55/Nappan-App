@@ -69,6 +69,16 @@
       <label>📍 Dirección / Notas especiales</label>
       <textarea id="notes" placeholder="Dirección de entrega, temática del evento, nombre del cumpleañero..."></textarea>
     </div>
+    <div class="date-field" style="flex:100%">
+      <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="deliveryCP" placeholder="Ej. 64349" maxlength="5" inputmode="numeric"
+          style="max-width:130px;"
+          onkeypress="if(event.key==='Enter'){event.preventDefault();calculateShipping();}"/>
+        <button onclick="calculateShipping()" style="padding:10px 16px;background:#DAA520;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1A1008'" onmouseout="this.style.background='#DAA520'">Calcular 🗺️</button>
+      </div>
+      <div id="shippingResult" style="margin-top:8px;font-size:13px;font-weight:500;min-height:18px;"></div>
+    </div>
   </div>
 </div>
 
@@ -267,6 +277,7 @@
     <div class="order-summary" id="orderSummary">
       <div class="summary-empty">📋 Llena los datos del pedido abajo para ver el resumen aquí.</div>
     </div>
+    <div id="shippingRow" style="display:none;justify-content:space-between;align-items:center;padding:5px 0 2px;font-size:13px;color:#555;border-top:1px solid #f0e6d3;margin-top:4px;"></div>
     <div class="total-row">
       <span class="total-label">Total</span>
       <span class="total-amount" id="cartTotal">$0</span>
@@ -288,6 +299,11 @@
   let cart = [];
   let cartOpen = false;
   const capybaraImg = 'images/pancakeart-capibara.png';
+
+  // ── Estado de envío ────────────────────────────────────────
+  let shippingCost  = 0;    // 0 = no calculado / fuera de zona
+  let shippingLabel = '';   // 'calculated' | 'out_of_range' | 'error' | ''
+  let shippingCP    = '';   // CP capturado
 
   // Phase 5: Customer recurring detection
   let currentCustomer = null;
@@ -490,7 +506,22 @@
 
     let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
     const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
-    const total = subtotal - discountAmount;
+    const productsTotal  = subtotal - discountAmount;
+    const total          = productsTotal + shippingCost;
+
+    // Fila de envío en el carrito
+    const shippingRow = document.getElementById('shippingRow');
+    if (shippingRow) {
+      if (shippingLabel === 'calculated' && shippingCost > 0) {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío (CP ${shippingCP})</span><span style="font-weight:600;color:#2e7d32;">+$${shippingCost} MXN</span>`;
+      } else if (shippingLabel === 'out_of_range' || shippingLabel === 'error') {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío</span><span style="color:#E6AC00;font-weight:500;">Por cotizar</span>`;
+      } else {
+        shippingRow.style.display = 'none';
+      }
+    }
 
     if (tierDiscount > 0) {
       totalEl.textContent = `$${subtotal} → $${total} (${tierDiscount}% desc.)`;
@@ -537,6 +568,100 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ── CALCULADORA DE ENVÍO ───────────────────────────────────
+  const SHIPPING_ORIGIN = 'Caparroso 5609, Cumbres, Monterrey, 64349, Mexico';
+
+  function getShippingCost(km) {
+    if (km <= 3)  return 50;
+    if (km <= 8)  return 85;
+    if (km <= 15) return 130;
+    if (km <= 20) return 150;
+    if (km <= 45) return 200;
+    return null;
+  }
+
+  function calculateShipping() {
+    const cpInput  = document.getElementById('deliveryCP');
+    const resultEl = document.getElementById('shippingResult');
+    const cp = cpInput ? cpInput.value.trim() : '';
+
+    if (!/^\d{5}$/.test(cp)) {
+      if (resultEl) resultEl.innerHTML = '<span style="color:#c0392b;">❌ Ingresa un CP válido de 5 dígitos</span>';
+      return;
+    }
+
+    shippingCP = cp;
+    if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
+
+    // Timeout global si el SDK nunca carga
+    clearTimeout(window._shippingTimeout);
+    window._shippingTimeout = setTimeout(() => {
+      shippingCost  = 0;
+      shippingLabel = 'error';
+      if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+      renderCart();
+    }, 8000);
+
+    const tryCalc = () => {
+      if (!window.google || !window.google.maps) {
+        setTimeout(tryCalc, 500);
+        return;
+      }
+      clearTimeout(window._shippingTimeout);
+
+      const apiTimeout = setTimeout(() => {
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        renderCart();
+      }, 6000);
+
+      try {
+        const svc = new google.maps.DistanceMatrixService();
+        svc.getDistanceMatrix({
+          origins:      [SHIPPING_ORIGIN],
+          destinations: [`${cp}, Monterrey, NL, Mexico`],
+          travelMode:   google.maps.TravelMode.DRIVING,
+          unitSystem:   google.maps.UnitSystem.METRIC,
+        }, (response, status) => {
+          clearTimeout(apiTimeout);
+          try {
+            if (status === 'OK' && response?.rows?.[0]?.elements?.[0]?.status === 'OK') {
+              const km   = response.rows[0].elements[0].distance.value / 1000;
+              const cost = getShippingCost(km);
+              if (cost === null) {
+                shippingCost  = 0;
+                shippingLabel = 'out_of_range';
+                if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura (${km.toFixed(1)} km). Cotizamos por WhatsApp.</span>`;
+              } else {
+                shippingCost  = cost;
+                shippingLabel = 'calculated';
+                if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;">✅ Envío estimado: <strong>$${cost} MXN</strong> (${km.toFixed(1)} km)</span>`;
+              }
+            } else {
+              shippingCost  = 0;
+              shippingLabel = 'error';
+              if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+            }
+          } catch(e) {
+            shippingCost  = 0;
+            shippingLabel = 'error';
+            if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+          }
+          renderCart();
+        });
+      } catch(e) {
+        clearTimeout(apiTimeout);
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        renderCart();
+      }
+    };
+
+    tryCalc();
   }
 
   async function lookupCustomerLB(phoneValue) {
@@ -609,7 +734,8 @@
 
     let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
     const discountAmount = Math.round(subtotal * tierDiscount / 100 * 100) / 100;
-    const total = subtotal - discountAmount;
+    const productsTotal  = subtotal - discountAmount;
+    const total          = productsTotal + shippingCost;
 
     let msg = `🥞 *PEDIDO NAPPANCAKES*\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
@@ -617,7 +743,7 @@
     if (phone) msg += `📱 *Teléfono:* ${phone}\n`;
     msg += `📅 *Fecha:* ${formatDate(date)}\n`;
     if (time) msg += `⏰ *Hora:* ${time}\n`;
-    if (notes) msg += `📍 *Notas:* ${notes}\n`;
+    if (notes) msg += `📍 *Dirección:* ${notes}\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `*PRODUCTOS:*\n`;
 
@@ -632,12 +758,15 @@
 
     msg += `\n━━━━━━━━━━━━━━━━\n`;
     if (tierDiscount > 0) {
-      msg += `💰 *Subtotal: $${subtotal} MXN*\n`;
-      msg += `🎁 *Descuento (${tierDiscount}%): -$${discountAmount} MXN*\n`;
-      msg += `💰 *TOTAL: $${total} MXN*\n`;
-    } else {
-      msg += `💰 *TOTAL: $${total} MXN*\n`;
+      msg += `💰 *Subtotal productos:* $${subtotal} MXN\n`;
+      msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN\n`;
     }
+    if (shippingLabel === 'calculated' && shippingCost > 0) {
+      msg += `🚚 *Envío (CP ${shippingCP}):* $${shippingCost} MXN\n`;
+    } else {
+      msg += `🚚 *Envío:* Por cotizar\n`;
+    }
+    msg += `💰 *TOTAL: $${total} MXN*\n`;
     msg += `\n¡Gracias por tu pedido! 🐻✨`;
 
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
@@ -654,6 +783,7 @@
         delivery_address: notes,
         subtotal: subtotal,
         discount_amount: discountAmount,
+        shipping_cost: shippingCost,
         total: total,
         whatsapp_sent: true,
         notes: notes,
