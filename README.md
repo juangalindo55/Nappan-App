@@ -110,14 +110,19 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 - **Selector de Fruta o Gelatina** con custom checkboxes marrón (#8B5E3C)
   - Validación obligatoria (toast si no se selecciona)
   - Palomilla blanca visible solo cuando está seleccionado
+- **Detección de cliente recurrente:** Búsqueda por teléfono en `onblur`
+  - Welcome badge con nombre del cliente y tier de membresía
+  - Aplicación automática de descuentos (Individual/Premium/Business)
+- **Calculadora de envío:** Integrada con Google Maps API en el carrito
 - Extras seleccionables con precio dinámico
 - Carrito lateral con panel deslizante
 - Restricción: un tipo de box y una figura por pedido
-- Envío de pedido pre-formateado a WhatsApp
+- Envío de pedido pre-formateado a WhatsApp con desglose de descuentos y envío
 
 ### 🎨 Nappan Box (`nappan-box.html`)
 - **Nappan Box** ($450) — Arte con personaje a elección
 - **Premium Box** ($850) — Arte ultra-detallado con foto de referencia
+- **Detección de cliente recurrente:** Welcome badge y descuentos por tier aplicados a ambas versiones
 - Tabs para cambiar entre versiones
 - Extras de PancakeART pequeño ($150 c/u)
 - Formulario completo con validaciones
@@ -128,7 +133,8 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 - **Boost Shots:** Detox Glow, Energy Boost, Golden Power (con imágenes WebP)
 - **Signature Pancakes:** Power Pancakes, Protein Minis
 - **Combos:** Combo Fit, Combo Shots
-- Carrito con agrupación por producto y thumbnails
+- **Detección de cliente recurrente:** Campo de teléfono con lookup de membresía y bienvenida personalizada
+- Carrito con agrupación por producto, thumbnails y aplicación de descuentos por tier
 - Formulario con nombre, fecha, hora y notas
 
 ### 🎪 Eventos en Vivo (`nappan-eventos.html`)
@@ -225,13 +231,23 @@ Luego abre: **http://localhost:8080**
   - [x] Admin: Tab **Productos** para editar precios y extras
   - [x] Carrito refleja precios actualizados en tiempo real
 
-### Fase 5+ — Futuro
-- [ ] Tabla `pricing_rules` para promociones temporales y descuentos por volumen
-- [ ] Tabla `customers` para tracking de clientes recurrentes con tiers (Individual/Premium/Business)
-- [ ] Detección automática de clientes por teléfono + gestión de membership tiers
-- [ ] Analytics — dashboard con gráficos (revenue, top productos, repeat rate)
-- [ ] PWA / Service Worker
+- [x] **Fase 5 — Clientes Recurrentes y Tiers de Membresía**
+  - [x] Tabla `customers` con tiers: `individual`, `premium`, `business`
+  - [x] Triggers para sincronización automática de estadísticas de clientes
+  - [x] RPC `find_customer_by_phone` para búsqueda segura desde el frontend
+  - [x] Integración de "Welcome Badge" en Lunch Box, Fit Bar y Nappan Box
+  - [x] Aplicación dinámica de descuentos configurables según el tier del cliente
+  - [x] Admin: Tab **Clientes** para gestión completa (CRUD) de la base de datos
+  - [x] Admin: Configuración de porcentajes de descuento por membresía
+  - [x] Inclusión de desglose de descuentos en mensajes de WhatsApp y base de datos
+
+### Fase 6 — Futuro
+- [ ] **Fase 6 — Analytics & Dashboard Estadístico**
+  - [ ] RPC `get_dashboard_stats()` para agregaciones de datos
+  - [ ] Dashboard con gráficos (revenue, top productos, repeat rate, LTV) en Admin
+- [ ] PWA / Service Worker (Offline support + Installable)
 - [ ] Google Analytics / tracking avanzado
+- [ ] Integración avanzada con WhatsApp Business API para bots automáticos de confirmación
 
 ---
 
@@ -256,8 +272,8 @@ La app usa **Supabase** (PostgreSQL hosted) para persistencia de datos, autentic
 | `products` | Catálogo dinámico (SKU, base_price) | SELECT abierto, CRUD admin |
 | `product_extras` | Add-ons con precio por producto | SELECT abierto, CRUD admin |
 | `event_gallery` | Fotos galería eventos | SELECT abierto, CRUD admin |
-| `customers` | Info de clientes (futuro Phase 5) | SELECT/UPDATE admin |
-| `pricing_rules` | Reglas de descuento temporales (futuro) | SELECT abierto, CRUD admin |
+| `customers` | Base de datos de clientes y tiers de membresía | SELECT/UPDATE admin (find_phone RPC public) |
+| `pricing_rules` | Reglas de descuento temporales (futuro Phase 6+) | SELECT abierto, CRUD admin |
 
 ### API: `window.NappanDB`
 
@@ -290,9 +306,10 @@ NappanDB.updateExtraPrice(extraId, newPrice)
 **Credenciales:** Email + password configurados en Supabase Auth
 
 **Tabs:**
-- 📦 **Pedidos** — Historial, filtros, status editable
-- 📊 **Productos** — Edición de precios por sección
-- ⚙️ **Configuración** — WhatsApp, envío, extras, galería
+- 📦 **Pedidos** — Historial, filtros, status editable, exportación CSV
+- 📊 **Productos** — Edición de precios base y extras por sección
+- 👥 **Clientes** — Gestión de base de datos de clientes, tiers y búsqueda
+- ⚙️ **Configuración** — WhatsApp, envío, descuentos membresía, galería
 
 ---
 
