@@ -367,7 +367,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- MODAL: Editar Pedido -->
-<div id="editOrderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+<div id="editOrderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
   <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
     <h3 id="editOrderTitle" style="margin: 0 0 20px 0; font-size: 20px; font-weight: 700;">Editar Pedido</h3>
 
@@ -421,6 +421,36 @@
   </div>
 </div>
 
+<!-- MODAL: Seleccionar Producto -->
+<div id="selectProductModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1002; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700;">Seleccionar Producto</h3>
+    <div id="productSelector" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+      <!-- Se rellena dinámicamente -->
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button onclick="closeProductSelector()" style="padding: 10px 20px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar eliminación -->
+<div id="confirmDeleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #d32f2f;">🗑️ Eliminar Pedido</h3>
+    <p style="margin: 0 0 20px 0; font-size: 14px; color: #666;">
+      ¿Estás seguro de que quieres eliminar el pedido de <strong id="confirmDeleteCustomer">—</strong>?
+    </p>
+    <p style="margin: 0 0 20px 0; font-size: 13px; color: #999;">
+      El pedido quedará oculto pero podrás recuperarlo desde "Mostrar eliminados".
+    </p>
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button onclick="cancelDeleteConfirm()" style="padding: 10px 20px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+      <button onclick="confirmDeleteFinal()" style="padding: 10px 20px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Global state
   let allOrders = [];
@@ -430,6 +460,8 @@
   let expandedOrderId = null;
   let editingOrderId = null;
   let editingOrderData = null;
+  let pendingDeleteOrderId = null;
+  let editingOrderProducts = [];
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -563,8 +595,12 @@
       html += '</select></td>';
       html += '<td>' + date + '</td>';
       html += '<td style="display: flex; gap: 8px; justify-content: center;">';
-      html += '<button onclick="openEditOrder(\'' + order.id + '\')" title="Editar" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>';
-      html += '<button onclick="confirmDeleteOrder(\'' + order.id + '\')" title="Eliminar" style="background: none; border: none; cursor: pointer; font-size: 16px;">🗑️</button>';
+      if (isDeleted) {
+        html += '<button onclick="recoverDeletedOrder(\'' + order.id + '\')" title="Recuperar" style="background: none; border: none; cursor: pointer; font-size: 16px;">↩️</button>';
+      } else {
+        html += '<button onclick="openEditOrder(\'' + order.id + '\')" title="Editar" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>';
+        html += '<button onclick="confirmDeleteOrder(\'' + order.id + '\')" title="Eliminar" style="background: none; border: none; cursor: pointer; font-size: 16px;">🗑️</button>';
+      }
       html += '</td>';
       html += '</tr>';
 
@@ -583,11 +619,16 @@
           cartDisplay = 'Error al parsear carrito';
         }
 
+        const createdAt = order.created_at ? new Date(order.created_at).toLocaleString('es-MX') : 'No disponible';
+        const updatedAt = order.updated_at ? new Date(order.updated_at).toLocaleString('es-MX') : createdAt;
+
         html += '<tr class="detail-row show">';
         html += '<td colspan="8"><div class="detail-content">';
         html += '<div class="detail-grid">';
         html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + phone + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + deliveryDate + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">📅 Creado</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + createdAt + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">✏️ Último cambio</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + updatedAt + '</div></div>';
         html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + notes + '</div></div>';
         html += '</div>';
         html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Carrito</div><div class="raw-cart-list">' + cartDisplay + '</div></div>';
@@ -650,12 +691,43 @@
     }
   }
 
-  async function confirmDeleteOrder(orderId) {
-    if (!confirm('¿Eliminar este pedido? Podrás recuperarlo desde "Mostrar eliminados"')) return;
+  function confirmDeleteOrder(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+      showToast('Pedido no encontrado', 'error');
+      return;
+    }
+
+    pendingDeleteOrderId = orderId;
+    document.getElementById('confirmDeleteCustomer').textContent = order.customer_name || 'sin nombre';
+    document.getElementById('confirmDeleteModal').style.display = 'flex';
+  }
+
+  function cancelDeleteConfirm() {
+    document.getElementById('confirmDeleteModal').style.display = 'none';
+    pendingDeleteOrderId = null;
+  }
+
+  async function confirmDeleteFinal() {
+    if (!pendingDeleteOrderId) return;
+    const orderId = pendingDeleteOrderId;
+    cancelDeleteConfirm();
     await changeOrderStatus(orderId, 'deleted');
   }
 
-  function openEditOrder(orderId) {
+  async function recoverDeletedOrder(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+
+    try {
+      await changeOrderStatus(orderId, 'pending');
+      showToast('✓ Pedido recuperado', 'success');
+    } catch (error) {
+      showToast('Error al recuperar: ' + error.message, 'error');
+    }
+  }
+
+  async function openEditOrder(orderId) {
     const order = allOrders.find(o => o.id === orderId);
     if (!order) {
       showToast('Pedido no encontrado', 'error');
@@ -672,6 +744,19 @@
     document.getElementById('editNotes').value = order.notes || '';
     document.getElementById('editTotal').value = order.total || 0;
 
+    // Cargar productos de TODAS las secciones
+    try {
+      const sections = ['lunchbox', 'nappanbox', 'fitbar', 'eventos'];
+      editingOrderProducts = [];
+      for (const section of sections) {
+        const sectionProducts = await window.NappanDB.loadProducts(section);
+        editingOrderProducts = editingOrderProducts.concat(sectionProducts);
+      }
+    } catch (error) {
+      console.warn('Error loading products:', error);
+      editingOrderProducts = [];
+    }
+
     // Renderizar carrito editable
     renderEditCart(order);
 
@@ -686,58 +771,134 @@
     let cart = [];
     try {
       if (order.raw_cart) {
-        cart = typeof order.raw_cart === 'string' ? JSON.parse(order.raw_cart) : order.raw_cart;
-        if (!Array.isArray(cart)) cart = [];
+        const parsed = typeof order.raw_cart === 'string' ? JSON.parse(order.raw_cart) : order.raw_cart;
+
+        // Detectar formato Nappan Box (objeto con type, character, etc)
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.type) {
+          // Convertir formato Nappan Box a array para mostrar
+          const desc = parsed.character || parsed.design || 'Diseño personalizado';
+          cart = [{
+            name: (parsed.type === 'normal' ? '🎨 Normal - ' : '⭐ Premium - ') + desc,
+            qty: 1,
+            price: 0,
+            description: parsed.type === 'normal'
+              ? `Personaje: ${parsed.character}, ${parsed.description}`
+              : `Diseño: ${parsed.design}, Referencia: ${parsed.reference}`,
+            extras: parsed.extras || 0
+          }];
+        } else if (Array.isArray(parsed)) {
+          cart = parsed;
+        } else {
+          cart = [];
+        }
       }
     } catch (e) {
+      console.warn('Error parsing raw_cart:', e, 'raw_cart:', order.raw_cart);
       cart = [];
     }
+
+    console.log('Rendering cart with', cart.length, 'items:', cart);
 
     cart.forEach((item, idx) => {
       const name = item.name || item.product_name || '';
       const qty = item.qty || item.quantity || 1;
-      const price = item.price || item.unit_price || 0;
+      const price = item.price || item.unit_price || item.unitPrice || 0;
       const subtotal = qty * price;
 
       let html = '<tr>';
       html += '<td style="padding: 10px;"><input type="text" value="' + name + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-      html += '<td style="padding: 10px; text-align: center;"><input type="number" value="' + qty + '" min="1" onchange="updateCartItem(' + idx + ', this.value, document.getElementById(\'price-' + idx + '\').value); updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-      html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + price + '" step="0.01" min="0" onchange="updateCartItem(' + idx + ', document.getElementById(\'qty-' + idx + '\').value, this.value); updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="' + qty + '" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + price + '" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
       html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + subtotal.toFixed(2) + '</td>';
       html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
       html += '</tr>';
 
       tbody.innerHTML += html;
 
-      // Fijar ID para los inputs
-      setTimeout(() => {
-        const qtyInput = tbody.querySelector('input[type="number"]');
-        if (qtyInput && !qtyInput.id) {
-          qtyInput.id = 'qty-' + idx;
+      // Si hay descripción (formato Nappan Box), mostrarla en otra fila
+      if (item.description) {
+        html = '<tr style="background: #f9f9f9;">';
+        html += '<td colspan="5" style="padding: 8px 10px; font-size: 12px; color: #666; font-style: italic;">' + item.description;
+        if (item.extras > 0) {
+          html += ' + ' + item.extras + ' extras';
         }
-      }, 0);
+        html += '</td>';
+        html += '</tr>';
+        tbody.innerHTML += html;
+      }
     });
 
     updateEditTotal();
   }
 
   function addCartRow() {
+    if (editingOrderProducts.length === 0) {
+      showToast('No hay productos disponibles para esta sección', 'error');
+      return;
+    }
+    showProductSelector();
+  }
+
+  function showProductSelector() {
+    const selector = document.getElementById('productSelector');
+    selector.innerHTML = '';
+
+    if (editingOrderProducts.length === 0) {
+      selector.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No hay productos disponibles</div>';
+      document.getElementById('selectProductModal').style.display = 'flex';
+      return;
+    }
+
+    editingOrderProducts.forEach(product => {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; text-align: left; font-size: 14px; transition: background 0.2s;';
+      btn.onmouseover = () => btn.style.background = '#f0f0f0';
+      btn.onmouseout = () => btn.style.background = '#f9f9f9';
+
+      const sectionLabel = product.section === 'lunchbox' ? '🍱 Lunch Box' :
+                          product.section === 'nappanbox' ? '🎨 Nappan Box' :
+                          product.section === 'fitbar' ? '💪 Fit Bar' :
+                          product.section === 'eventos' ? '🎉 Eventos' : 'Otro';
+
+      btn.innerHTML = '<div style="font-weight: 600;">' + product.name + '</div>' +
+                     '<div style="font-size: 12px; color: #999;">' + sectionLabel + ' • $' + (product.base_price || 0).toFixed(2) + '</div>';
+      btn.onclick = () => addProductToCart(product);
+
+      selector.appendChild(btn);
+    });
+
+    document.getElementById('selectProductModal').style.display = 'flex';
+  }
+
+  function closeProductSelector() {
+    document.getElementById('selectProductModal').style.display = 'none';
+  }
+
+  function addProductToCart(product) {
+    closeProductSelector();
+
     const tbody = document.getElementById('editCartBody');
     const idx = tbody.children.length;
 
     let html = '<tr>';
-    html += '<td style="padding: 10px;"><input type="text" placeholder="Nombre del artículo" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px;"><input type="text" value="' + product.name + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
     html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="1" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-    html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="0" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-    html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$0.00</td>';
+    html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + (product.base_price || 0) + '" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + (product.base_price || 0).toFixed(2) + '</td>';
     html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
     html += '</tr>';
 
     tbody.innerHTML += html;
+    updateEditTotal();
   }
 
   function updateCartItemName(idx, newName) {
     // Las filas editan directamente en el form
+  }
+
+  function updateCartItem(idx, qty, price) {
+    // Los valores se actualizan directamente en los inputs
+    updateEditTotal();
   }
 
   function removeCartRow(idx) {
@@ -1286,6 +1447,9 @@
         return;
       }
 
+      // Recargar órdenes desde Supabase para obtener cambios recientes (e.g., eliminaciones)
+      allOrders = await window.NappanDB.loadAllOrders({});
+
       // Enriquecer datos de clientes con información de órdenes
       await enrichCustomersWithOrderData();
 
@@ -1303,9 +1467,12 @@
         allOrders = await window.NappanDB.loadAllOrders({});
       }
 
-      // Agrupar órdenes por teléfono del cliente (normalizado)
+      // Filtrar órdenes válidas (excluir cancelled y deleted)
+      const validOrders = allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted');
+
+      // Agrupar órdenes válidas por teléfono del cliente (normalizado)
       const ordersByPhone = {};
-      allOrders.forEach(order => {
+      validOrders.forEach(order => {
         const phone = (order.customer_phone || '').replace(/\D/g, '');
         if (!phone) return;
         if (!ordersByPhone[phone]) {
