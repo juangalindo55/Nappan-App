@@ -65,7 +65,7 @@
       </div>
       <div class="form-field">
         <label>📱 Tu teléfono</label>
-        <input type="tel" id="nb-phone" placeholder="Ej. 81 1234 5678"/>
+        <input type="tel" id="nb-phone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value, 'normal')"/>
       </div>
       <div class="form-field full">
         <label>🎨 ¿Qué personaje quieres?</label>
@@ -152,7 +152,7 @@
       </div>
       <div class="form-field premium">
         <label>📱 Tu teléfono</label>
-        <input type="tel" id="pr-phone" placeholder="Ej. 81 1234 5678"/>
+        <input type="tel" id="pr-phone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value, 'premium')"/>
       </div>
       <div class="form-field full premium">
         <label>🎨 Describe tu diseño</label>
@@ -220,6 +220,53 @@
   let premiumBoxPrice = 850;
   let nbExtraPrice = 150;    // Extra price for Nappan Box
   let pbExtraPrice = 150;    // Extra price for Premium Box
+
+  // Phase 5: Customer recurring detection
+  let currentCustomer = null;
+  let tierDiscount = 0;
+
+  async function lookupCustomer(phoneValue, type) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+    if (!window.NappanDB) return;
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      currentCustomer = customer;
+      const nameInput = document.getElementById(type === 'normal' ? 'nb-name' : 'pr-name');
+      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+      
+      const config = await window.NappanDB.loadAppConfig();
+      if (customer.membership_tier === 'premium') tierDiscount = parseFloat(config.tier_premium_discount || 0);
+      else if (customer.membership_tier === 'business') tierDiscount = parseFloat(config.tier_business_discount || 0);
+      else tierDiscount = 0;
+
+      showWelcomeBadge(customer, type);
+    }
+  }
+
+  function showWelcomeBadge(customer, type) {
+    let badgeHtml = `<div class="welcome-badge" style="background:linear-gradient(135deg,#FFB3C6,#ffe6ec);color:#1A1008;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-weight:600;text-align:center;">
+      👋 ¡Bienvenid@ de regreso, ${customer.name}!<br>
+      <span style="font-size:13px;opacity:0.9;">Tier: <span class="tier-badge tier-${customer.membership_tier}" style="display:inline-block;padding:3px 8px;border-radius:12px;background:rgba(255,255,255,0.5);">${customer.membership_tier}</span> — Descuento: ${tierDiscount}%</span>
+    </div>`;
+
+    const formSection = document.querySelector(`#panel-${type} .form-grid`);
+    if (formSection) {
+      const panel = document.getElementById(`panel-${type}`);
+      const existing = panel.querySelector('.welcome-badge');
+      if (existing) existing.remove();
+      
+      const div = document.createElement('div');
+      div.innerHTML = badgeHtml;
+      formSection.parentNode.insertBefore(div.firstChild, formSection);
+    }
+  }
 
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -335,7 +382,9 @@
       if (!character) { showToast('⚠️ Dinos qué personaje quieres'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
-      const total = nappaBoxPrice + (hasExtra ? extraQty * nbExtraPrice : 0);
+      const subtotal = nappaBoxPrice + (hasExtra ? extraQty * nbExtraPrice : 0);
+      const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+      const total = subtotal - discountAmount;
 
       let msg = `🎨 *PEDIDO NAPPAN BOX*
 `;
@@ -361,6 +410,12 @@
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
+      if (tierDiscount > 0) {
+        msg += `💰 *Subtotal:* $${subtotal} MXN
+`;
+        msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN
+`;
+      }
       msg += `💰 *TOTAL ESTIMADO: $${total} MXN*
 `;
       if (notes) msg += `📍 *Notas:* ${notes}
@@ -377,7 +432,8 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
           customer_name: name,
           customer_phone: phone || null,
           delivery_date: date,
-          subtotal: total,
+          subtotal: subtotal,
+          discount_amount: discountAmount,
           total: total,
           whatsapp_sent: true,
           notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
@@ -405,7 +461,9 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       if (!design) { showToast('⚠️ Describe tu diseño'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
-      const total = premiumBoxPrice + (hasExtra ? extraQty * pbExtraPrice : 0);
+      const subtotal = premiumBoxPrice + (hasExtra ? extraQty * pbExtraPrice : 0);
+      const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+      const total = subtotal - discountAmount;
 
       let msg = `⭐ *PEDIDO NAPPAN PREMIUM BOX*
 `;
@@ -431,6 +489,12 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
+      if (tierDiscount > 0) {
+        msg += `💰 *Subtotal:* $${subtotal} MXN
+`;
+        msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN
+`;
+      }
       msg += `💰 *TOTAL ESTIMADO: $${total} MXN*
 `;
       if (notes) msg += `📍 *Notas:* ${notes}
@@ -449,7 +513,8 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
           customer_name: name,
           customer_phone: phone || null,
           delivery_date: date,
-          subtotal: total,
+          subtotal: subtotal,
+          discount_amount: discountAmount,
           total: total,
           whatsapp_sent: true,
           notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,

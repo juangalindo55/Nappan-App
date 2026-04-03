@@ -31,18 +31,16 @@
 - Fit Bar: 10 products + 2 combos
 - All editable from Admin > Productos
 
-### Phase 5: Recurring Customers + Tier Pricing (🟡 In Progress)
+### Phase 5: Recurring Customers + Tier Pricing (✅ Complete)
 **Completed:**
 - ✅ `customers` table with membership tiers (individual/premium/business)
 - ✅ RPC function `find_customer_by_phone` (public, SECURITY DEFINER)
 - ✅ Trigger `sync_customer_stats` — auto-upsert on new orders
 - ✅ **Lunch Box:** Phone field + customer lookup on blur + welcome badge + tier discounts applied
 - ✅ Tier discount config in Admin > Configuración > Descuentos por Membresía
-
-**Pending (same pattern as Lunch Box):**
-- ⏳ Fit Bar — add phone field + lookup + tier pricing
-- ⏳ Nappan Box — add lookup (already has phone fields)
-- ⏳ Eventos — add lookup (already has phone field)
+- ✅ **Fit Bar:** Phone field + lookup + welcome badge + tier pricing applied to cart
+- ✅ **Nappan Box:** Phone lookup + welcome badge + tier pricing applied to both Normal/Premium boxes
+*(Nota: Eventos en Vivo queda excluido de esta fase por ser sistema de cotización abierta).*
 
 ### Phase 6: Analytics (❌ Not Started)
 - `get_dashboard_stats()` RPC for aggregations
@@ -61,19 +59,18 @@
 - `supabase-schema.sql` — DDL for all tables + RLS + triggers
 - `supabase-phase5-schema.sql` — Phase 5: customers table + RPC + trigger
 
-### Section Pages (Phase 5 in progress)
+### Section Pages (Phase 5 complete)
 - `nappan-lunchbox.html` — ✅ Complete (phone field + lookup + tier pricing)
-- `nappan-fitbar.html` — ⏳ Needs phone field + lookup
-- `nappan-box.html` — ⏳ Needs lookup (has phone fields)
-- `nappan-eventos.html` — ⏳ Needs lookup (has phone field)
+- `nappan-fitbar.html` — ✅ Complete (phone field + lookup + tier pricing)
+- `nappan-box.html` — ✅ Complete (lookup + tier pricing)
+- `nappan-eventos.html` — ⏸️ Excluido de Fase 5 (cotización abierta)
 
 ---
 
-## Next Steps (Phase 5 → Phase 6)
+## Next Steps (Phase 6)
 
-1. **Complete Phase 5** — Apply Lunch Box pattern (lookup + tier pricing) to Fit Bar, Nappan Box, Eventos
-2. **Phase 6 — Analytics** — Add stats RPC, charts dashboard in admin
-3. **Optional polish** — PWA, service worker, enhanced mobile UX
+1. **Phase 6 — Analytics** — Add stats RPC, charts dashboard in admin
+2. **Optional polish** — PWA, service worker, enhanced mobile UX
 
 ---
 

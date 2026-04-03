@@ -250,6 +250,10 @@
         <input type="text" id="clientName" placeholder="Ej. María García" />
       </div>
       <div class="date-field">
+        <label>📱 Tu teléfono (opcional)</label>
+        <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomer(this.value)"/>
+      </div>
+      <div class="date-field">
         <label>📅 Fecha de entrega</label>
         <input type="date" id="deliveryDate" />
       </div>
@@ -341,6 +345,10 @@
 
   // CARRITO DE COMPRAS
   let cartPFB = [];
+
+  // Phase 5: Customer recurring detection
+  let currentCustomer = null;
+  let tierDiscount = 0;
 
   // Agregar producto con cantidad (para Boost Shots)
   function addToCartShot(productName, price, qtyInputId, imagePath = null) {
@@ -436,8 +444,73 @@
     cartContainer.innerHTML = html;
 
     // Calcular total
-    const total = cartPFB.reduce((sum, item) => sum + item.price, 0);
-    totalElement.textContent = `$${total}`;
+    const subtotal = cartPFB.reduce((sum, item) => sum + item.price, 0);
+    const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+    const finalTotal = subtotal - discountAmount;
+
+    if (tierDiscount > 0) {
+      totalElement.textContent = `$${subtotal} → $${finalTotal} (${tierDiscount}% desc.)`;
+    } else {
+      totalElement.textContent = `$${finalTotal}`;
+    }
+  }
+
+  // == PHASE 5: TIER PRICING LOGIC ==
+  async function lookupCustomer(phoneValue) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      currentCustomer = customer;
+      const nameInput = document.getElementById('clientName');
+      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+      await applyTierDiscount(customer.membership_tier);
+      showWelcomeBadge(customer);
+    }
+  }
+
+  function showWelcomeBadge(customer) {
+    let badgeHtml = `<div class="welcome-badge" style="background:linear-gradient(135deg,#A8E6CF,#d2f5e8);color:#1A1008;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-weight:600;text-align:center;">
+      👋 ¡Bienvenid@ de regreso, ${customer.name}!<br>
+      <span style="font-size:13px;opacity:0.9;">Tier: <span class="tier-badge tier-${customer.membership_tier}" style="display:inline-block;padding:3px 8px;border-radius:12px;background:rgba(255,255,255,0.5);">${customer.membership_tier}</span> — Descuento: ${tierDiscount}%</span>
+    </div>`;
+    const orderSummary = document.querySelector('.order-summary');
+    if (orderSummary) {
+      const existing = orderSummary.querySelector('.welcome-badge');
+      if (existing) existing.remove();
+      orderSummary.insertBefore(createElementFromHTML(badgeHtml), orderSummary.firstChild);
+    }
+  }
+
+  function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString;
+    return div.firstChild;
+  }
+
+  async function applyTierDiscount(tier) {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const config = await window.NappanDB.loadAppConfig();
+    if (tier === 'premium') tierDiscount = parseFloat(config.tier_premium_discount || 0);
+    else if (tier === 'business') tierDiscount = parseFloat(config.tier_business_discount || 0);
+    else tierDiscount = 0;
+
+    updateCart();
   }
 
   // Eliminar producto del carrito
@@ -472,6 +545,7 @@
     }
 
     const clientName = document.getElementById('clientName').value.trim();
+    const clientPhone = document.getElementById('clientPhone').value.trim();
     const deliveryDate = document.getElementById('deliveryDate').value;
     const deliveryTime = document.getElementById('deliveryTime').value;
     const specialNotes = document.getElementById('specialNotes').value.trim();
@@ -503,6 +577,7 @@
     let message = '🎉 *NUEVO PEDIDO - PROTEIN FIT BAR*\n\n';
     message += '━━━━━━━━━━━━━━━━━━━━━━━\n';
     message += `👤 *Cliente:* ${clientName}\n`;
+    if (clientPhone) message += `📱 *Teléfono:* ${clientPhone}\n`;
     message += `📅 *Fecha:* ${deliveryDate}\n`;
 
     if (deliveryTime) {
@@ -512,15 +587,24 @@
     message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
     message += '📋 *PRODUCTOS:*\n';
 
-    let total = 0;
+    let subtotal = 0;
     Object.values(groupedCart).forEach(item => {
-      const subtotal = item.price * item.quantity;
-      total += subtotal;
-      message += `• ${item.name} x${item.quantity} = $${subtotal}\n`;
+      const subtotalItem = item.price * item.quantity;
+      subtotal += subtotalItem;
+      message += `• ${item.name} x${item.quantity} = $${subtotalItem}\n`;
     });
 
+    const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+    const finalTotal = subtotal - discountAmount;
+
     message += '\n━━━━━━━━━━━━━━━━━━━━━━━\n';
-    message += `💰 *TOTAL:* $${total}\n`;
+    if (tierDiscount > 0) {
+      message += `💰 *Subtotal: $${subtotal} MXN*\n`;
+      message += `🎁 *Descuento (${tierDiscount}%): -$${discountAmount} MXN*\n`;
+      message += `💰 *TOTAL: $${finalTotal} MXN*\n`;
+    } else {
+      message += `💰 *TOTAL: $${finalTotal} MXN*\n`;
+    }
     message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
 
     if (specialNotes) {
@@ -540,11 +624,12 @@
       NappanDB.saveOrder({
         section: 'fitbar',
         customer_name: clientName,
-        customer_phone: null,
+        customer_phone: clientPhone || null,
         delivery_date: deliveryDate,
         delivery_time: deliveryTime,
-        subtotal: total,
-        total: total,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        total: finalTotal,
         whatsapp_sent: true,
         notes: specialNotes,
         raw_cart: JSON.parse(JSON.stringify(cartPFB))
@@ -554,6 +639,7 @@
     // Limpiar formulario
     setTimeout(() => {
       document.getElementById('clientName').value = '';
+      if (document.getElementById('clientPhone')) document.getElementById('clientPhone').value = '';
       document.getElementById('deliveryDate').value = '';
       document.getElementById('deliveryTime').value = '';
       document.getElementById('specialNotes').value = '';

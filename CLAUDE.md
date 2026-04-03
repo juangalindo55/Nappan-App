@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page architecture. 4 sections fully functional. **Phases 1-4 complete: Supabase integration, order capture, dynamic pricing, admin dashboard.** Phase 5 in progress (recurring customers + tier pricing).
+**Status:** Modular multi-page architecture. 4 sections fully functional. **Phases 1-5 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts.** Phase 6 (Analytics) pending.
 
 ## Running Locally
 
