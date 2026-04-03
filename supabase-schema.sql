@@ -42,7 +42,7 @@ CREATE POLICY "app_config_delete_admin" ON app_config
 -- Seed initial config values
 INSERT INTO app_config (key, value, description) VALUES
   ('whatsapp_number', '528123509768', 'WhatsApp business number for orders'),
-  ('origin_address', 'Caparroso 5609, Cumbres, Monterrey, 64349, Mexico', 'Business address for shipping calculations'),
+  ('origin_address', 'Cumbres, Monterrey, 64349, Mexico', 'Business address for shipping calculations'),
   ('shipping_tier_1_km', '3', 'Distance limit for tier 1 shipping'),
   ('shipping_tier_1_price', '50', 'Price in MXN for tier 1'),
   ('shipping_tier_2_km', '8', 'Distance limit for tier 2 shipping'),

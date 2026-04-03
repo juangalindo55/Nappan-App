@@ -185,7 +185,7 @@
 
   // ── CONFIGURACIÓN ──────────────────────────────────────────
   const GOOGLE_MAPS_API_KEY = 'AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA';
-  const ORIGIN_ADDRESS = 'Caparroso 5609, Cumbres, Monterrey, 64349, Mexico';
+  const ORIGIN_ADDRESS = 'Cumbres, Monterrey, 64349, Mexico';
 
   // ── CLASE CHATBOT ──────────────────────────────────────────
   class NappanChatbot {
