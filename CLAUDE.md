@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page architecture. 4 sections fully functional.
+**Status:** Modular multi-page architecture. 4 sections fully functional. **Phases 1-4 complete: Supabase integration, order capture, dynamic pricing, admin dashboard.** Phase 5 in progress (recurring customers + tier pricing).
 
 ## Running Locally
 
@@ -88,15 +88,52 @@ Full spec in `TYPOGRAPHY_SYSTEM.md`.
 ### Principle
 Minimalist, high-end "boutique" feel. Mobile-first responsive design.
 
+## Supabase Integration (Phases 1-5)
+
+Backend: **Supabase PostgreSQL + Auth + RLS**
+
+### Core Tables
+- `orders` — Every order (anon INSERT, admin SELECT/UPDATE)
+- `customers` — Recurring customers with membership tiers (admin CRUD)
+- `products` — Dynamic catalog with pricing (anon SELECT, admin CRUD)
+- `product_extras` — Add-ons per product (anon SELECT, admin CRUD)
+- `app_config` — Key-value config (anon SELECT, admin UPDATE)
+- `event_gallery` — Dynamic gallery photos (anon SELECT, admin CRUD)
+
+### Client API: `window.NappanDB`
+All functions exported from `supabase-client.js`:
+- **Public:** `saveOrder()`, `loadProducts()`, `loadExtras()`, `loadAppConfig()`, `findCustomerByPhone()`
+- **Admin:** `loadCustomers()`, `updateCustomer()`, `insertCustomer()`, `deleteCustomer()`, `updateOrderStatus()`, etc.
+
+### Tier Pricing (Phase 5 — Lunch Box)
+- Customers detected by phone on blur
+- Membership tiers: `individual`, `premium` (10% discount), `business` (15% discount)
+- Discounts configurable from Admin > Configuración > Descuentos por Membresía
+
 ## WhatsApp Integration
 
-The business phone number for orders is centralized in `utils.js`:
+The business phone number is **dynamic** (loaded from `app_config` at runtime):
 
+```javascript
+const WA_NUMBER = await NappanDB.getConfigValue('whatsapp_number', '528123509768');
+```
+
+Fallback in `utils.js` if Supabase unavailable:
 ```javascript
 const WA_NUMBER = '528123509768'; // Format: 52 + number
 ```
 
-All pages import `utils.js` and reference this constant.
+All pages reference this constant for orders.
+
+## Admin Dashboard (`nappan-admin-v2.html`)
+
+**Tabs:**
+- 📋 **Pedidos** — Filters, inline status edit, expandable details, paginación, CSV export
+- 💰 **Productos** — Inline price editing for all products
+- 👥 **Clientes** — CRUD: view, edit name/tier, add new, delete
+- ⚙️ **Configuración** — WhatsApp, shipping rates, product extras, event gallery, tier discounts
+
+**Access:** Discrete 🔐 Admin link in `index.html` footer (not visible on section pages).
 
 ## Development Rules
 

@@ -1,83 +1,101 @@
-# 🗺️ Nappan App — Roadmap & Plan de Desarrollo
+# Plan: Nappan App — Roadmap & Implementation Status
 
-> Actualizado: Abril 2026 · Estado real del proyecto.
+## Project Status ✅ Phases 1-5 in Progress
 
----
+### Phase 1: Order Capture (✅ Complete)
+- Supabase PostgreSQL integration via CDN
+- `orders` & `order_items` tables with RLS
+- Fire-and-forget order persistence from all 4 sections
+- Sequential order numbering via trigger
 
-## 🚀 En Desarrollo (Prioridad Alta)
+### Phase 2: Admin Dashboard (✅ Complete)
+- Authentication (email/password)
+- Tab: Pedidos — filters, search, inline status edit, expandable details, pagination, CSV export
+- Tab: Productos — inline price editing
+- Tab: Configuración — WhatsApp, shipping rates, extras, gallery, tier discounts
+- Tab: Clientes — CRUD (view, edit, add, delete customers)
 
-- [ ] **Galería dinámica con fotos reales** en `nappan-eventos.html`
-    - La estructura ya existe (`GALLERY_PHOTOS` en el JS).
-    - Faltan las imágenes reales para cada categoría: cumpleaños, wellness, corporativos, baby shower, graduaciones, ferias.
-    - Reemplazar `null` por rutas `'images/nombre.webp'` cuando tengamos las fotos.
-- [ ] **Actualizar la tarjeta de Eventos** en `index.html`
-    - Cambiar su badge de "Próximamente" → "Nuevo" o eliminarlo.
-    - Confirmar que el link lleva a `nappan-eventos.html`.
-- [ ] **Pulido final de UI/UX transversal**:
-    - Revisar consistencia visual de los 4 headers (logo centrado, back-btn izquierda).
-    - Verificar que el `nav-float-btn` (menú hamburguesa) esté presente en todas las páginas.
+### Phase 3: Dynamic Config (✅ Complete)
+- `app_config` table (key-value store)
+- Dynamic WhatsApp number loading
+- Shipping rates configurable (5 tiers)
+- Event gallery dynamic loading
+- All editable from Admin > Configuración
 
----
+### Phase 4: Dynamic Pricing (✅ Complete)
+- `products` table with SKU and base_price
+- `product_extras` table for add-ons
+- Price loading from DB to override HTML hardcoded values
+- Lunch Box: 2 products + dynamic extras
+- Nappan Box: 2 products (Normal + Premium) + separate extras per product
+- Fit Bar: 10 products + 2 combos
+- All editable from Admin > Productos
 
-## ⏭️ Próximos Pasos (Feature Backlog)
+### Phase 5: Recurring Customers + Tier Pricing (🟡 In Progress)
+**Completed:**
+- ✅ `customers` table with membership tiers (individual/premium/business)
+- ✅ RPC function `find_customer_by_phone` (public, SECURITY DEFINER)
+- ✅ Trigger `sync_customer_stats` — auto-upsert on new orders
+- ✅ **Lunch Box:** Phone field + customer lookup on blur + welcome badge + tier discounts applied
+- ✅ Tier discount config in Admin > Configuración > Descuentos por Membresía
 
-- [ ] **Sistema de Cupones**: Agregar campo de "Código de Descuento" en los formularios de pedido que se incluya en el mensaje de WhatsApp.
-- [ ] **Checkout Mejorado**: Preguntar si es regalo y permitir agregar una dedicatoria rápida.
-- [ ] **Multi-idioma**: Preparar estructura para Inglés/Español (Monterrey es zona internacional).
-- [ ] **Chatbot mejorado**: Agregar respuestas con precios orientativos y menú Fit Bar más detallado en el chatbot.
+**Pending (same pattern as Lunch Box):**
+- ⏳ Fit Bar — add phone field + lookup + tier pricing
+- ⏳ Nappan Box — add lookup (already has phone fields)
+- ⏳ Eventos — add lookup (already has phone field)
 
----
-
-## 💡 Ideas en el Tintero (Brainstorming)
-
-- [ ] **Confirmación Automática**: Integración con WhatsApp Business API para bots más avanzados.
-- [ ] **Localizador**: Mapa interactivo para pick-up si se habilita un punto físico.
-- [ ] **Video Background**: Clips de 3–5 segundos de arte en pancake en el Hero del `index.html`.
-- [ ] **Reseñas / Testimonios**: Sección de comentarios reales de clientes en cada página de producto.
-
----
-
-## ✅ Completado
-
-### Arquitectura & Infraestructura
-- [x] Estructura modular multi-página (index + 4 secciones independientes).
-- [x] Sistema de diseño global en `styles.css` (~73 KB, ~2,100 líneas).
-- [x] `utils.js` con `WA_NUMBER` centralizado.
-- [x] `script.js` con router `goTo()` y toast "coming soon".
-- [x] Reescritura de documentación técnica (`README.md`, `AGENTS.md`, `CLAUDE.md`).
-- [x] Sistema tipográfico definido: Montserrat (H1) + Inter (todo lo demás). Ver `TYPOGRAPHY_SYSTEM.md`.
-
-### Chatbot (`chatbot.js`)
-- [x] Chatbot global auto-inyectado en todas las páginas vía `<script src="chatbot.js">`.
-- [x] Menú de bienvenida con quick-replies para Lunch Box, Nappan Box, Fit Bar, Eventos y Contacto.
-- [x] **Calculadora de envío** integrada: ingresa CP → llama Google Maps Distance Matrix API → devuelve precio.
-    - Cobertura: 0–3 km → $50 · 4–8 km → $85 · 9–15 km → $130 · 16–20 km → $150 · 21–45 km → $200.
-- [x] Clave de Google Maps actualizada en `chatbot.js` (`GOOGLE_MAPS_API_KEY`).
-
-### Nappan Eventos en Vivo (`nappan-eventos.html`) ✅ Live
-- [x] Página creada y funcional (ya no es "Planned").
-- [x] Hero, tarjeta de servicio, sección "¿Cómo funciona?" (3 pasos).
-- [x] **Pills de tipo de evento** con auto-completado del selector del formulario.
-- [x] **Galería dinámica** (estructura lista, espera fotos reales).
-- [x] Formulario completo de cotización (nombre, teléfono, tipo, invitados, fecha, horario, lugar, temática, notas).
-- [x] Validación de campos + fecha mínima a 14 días.
-- [x] Envío por WhatsApp con mensaje formateado en negritas.
-- [x] Menú flotante hamburguesa con navegación a todas las secciones.
-
-### Nappan Lunch Box (`nappan-lunchbox.html`)
-- [x] Header unificado con logo centrado (estilo landing page).
-- [x] **Custom checkboxes** Fruta/Gelatina en Lunch Box 1 y 2 (color marrón `#8B5E3C`, validación obligatoria con toast).
-- [x] Texto PancakeART: separador cambiado de "o" a "/" entre "miel" y "Upgrade a Nucolato".
-- [x] Tamaño de "ARTÍSTICOS!" reducido a 0.75em para mejor jerarquía visual.
-- [x] Link a Instagram en color dorado mantenido.
-
-### Nappan Box (`nappan-box.html`)
-- [x] Página funcional con catálogo Nappan Box + Premium Box.
-
-### Nappan Fit Bar (`nappan-fitbar.html`)
-- [x] Integración de imágenes reales en la sección Coffee (WebP).
-- [x] Logo blanco actualizado en header.
+### Phase 6: Analytics (❌ Not Started)
+- `get_dashboard_stats()` RPC for aggregations
+- Admin > Statistics tab with charts (Chart.js CDN)
+- Revenue, top products, repeat rate, heatmaps
+- Top 10 customers by lifetime value
 
 ---
 
-*Este archivo es dinámico y se actualiza a medida que el proyecto evoluciona.*
+## Key Files
+
+### Core
+- `index.html` — Landing page with 🔐 Admin link in footer
+- `supabase-client.js` — Supabase client API (window.NappanDB)
+- `nappan-admin-v2.html` — Admin dashboard (auth-gated)
+- `supabase-schema.sql` — DDL for all tables + RLS + triggers
+- `supabase-phase5-schema.sql` — Phase 5: customers table + RPC + trigger
+
+### Section Pages (Phase 5 in progress)
+- `nappan-lunchbox.html` — ✅ Complete (phone field + lookup + tier pricing)
+- `nappan-fitbar.html` — ⏳ Needs phone field + lookup
+- `nappan-box.html` — ⏳ Needs lookup (has phone fields)
+- `nappan-eventos.html` — ⏳ Needs lookup (has phone field)
+
+---
+
+## Next Steps (Phase 5 → Phase 6)
+
+1. **Complete Phase 5** — Apply Lunch Box pattern (lookup + tier pricing) to Fit Bar, Nappan Box, Eventos
+2. **Phase 6 — Analytics** — Add stats RPC, charts dashboard in admin
+3. **Optional polish** — PWA, service worker, enhanced mobile UX
+
+---
+
+## SQL Still to Run (Phase 5)
+
+Execute in Supabase SQL Editor to enable admin INSERT/DELETE on customers:
+```sql
+CREATE POLICY "customers_insert_admin" ON customers
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "customers_delete_admin" ON customers
+  FOR DELETE USING (auth.role() = 'authenticated');
+```
+
+---
+
+## Verification Checklist (Phase 5)
+
+- ✅ Lunch Box: Phone field recognizes existing customers
+- ✅ Badge shows with tier and discount percentage
+- ✅ Carrito total reflects discount
+- ✅ WhatsApp message includes discount breakdown
+- ✅ Admin can edit tier discount percentages
+- ✅ Changes reflect in Lunch Box immediately
+- ✅ Admin can CRUD customers (view, edit name/tier, add, delete)
