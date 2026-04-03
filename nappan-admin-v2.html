@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nappan — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-client.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f5f3f0; color: #2D1B0E; }
+    h1, h2 { font-family: 'Montserrat', sans-serif; }
+
+    #loginSection { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1A1008 0%, #2D1B0E 100%); }
+    #dashboardSection { display: none; }
+
+    .login-container { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .login-container h1 { font-size: 28px; margin-bottom: 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif; }
+    .form-group input:focus { outline: none; border-color: #DAA520; box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1); }
+    .btn { width: 100%; padding: 12px; background-color: #DAA520; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 16px; }
+    .btn:hover { background-color: #FFD93D; color: #1A1008; }
+    .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    .error { color: #FF6B6B; margin-top: 15px; display: none; }
+
+    .admin-header { background: #1A1008; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-logout { background-color: #FF6B6B; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .btn-logout:hover { background-color: #ff5555; }
+
+    .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+    .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background-color: #f0ede8; border-bottom: 2px solid #ddd; padding: 15px; text-align: left; font-weight: 600; font-size: 13px; text-transform: uppercase; }
+    td { padding: 15px; border-bottom: 1px solid #eee; }
+    tbody tr:hover { background-color: #faf9f8; }
+
+    .order-number { font-weight: 600; color: #DAA520; }
+    .status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-pending { background-color: #FFE5B4; color: #8B5E3C; }
+    .status-confirmed { background-color: #B3E5FC; color: #01579B; }
+    .status-in_progress { background-color: #FFF9C4; color: #F57F17; }
+    .status-delivered { background-color: #C8E6C9; color: #1B5E20; }
+    .status-cancelled { background-color: #FFCDD2; color: #B71C1C; }
+
+    .loading { text-align: center; padding: 40px; color: #999; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #2D1B0E; color: white; padding: 15px 20px; border-radius: 6px; display: none; z-index: 1000; }
+    .toast.show { display: block; animation: slideIn 0.3s ease; }
+    .toast.success { background-color: #1B5E20; }
+    .toast.error { background-color: #B71C1C; }
+    @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .tab-btn { padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #999; border-bottom: 3px solid transparent; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+    .tab-btn.active { color: #DAA520; border-bottom-color: #DAA520; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Filter Bar */
+    .filter-bar { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 15px; align-items: flex-end; }
+    .filter-bar input, .filter-bar select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif; }
+    .filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: #DAA520; box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1); }
+    .btn-export { background-color: #1B5E20; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn-export:hover { background-color: #2d7a2f; }
+
+    /* Expand Detail */
+    .detail-row { display: none; }
+    .detail-row.show { display: table-row; background-color: #f5f5f5; }
+    .detail-content { padding: 20px 15px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    .detail-field { font-size: 14px; }
+    .detail-field-label { font-weight: 600; color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
+    .detail-field-value { color: #2D1B0E; }
+    .raw-cart-section { grid-column: 1 / -1; }
+    .raw-cart-list { background: white; padding: 10px; border-radius: 4px; border-left: 3px solid #DAA520; font-size: 13px; font-family: monospace; line-height: 1.6; max-height: 200px; overflow-y: auto; }
+
+    /* Inline Edit */
+    .inline-edit { display: flex; gap: 5px; align-items: center; }
+    .inline-edit input { width: 100px; padding: 8px; border: 1px solid #DAA520; border-radius: 4px; font-family: 'Inter', sans-serif; }
+    .btn-confirm, .btn-cancel { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px; }
+    .btn-confirm { background-color: #1B5E20; color: white; }
+    .btn-confirm:hover { background-color: #2d7a2f; }
+    .btn-cancel { background-color: #FF6B6B; color: white; }
+    .btn-cancel:hover { background-color: #ff5555; }
+
+    /* Pagination */
+    .pagination { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 20px; }
+    .pagination button { padding: 8px 15px; background-color: #f0ede8; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .pagination button:hover:not(:disabled) { background-color: #DAA520; color: white; }
+    .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination-info { color: #666; font-size: 14px; }
+
+    /* Expand button */
+    .btn-expand { background: none; border: none; cursor: pointer; padding: 5px 10px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginSection">
+  <div class="login-container">
+    <h1>Nappan Admin</h1>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" required placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn" id="submitBtn">Entrar</button>
+      <div class="error" id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardSection">
+  <div class="admin-header">
+    <h1>Dashboard Admin</h1>
+    <button class="btn-logout" onclick="handleLogout()">Cerrar sesion</button>
+  </div>
+
+  <div class="dashboard-container">
+    <!-- TABS -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
+      <button onclick="switchTabTo('pedidos', this)" class="tab-btn active">📋 Pedidos</button>
+      <button onclick="switchTabTo('productos', this)" class="tab-btn">💰 Productos</button>
+      <button onclick="switchTabTo('config', this)" class="tab-btn">⚙️ Configuración</button>
+    </div>
+
+    <!-- TAB: PEDIDOS -->
+    <div id="pedidos-tab" class="tab-content">
+      <!-- FILTROS -->
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Buscar por cliente o número de pedido..." onkeyup="applyOrderFilters()">
+        <select id="sectionFilter" onchange="applyOrderFilters()">
+          <option value="">Todas las secciones</option>
+          <option value="lunchbox">Lunch Box</option>
+          <option value="nappanbox">Nappan Box</option>
+          <option value="fitbar">Fit Bar</option>
+          <option value="eventos">Eventos</option>
+        </select>
+        <select id="statusFilter" onchange="applyOrderFilters()">
+          <option value="">Todos los status</option>
+          <option value="pending">Pendiente</option>
+          <option value="confirmed">Confirmado</option>
+          <option value="in_progress">En Progreso</option>
+          <option value="delivered">Entregado</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+        <button class="btn-export" onclick="exportOrdersCSV()">⬇ CSV</button>
+      </div>
+
+      <!-- TABLA -->
+      <div id="tableContainer" class="table-container">
+        <div class="loading">Cargando pedidos...</div>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      <div class="pagination" id="paginationControls" style="display: none;">
+        <button onclick="previousPage()" id="btnPrev">← Anterior</button>
+        <span class="pagination-info"><span id="pageInfo">1 de 1</span></span>
+        <button onclick="nextPage()" id="btnNext">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- TAB: PRODUCTOS -->
+    <div id="productos-tab" class="tab-content" style="display: none;">
+      <h2 style="margin-bottom: 20px;">Productos</h2>
+      <div id="productsContainer" class="table-container">
+        <div class="loading">Cargando productos...</div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIGURACIÓN -->
+    <div id="config-tab" class="tab-content" style="display: none;">
+      <h2 style="margin-bottom: 20px;">Configuración</h2>
+
+      <!-- WhatsApp -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">WhatsApp</h3>
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px; text-transform: uppercase;">Número (sin +)</label>
+            <input type="text" id="configWhatsapp" placeholder="528123509768" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif;">
+          </div>
+          <button onclick="saveWhatsapp()" class="btn" style="width: auto; padding: 10px 20px;">Guardar</button>
+        </div>
+      </div>
+
+      <!-- Tarifas de Envío -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">Tarifas de Envío</h3>
+        <div id="shippingContainer"></div>
+        <button onclick="saveShipping()" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Tarifas</button>
+      </div>
+
+      <!-- Extras de Productos -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">Extras de Productos</h3>
+        <div id="extrasContainer"></div>
+        <button onclick="saveExtras()" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Extras</button>
+      </div>
+
+      <!-- Galería de Eventos -->
+      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">Galería de Eventos</h3>
+        <div id="galleryContainer"></div>
+        <button onclick="saveGallery()" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Galería</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Global state
+  let allOrders = [];
+  let currentPage = 1;
+  const PAGE_SIZE = 20;
+  let activeFilters = { search: '', section: '', status: '' };
+  let expandedOrderId = null;
+
+  async function handleLogin(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+      showToast('Completa email y contraseña', 'error');
+      return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Entrando...';
+
+    try {
+      const result = await window.NappanDB.signIn(email, password);
+
+      if (result.error) {
+        showToast('Email o contraseña incorrectos', 'error');
+        document.getElementById('loginError').textContent = result.error.message;
+        document.getElementById('loginError').style.display = 'block';
+      } else if (result.session) {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        await loadOrders();
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      showToast('Error: ' + error.message, 'error');
+    } finally {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Entrar';
+    }
+  }
+
+  async function handleLogout() {
+    await window.NappanDB.signOut();
+    document.getElementById('dashboardSection').style.display = 'none';
+    document.getElementById('loginSection').style.display = 'flex';
+    document.getElementById('loginForm').reset();
+  }
+
+  async function loadOrders() {
+    const container = document.getElementById('tableContainer');
+    container.innerHTML = '<div class="loading">Cargando pedidos...</div>';
+
+    try {
+      allOrders = await window.NappanDB.loadAllOrders({});
+
+      if (!allOrders || allOrders.length === 0) {
+        container.innerHTML = '<div class="loading">No hay pedidos</div>';
+        document.getElementById('paginationControls').style.display = 'none';
+        return;
+      }
+
+      currentPage = 1;
+      renderOrdersTable();
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      container.innerHTML = '<div class="loading">Error cargando pedidos</div>';
+    }
+  }
+
+  function applyOrderFilters() {
+    activeFilters.search = document.getElementById('searchInput').value.toLowerCase();
+    activeFilters.section = document.getElementById('sectionFilter').value;
+    activeFilters.status = document.getElementById('statusFilter').value;
+    currentPage = 1;
+    renderOrdersTable();
+  }
+
+  function getFilteredOrders() {
+    return allOrders.filter(o => {
+      const matchSearch = !activeFilters.search ||
+        o.customer_name.toLowerCase().includes(activeFilters.search) ||
+        (o.order_number || '').toLowerCase().includes(activeFilters.search);
+      const matchSection = !activeFilters.section || o.section === activeFilters.section;
+      const matchStatus = !activeFilters.status || o.status === activeFilters.status;
+      return matchSearch && matchSection && matchStatus;
+    });
+  }
+
+  function renderOrdersTable() {
+    const container = document.getElementById('tableContainer');
+    const filtered = getFilteredOrders();
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="loading">No hay pedidos que coincidan</div>';
+      document.getElementById('paginationControls').style.display = 'none';
+      return;
+    }
+
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page = filtered.slice(start, start + PAGE_SIZE);
+
+    let html = '<table><thead><tr>';
+    html += '<th></th>';
+    html += '<th>Pedido</th>';
+    html += '<th>Cliente</th>';
+    html += '<th>Sección</th>';
+    html += '<th>Total</th>';
+    html += '<th>Status</th>';
+    html += '<th>Fecha</th>';
+    html += '</tr></thead><tbody>';
+
+    for (let i = 0; i < page.length; i++) {
+      const order = page[i];
+      const date = new Date(order.created_at).toLocaleDateString('es-MX');
+      const statusLabel = getStatusLabel(order.status);
+      const isExpanded = expandedOrderId === order.id;
+
+      html += '<tr>';
+      html += '<td><button class="btn-expand" onclick="toggleOrderDetail(\'' + order.id + '\')">▶</button></td>';
+      html += '<td class="order-number">' + (order.order_number || 'N/A') + '</td>';
+      html += '<td>' + (order.customer_name || 'N/A') + '</td>';
+      html += '<td>' + (order.section || 'N/A') + '</td>';
+      html += '<td>$' + (order.total || 0) + '</td>';
+      html += '<td><select onchange="changeOrderStatus(\'' + order.id + '\', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">';
+      html += '<option value="pending" ' + (order.status === 'pending' ? 'selected' : '') + '>Pendiente</option>';
+      html += '<option value="confirmed" ' + (order.status === 'confirmed' ? 'selected' : '') + '>Confirmado</option>';
+      html += '<option value="in_progress" ' + (order.status === 'in_progress' ? 'selected' : '') + '>En Progreso</option>';
+      html += '<option value="delivered" ' + (order.status === 'delivered' ? 'selected' : '') + '>Entregado</option>';
+      html += '<option value="cancelled" ' + (order.status === 'cancelled' ? 'selected' : '') + '>Cancelado</option>';
+      html += '</select></td>';
+      html += '<td>' + date + '</td>';
+      html += '</tr>';
+
+      // Detail row
+      if (isExpanded) {
+        const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
+        const phone = order.customer_phone || 'No proporcionado';
+        const notes = order.notes || 'Sin notas';
+        let cartDisplay = 'Carrito vacío';
+        try {
+          if (order.raw_cart) {
+            const cart = typeof order.raw_cart === 'string' ? JSON.parse(order.raw_cart) : order.raw_cart;
+            cartDisplay = JSON.stringify(cart, null, 2);
+          }
+        } catch (e) {
+          cartDisplay = 'Error al parsear carrito';
+        }
+
+        html += '<tr class="detail-row show">';
+        html += '<td colspan="7"><div class="detail-content">';
+        html += '<div class="detail-grid">';
+        html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + phone + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + deliveryDate + '</div></div>';
+        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + notes + '</div></div>';
+        html += '</div>';
+        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Carrito</div><pre class="raw-cart-list">' + cartDisplay + '</pre></div>';
+        html += '</div></td></tr>';
+      }
+    }
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    // Pagination
+    const paginationControls = document.getElementById('paginationControls');
+    if (totalPages > 1) {
+      paginationControls.style.display = 'flex';
+      document.getElementById('pageInfo').textContent = currentPage + ' de ' + totalPages;
+      document.getElementById('btnPrev').disabled = currentPage === 1;
+      document.getElementById('btnNext').disabled = currentPage === totalPages;
+    } else {
+      paginationControls.style.display = 'none';
+    }
+  }
+
+  function toggleOrderDetail(orderId) {
+    expandedOrderId = expandedOrderId === orderId ? null : orderId;
+    renderOrdersTable();
+  }
+
+  function previousPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      renderOrdersTable();
+    }
+  }
+
+  function nextPage() {
+    const filtered = getFilteredOrders();
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderOrdersTable();
+    }
+  }
+
+  async function changeOrderStatus(orderId, newStatus) {
+    try {
+      const { error } = await window.NappanDB.updateOrderStatus(orderId, newStatus);
+
+      if (error) {
+        showToast('Error actualizando status: ' + error.message, 'error');
+      } else {
+        // Actualizar en memoria
+        const order = allOrders.find(o => o.id === orderId);
+        if (order) order.status = newStatus;
+        showToast('✓ Status actualizado', 'success');
+        renderOrdersTable();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  function exportOrdersCSV() {
+    const filtered = getFilteredOrders();
+    if (filtered.length === 0) {
+      showToast('No hay pedidos para exportar', 'error');
+      return;
+    }
+
+    const headers = ['Pedido', 'Cliente', 'Teléfono', 'Sección', 'Total', 'Status', 'Fecha', 'Notas'];
+    const rows = [headers];
+
+    filtered.forEach(order => {
+      const date = new Date(order.created_at).toLocaleDateString('es-MX');
+      const statusLabel = getStatusLabel(order.status);
+      const phone = order.customer_phone || '';
+      const notes = (order.notes || '').replace(/"/g, '""'); // Escape quotes for CSV
+
+      rows.push([
+        order.order_number || '',
+        order.customer_name || '',
+        phone,
+        order.section || '',
+        '$' + (order.total || 0),
+        statusLabel,
+        date,
+        '"' + notes + '"'
+      ]);
+    });
+
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv; charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'pedidos_' + new Date().getTime() + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('✓ CSV exportado (' + filtered.length + ' pedidos)', 'success');
+  }
+
+  function getStatusLabel(status) {
+    const labels = {
+      'pending': 'Pendiente',
+      'confirmed': 'Confirmado',
+      'in_progress': 'En Progreso',
+      'delivered': 'Entregado',
+      'cancelled': 'Cancelado'
+    };
+    return labels[status] || status;
+  }
+
+  function showToast(message, type) {
+    if (!type) type = 'success';
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function switchTabTo(tabName, btnEl) {
+    document.querySelectorAll('[id$="-tab"]').forEach(el => {
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(el => {
+      el.classList.remove('active');
+    });
+
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    btnEl.classList.add('active');
+
+    if (tabName === 'config') {
+      loadConfig();
+    } else if (tabName === 'productos') {
+      loadProductsList();
+    }
+  }
+
+  let allProducts = [];
+
+  async function loadProductsList() {
+    const container = document.getElementById('productsContainer');
+    container.innerHTML = '<div class="loading">Cargando productos...</div>';
+
+    try {
+      allProducts = [];
+      for (const section of ['lunchbox', 'nappanbox', 'fitbar', 'eventos']) {
+        const prods = await window.NappanDB.loadProducts(section);
+        allProducts.push(...prods);
+      }
+
+      if (!allProducts || allProducts.length === 0) {
+        container.innerHTML = '<div class="loading">No hay productos</div>';
+        return;
+      }
+
+      let html = '<table><thead><tr>';
+      html += '<th>Sección</th>';
+      html += '<th>Nombre</th>';
+      html += '<th>SKU</th>';
+      html += '<th>Precio</th>';
+      html += '<th>Acciones</th>';
+      html += '</tr></thead><tbody>';
+
+      allProducts.forEach(product => {
+        html += '<tr id="prod-row-' + product.id + '">';
+        html += '<td>' + (product.section || 'N/A') + '</td>';
+        html += '<td>' + (product.name || 'N/A') + '</td>';
+        html += '<td style="font-family: monospace; font-size: 12px;">' + (product.sku || 'N/A') + '</td>';
+        html += '<td id="price-cell-' + product.id + '" style="font-weight: 600; color: #DAA520;">$' + (product.base_price || 0) + '</td>';
+        html += '<td><button class="btn" style="padding: 8px 12px; font-size: 13px;" onclick="startEditProductPrice(\'' + product.id + '\', ' + product.base_price + ')">Editar</button></td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    } catch (error) {
+      console.error('Error loading products:', error);
+      container.innerHTML = '<div class="loading">Error cargando productos</div>';
+    }
+  }
+
+  function startEditProductPrice(productId, currentPrice) {
+    const cellEl = document.getElementById('price-cell-' + productId);
+    cellEl.innerHTML = '<div class="inline-edit"><span>$</span><input type="number" id="input-' + productId + '" value="' + currentPrice + '" min="0" step="0.01"><button class="btn-confirm" onclick="confirmEditProductPrice(\'' + productId + '\')">✓</button><button class="btn-cancel" onclick="cancelEditProductPrice(\'' + productId + '\', ' + currentPrice + ')">✗</button></div>';
+    document.getElementById('input-' + productId).focus();
+  }
+
+  async function confirmEditProductPrice(productId) {
+    const input = document.getElementById('input-' + productId);
+    const newPrice = parseFloat(input.value);
+
+    if (isNaN(newPrice) || newPrice < 0) {
+      showToast('Ingresa un precio válido', 'error');
+      return;
+    }
+
+    try {
+      const { error } = await window.NappanDB.updateProductPrice(productId, newPrice);
+
+      if (error) {
+        showToast('Error guardando precio: ' + error.message, 'error');
+      } else {
+        // Update in memory
+        const product = allProducts.find(p => p.id === productId);
+        if (product) product.base_price = newPrice;
+        showToast('✓ Precio actualizado', 'success');
+
+        // Update cell display
+        const cellEl = document.getElementById('price-cell-' + productId);
+        cellEl.innerHTML = '$' + newPrice;
+        cellEl.style.fontWeight = '600';
+        cellEl.style.color = '#DAA520';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  function cancelEditProductPrice(productId, originalPrice) {
+    const cellEl = document.getElementById('price-cell-' + productId);
+    cellEl.innerHTML = '$' + originalPrice;
+    cellEl.style.fontWeight = '600';
+    cellEl.style.color = '#DAA520';
+  }
+
+  async function loadConfig() {
+    try {
+      const config = await window.NappanDB.loadAppConfig();
+
+      document.getElementById('configWhatsapp').value = config.whatsapp_number || '';
+
+      let shippingHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        const km = config['shipping_tier_' + i + '_km'] || '';
+        const price = config['shipping_tier_' + i + '_price'] || '';
+        shippingHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">';
+        shippingHtml += '<div><label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px;">Tier ' + i + ' (km)</label>';
+        shippingHtml += '<input type="number" class="shipping-km" data-tier="' + i + '" value="' + km + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></div>';
+        shippingHtml += '<div><label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px;">Precio (MXN)</label>';
+        shippingHtml += '<input type="number" class="shipping-price" data-tier="' + i + '" value="' + price + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></div>';
+        shippingHtml += '</div>';
+      }
+      document.getElementById('shippingContainer').innerHTML = shippingHtml;
+
+      const gallery = await window.NappanDB.loadGalleryPhotos();
+      let galleryHtml = '';
+      for (const eventType in gallery) {
+        galleryHtml += '<div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+        galleryHtml += '<h4 style="margin-bottom: 10px;">' + gallery[eventType].label + '</h4>';
+        if (gallery[eventType].images) {
+          gallery[eventType].images.forEach((img, idx) => {
+            galleryHtml += '<div style="margin-bottom: 10px;">';
+            galleryHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">Imagen ' + (idx + 1) + ' URL</label>';
+            galleryHtml += '<input type="text" class="gallery-url" data-event="' + eventType + '" data-slot="' + (idx + 1) + '" value="' + (img.image_url || '') + '" placeholder="images/ejemplo.webp" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 12px;">';
+            galleryHtml += '</div>';
+          });
+        }
+        galleryHtml += '</div>';
+      }
+      document.getElementById('galleryContainer').innerHTML = galleryHtml;
+
+      // Load extras
+      await loadExtrasForConfig();
+    } catch (error) {
+      console.error('Error loading config:', error);
+      showToast('Error cargando configuración', 'error');
+    }
+  }
+
+  async function loadExtrasForConfig() {
+    try {
+      const allProducts = [];
+      for (const section of ['lunchbox', 'nappanbox', 'fitbar', 'eventos']) {
+        const prods = await window.NappanDB.loadProducts(section);
+        allProducts.push(...prods);
+      }
+
+      let extrasHtml = '';
+      for (const product of allProducts) {
+        const extras = await window.NappanDB.loadExtras(product.id);
+        if (extras && extras.length > 0) {
+          extrasHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+          extrasHtml += '<h4 style="margin-bottom: 10px;">' + product.name + ' (' + product.section + ')</h4>';
+          extras.forEach((extra, idx) => {
+            extrasHtml += '<div style="margin-bottom: 10px;">';
+            extrasHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">' + extra.label + '</label>';
+            extrasHtml += '<input type="number" class="extra-price" data-extra-id="' + extra.id + '" value="' + extra.price + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
+            extrasHtml += '</div>';
+          });
+          extrasHtml += '</div>';
+        }
+      }
+      document.getElementById('extrasContainer').innerHTML = extrasHtml || '<div class="loading">No hay extras</div>';
+    } catch (error) {
+      console.error('Error loading extras:', error);
+      document.getElementById('extrasContainer').innerHTML = '<div class="loading">Error cargando extras</div>';
+    }
+  }
+
+  async function saveExtras() {
+    try {
+      const inputs = document.querySelectorAll('.extra-price');
+      if (inputs.length === 0) {
+        showToast('No hay extras para guardar', 'error');
+        return;
+      }
+
+      for (const input of inputs) {
+        const extraId = input.dataset.extraId;
+        const price = input.value.trim();
+
+        if (price) {
+          const { error } = await window.NappanDB.updateExtraPrice(extraId, parseFloat(price));
+          if (error) {
+            console.error('Error saving extra:', error);
+          }
+        }
+      }
+
+      showToast('✓ Extras guardados', 'success');
+      await loadExtrasForConfig();
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function saveWhatsapp() {
+    const value = document.getElementById('configWhatsapp').value.trim();
+    if (!value) {
+      showToast('Ingresa un número', 'error');
+      return;
+    }
+
+    try {
+      const { error } = await window.NappanDB.updateConfigValue('whatsapp_number', value);
+
+      if (error) {
+        showToast('Error guardando: ' + error.message, 'error');
+      } else {
+        showToast('✓ WhatsApp actualizado', 'success');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function saveShipping() {
+    try {
+      const inputs = document.querySelectorAll('.shipping-km');
+      let success = true;
+
+      for (const input of inputs) {
+        const tier = input.dataset.tier;
+        const km = input.value.trim();
+        const priceInput = document.querySelector('.shipping-price[data-tier="' + tier + '"]');
+        const price = priceInput.value.trim();
+
+        if (km && price) {
+          const { error: kmError } = await window.NappanDB.updateConfigValue('shipping_tier_' + tier + '_km', km);
+          const { error: priceError } = await window.NappanDB.updateConfigValue('shipping_tier_' + tier + '_price', price);
+
+          if (kmError || priceError) {
+            success = false;
+          }
+        }
+      }
+
+      if (success) {
+        showToast('✓ Tarifas guardadas', 'success');
+      } else {
+        showToast('Error guardando algunas tarifas', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function saveGallery() {
+    try {
+      const inputs = document.querySelectorAll('.gallery-url');
+      let success = true;
+
+      for (const input of inputs) {
+        const eventType = input.dataset.event;
+        const slot = input.dataset.slot;
+        const imageUrl = input.value.trim() || null;
+
+        const { error } = await window.NappanDB.updateGalleryPhoto(eventType, parseInt(slot), imageUrl);
+
+        if (error) {
+          success = false;
+        }
+      }
+
+      if (success) {
+        showToast('✓ Galería actualizada', 'success');
+        await loadConfig();
+      } else {
+        showToast('Error guardando algunas fotos', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function checkAuth() {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (window.NappanDB) {
+      const result = await window.NappanDB.getSession();
+      if (result && result.session) {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        await loadOrders();
+      }
+    }
+  }
+
+  checkAuth();
+</script>
+
+</body>
+</html>
