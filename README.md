@@ -16,11 +16,11 @@ Sitio web oficial de **Nappan**, una marca de lifestyle basada en Monterrey, Mé
 | **Estilos** | CSS3 con variables, `clamp()`, responsive design |
 | **Lógica** | Vanilla JavaScript (zero dependencies) |
 | **Tipografía** | Inter (UI) + Montserrat (títulos) vía Google Fonts |
-| **Base de Datos** | Supabase (PostgreSQL) vía CDN |
-| **Autenticación** | Supabase Auth (email/password para admin) |
-| **Pedidos** | Captura en BD + integración directa con WhatsApp Business API |
+| **Base de Datos** | PostgreSQL via CDN |
+| **Autenticación** | Auth Service (email/password para admin) |
+| **Pedidos** | Captura persistente + integración directa con WhatsApp Business API |
 | **Chatbot** | Chatbot embebido con calculadora de envío vía Google Maps Distance Matrix API |
-| **Deploy** | GitHub Pages (frontend) + Supabase (backend) |
+| **Deploy** | GitHub Pages (frontend) |
 | **Control de versiones** | Git & GitHub |
 | **IA Partner** | Claude Code (Anthropic) — Vibe Coding methodology |
 
@@ -45,8 +45,7 @@ Arquitectura **multi-página modular** — cada línea de negocio es una página
 ├── script.js               ← Router de navegación goTo() + toast notifications
 ├── utils.js                ← Constantes compartidas (WA_NUMBER)
 ├── chatbot.js              ← Chatbot embebido con calculadora de envío (Google Maps API)
-├── supabase-client.js      ← Inicialización cliente Supabase y API window.NappanDB
-├── supabase-schema.sql     ← DDL: tablas, RLS policies, triggers, seed data
+├── supabase-client.js      ← Cliente de datos y API window.NappanDB
 │
 ├── images/
 │   ├── logo-dorado.webp        ← Logo principal (usado en headers dark)
@@ -201,134 +200,12 @@ Luego abre: **http://localhost:8080**
 - [x] Chatbot embebido con menú interactivo y calculadora de envío (Google Maps)
 - [x] Deploy en GitHub Pages
 
-### Fase 2 — Supabase Integration ✅
-- [x] **Fase 1 — Captura de Órdenes**
-  - [x] Tabla `orders` + `order_items` en Supabase
-  - [x] Función `NappanDB.saveOrder()` para persistencia
-  - [x] Integración en las 4 secciones (fire-and-forget después de WhatsApp)
-  - [x] Trigger automático para generar `order_number` secuencial
-  
-- [x] **Fase 2 — Dashboard Admin** 
-  - [x] `nappan-admin-v2.html` con authentication (email/password)
-  - [x] Tab **Pedidos** — tabla con filtros, status editable, expand para ver detalles
-  - [x] Tab **Productos** — visualización de productos
-  - [x] Tab **Configuración** — edición de config, extras de productos, galería
-  - [x] Row Level Security (RLS) policies configuradas
-
-- [x] **Fase 3 — Configuración Dinámica**
-  - [x] Tabla `app_config` para almacenar valores editables
-  - [x] Número WhatsApp dinámico (cargado desde DB)
-  - [x] Tarifas de envío dinámicas (5 tiers configurables)
-  - [x] Galería de eventos dinámica (reemplaza `GALLERY_PHOTOS`)
-  - [x] Admin: Tab para editar configuración y galería
-
-- [x] **Fase 4 — Productos y Precios Dinámicos**
-  - [x] Tabla `products` con SKU y precios base
-  - [x] Tabla `product_extras` para add-ons (ej. PancakeART pequeño extra)
-  - [x] Precios dinámicos en **Lunch Box** (2 opciones)
-  - [x] Precios dinámicos en **Nappan Box** (Nappan + Premium) + extras separados
-  - [x] Precios dinámicos en **Fit Bar** (10 productos + 2 combos)
-  - [x] Admin: Tab **Productos** para editar precios y extras
-  - [x] Carrito refleja precios actualizados en tiempo real
-
-- [x] **Fase 5 — Clientes Recurrentes y Tiers de Membresía**
-  - [x] Tabla `customers` con tiers: `individual`, `premium`, `business`
-  - [x] Triggers para sincronización automática de estadísticas de clientes
-  - [x] RPC `find_customer_by_phone` para búsqueda segura desde el frontend
-  - [x] Integración de "Welcome Badge" en Lunch Box, Fit Bar y Nappan Box
-  - [x] Aplicación dinámica de descuentos configurables según el tier del cliente
-  - [x] Admin: Tab **Clientes** para gestión completa (CRUD) de la base de datos
-  - [x] Admin: Configuración de porcentajes de descuento por membresía
-  - [x] Inclusión de desglose de descuentos en mensajes de WhatsApp y base de datos
-
-### Fase 6 — Futuro
-- [ ] **Fase 6 — Analytics & Dashboard Estadístico**
-  - [ ] RPC `get_dashboard_stats()` para agregaciones de datos
-  - [ ] Dashboard con gráficos (revenue, top productos, repeat rate, LTV) en Admin
-- [ ] PWA / Service Worker (Offline support + Installable)
-- [ ] Google Analytics / tracking avanzado
-- [ ] Integración avanzada con WhatsApp Business API para bots automáticos de confirmación
-
----
-
-## 🗄️ Integración Supabase
-
-La app usa **Supabase** (PostgreSQL hosted) para persistencia de datos, autenticación del admin y configuración dinámica.
-
-### Setup Inicial
-
-1. Crear proyecto en [supabase.com](https://supabase.com)
-2. Copiar credenciales (`Proyecto URL` y `Anon Key`)
-3. Actualizar en `supabase-client.js` (líneas 6-7)
-4. Ejecutar DDL desde `supabase-schema.sql` en Supabase SQL Editor
-
-### Tablas principales
-
-| Tabla | Propósito | RLS |
-|---|---|---|
-| `orders` | Cada pedido (WhatsApp + admin) | INSERT abierto, SELECT/UPDATE admin |
-| `order_items` | Items normalizados por orden | INSERT abierto, SELECT admin |
-| `app_config` | Key-value (WA_NUMBER, tarifas, etc) | SELECT abierto, UPDATE admin |
-| `products` | Catálogo dinámico (SKU, base_price) | SELECT abierto, CRUD admin |
-| `product_extras` | Add-ons con precio por producto | SELECT abierto, CRUD admin |
-| `event_gallery` | Fotos galería eventos | SELECT abierto, CRUD admin |
-| `customers` | Base de datos de clientes y tiers de membresía | SELECT/UPDATE admin (find_phone RPC public) |
-| `pricing_rules` | Reglas de descuento temporales (futuro Phase 6+) | SELECT abierto, CRUD admin |
-
-### API: `window.NappanDB`
-
-**Funciones públicas (anon):**
-```javascript
-NappanDB.saveOrder(payload)        // → {order_id, order_number}
-NappanDB.loadProducts(section)     // → products[]
-NappanDB.loadExtras(productId)     // → extras[]
-NappanDB.loadGalleryPhotos()       // → grouped by event_type_key
-NappanDB.loadAppConfig()           // → {key: value, ...}
-```
-
-**Funciones admin (requieren sesión autenticada):**
-```javascript
-NappanDB.signIn(email, password)
-NappanDB.signOut()
-NappanDB.getSession()
-NappanDB.loadAllOrders(filters)
-NappanDB.updateOrderStatus(id, status)
-NappanDB.updateConfigValue(key, value)
-NappanDB.updateGalleryPhoto(eventType, slot, imageUrl)
-NappanDB.updateProductPrice(productId, newPrice)
-NappanDB.updateExtraPrice(extraId, newPrice)
-```
-
-### Acceso Admin
-
-**URL:** `http://localhost:8080/nappan-admin-v2.html`
-
-**Credenciales:** Email + password configurados en Supabase Auth
-
-**Tabs:**
-- 📦 **Pedidos** — Historial, filtros, status editable, exportación CSV
-- 📊 **Productos** — Edición de precios base y extras por sección
-- 👥 **Clientes** — Gestión de base de datos de clientes, tiers y búsqueda
-- ⚙️ **Configuración** — WhatsApp, envío, descuentos membresía, galería
 
 ---
 
 ## 📱 Integración WhatsApp
 
-Todos los pedidos se envían vía WhatsApp Business. El número se almacena en `app_config` (editable desde admin):
-
-```javascript
-// Cargado dinámicamente desde Supabase
-const WA_NUMBER = await NappanDB.getConfigValue('whatsapp_number', '528123509768');
-```
-
-Fallback si Supabase no está disponible:
-```javascript
-// utils.js
-const WA_NUMBER = '528123509768';
-```
-
-**Nota:** El número se almacena en la BD para permitir cambios sin modificar código.
+Todos los pedidos se gestionan vía WhatsApp Business. La configuración se actualiza dinámicamente desde el panel administrativo para permitir cambios sin necesidad de modificar el código fuente.
 
 ---
 
