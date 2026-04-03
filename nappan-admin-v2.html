@@ -131,6 +131,7 @@
     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
       <button onclick="switchTabTo('pedidos', this)" class="tab-btn active">📋 Pedidos</button>
       <button onclick="switchTabTo('productos', this)" class="tab-btn">💰 Productos</button>
+      <button onclick="switchTabTo('clientes', this)" class="tab-btn">👥 Clientes</button>
       <button onclick="switchTabTo('config', this)" class="tab-btn">⚙️ Configuración</button>
     </div>
 
@@ -175,6 +176,35 @@
       <h2 style="margin-bottom: 20px;">Productos</h2>
       <div id="productsContainer" class="table-container">
         <div class="loading">Cargando productos...</div>
+      </div>
+    </div>
+
+    <!-- TAB: CLIENTES -->
+    <div id="clientes-tab" class="tab-content" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Clientes</h2>
+        <button class="btn" onclick="showAddCustomerForm()" style="width: auto; padding: 10px 20px;">+ Agregar Cliente</button>
+      </div>
+
+      <!-- Formulario de nuevo cliente -->
+      <div id="addCustomerForm" style="display: none; background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="margin-bottom: 15px;">Nuevo Cliente</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <input type="tel" id="newCustPhone" placeholder="Teléfono (sin espacios)" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+          <input type="text" id="newCustName" placeholder="Nombre completo" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+          <select id="newCustTier" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            <option value="individual">Individual</option>
+            <option value="premium">Premium</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+        <button class="btn" onclick="saveNewCustomer()" style="width: auto; padding: 10px 20px; margin-right: 10px;">Guardar</button>
+        <button class="btn-cancel" onclick="hideAddCustomerForm()" style="padding: 10px 20px; background-color: #FF6B6B; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+      </div>
+
+      <!-- Tabla de clientes -->
+      <div id="customersContainer" class="table-container">
+        <div class="loading">Cargando clientes...</div>
       </div>
     </div>
 
@@ -577,6 +607,8 @@
       loadConfig();
     } else if (tabName === 'productos') {
       loadProductsList();
+    } else if (tabName === 'clientes') {
+      loadCustomersList();
     }
   }
 
@@ -875,6 +907,166 @@
       }
     } catch (error) {
       console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  // CLIENTES TAB
+  let allCustomers = [];
+
+  async function loadCustomersList() {
+    const container = document.getElementById('customersContainer');
+    container.innerHTML = '<div class="loading">Cargando clientes...</div>';
+
+    try {
+      allCustomers = await window.NappanDB.loadCustomers({});
+
+      if (!allCustomers || allCustomers.length === 0) {
+        container.innerHTML = '<div class="loading">No hay clientes</div>';
+        return;
+      }
+
+      renderCustomersTable();
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      container.innerHTML = '<div class="loading">Error cargando clientes</div>';
+    }
+  }
+
+  function renderCustomersTable() {
+    const container = document.getElementById('customersContainer');
+
+    let html = '<table><thead><tr>';
+    html += '<th>Teléfono</th>';
+    html += '<th>Nombre</th>';
+    html += '<th>Tier</th>';
+    html += '<th>Pedidos</th>';
+    html += '<th>Total Gastado</th>';
+    html += '<th>Último Pedido</th>';
+    html += '<th>Acciones</th>';
+    html += '</tr></thead><tbody>';
+
+    allCustomers.forEach(customer => {
+      const lastOrder = customer.last_order_at ? new Date(customer.last_order_at).toLocaleDateString('es-MX') : '—';
+      html += '<tr>';
+      html += '<td id="phone-' + customer.id + '">' + (customer.phone || '—') + '</td>';
+      html += '<td id="name-' + customer.id + '">' + (customer.name || '—') + '</td>';
+      html += '<td><select onchange="changeCustomerTier(\'' + customer.id + '\', this.value)">';
+      html += '<option value="individual" ' + (customer.membership_tier === 'individual' ? 'selected' : '') + '>Individual</option>';
+      html += '<option value="premium" ' + (customer.membership_tier === 'premium' ? 'selected' : '') + '>Premium</option>';
+      html += '<option value="business" ' + (customer.membership_tier === 'business' ? 'selected' : '') + '>Business</option>';
+      html += '</select></td>';
+      html += '<td>' + (customer.order_count || 0) + '</td>';
+      html += '<td>$' + (customer.total_spent || 0) + '</td>';
+      html += '<td>' + lastOrder + '</td>';
+      html += '<td><button class="btn" style="padding:6px 10px; font-size:12px;" onclick="startEditCustomer(\'' + customer.id + '\', \'name\', \'' + (customer.name || '').replace(/'/g, "\\'") + '\', document.getElementById(\'name-' + customer.id + '\'))">✏️</button> ';
+      html += '<button class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="deleteCustomerRow(\'' + customer.id + '\')">🗑️</button></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function startEditCustomer(id, field, currentVal, cellEl) {
+    cellEl.innerHTML = '<input type="text" id="input-' + id + '" value="' + currentVal + '" style="padding:6px; border:1px solid #DAA520; border-radius:4px;"> <button class="btn-confirm" style="padding:4px 8px; font-size:11px;" onclick="confirmEditCustomer(\'' + id + '\', \'' + field + '\')">✓</button> <button class="btn-cancel" style="padding:4px 8px; font-size:11px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="cancelEditCustomer(\'' + id + '\', \'' + field + '\', \'' + currentVal + '\')">✗</button>';
+    document.getElementById('input-' + id).focus();
+  }
+
+  async function confirmEditCustomer(id, field) {
+    const newVal = document.getElementById('input-' + id).value.trim();
+    if (!newVal) {
+      showToast('No puede estar vacío', 'error');
+      return;
+    }
+
+    const updates = {};
+    updates[field] = newVal;
+
+    try {
+      const { error } = await window.NappanDB.updateCustomer(id, updates);
+      if (error) {
+        showToast('Error: ' + error.message, 'error');
+      } else {
+        const customer = allCustomers.find(c => c.id === id);
+        if (customer) customer[field] = newVal;
+        showToast('✓ ' + field.charAt(0).toUpperCase() + field.slice(1) + ' actualizado', 'success');
+        renderCustomersTable();
+      }
+    } catch (error) {
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  function cancelEditCustomer(id, field, originalVal) {
+    const cellEl = document.getElementById(field + '-' + id);
+    cellEl.textContent = originalVal;
+  }
+
+  async function changeCustomerTier(id, newTier) {
+    try {
+      const { error } = await window.NappanDB.updateCustomer(id, { membership_tier: newTier });
+      if (error) {
+        showToast('Error: ' + error.message, 'error');
+      } else {
+        const customer = allCustomers.find(c => c.id === id);
+        if (customer) customer.membership_tier = newTier;
+        showToast('✓ Tier actualizado', 'success');
+      }
+    } catch (error) {
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function deleteCustomerRow(id) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este cliente?')) return;
+
+    try {
+      const { error } = await window.NappanDB.deleteCustomer(id);
+      if (error) {
+        showToast('Error: ' + error.message, 'error');
+      } else {
+        allCustomers = allCustomers.filter(c => c.id !== id);
+        showToast('✓ Cliente eliminado', 'success');
+        renderCustomersTable();
+      }
+    } catch (error) {
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  function showAddCustomerForm() {
+    document.getElementById('addCustomerForm').style.display = 'block';
+    document.getElementById('newCustPhone').focus();
+  }
+
+  function hideAddCustomerForm() {
+    document.getElementById('addCustomerForm').style.display = 'none';
+    document.getElementById('newCustPhone').value = '';
+    document.getElementById('newCustName').value = '';
+    document.getElementById('newCustTier').value = 'individual';
+  }
+
+  async function saveNewCustomer() {
+    const phone = document.getElementById('newCustPhone').value.trim();
+    const name = document.getElementById('newCustName').value.trim();
+    const tier = document.getElementById('newCustTier').value;
+
+    if (!phone || !name) {
+      showToast('Completa todos los campos', 'error');
+      return;
+    }
+
+    try {
+      const { error } = await window.NappanDB.insertCustomer(phone, name, tier);
+      if (error) {
+        showToast('Error: ' + error.message, 'error');
+      } else {
+        showToast('✓ Cliente agregado', 'success');
+        hideAddCustomerForm();
+        await loadCustomersList();
+      }
+    } catch (error) {
       showToast('Error: ' + error.message, 'error');
     }
   }
