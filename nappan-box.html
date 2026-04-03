@@ -8,6 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=4">
+<!-- Supabase Integration (Phase 1) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
 </head>
 <body class="page-nappanbox">
   <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
@@ -40,7 +43,7 @@
   <div class="price-card">
     <div class="price-info">
       <div class="price-name">Nappan Box</div>
-      <div class="price-amount">$450</div>
+      <div class="price-amount" id="price-NAPPAN-BOX">$450</div>
       <ul class="price-includes">
         <li>🥞 Pancake jumbo (Aprox. 28 cm) artístico</li>
         <li>🎨 3 PancakeART pequeños</li>
@@ -48,7 +51,7 @@
         <li>🍯 Miel en frasco + palita mielera de regalo</li>
         <li>🎁 Tú nos dices el personaje, nosotros buscamos el diseño</li>
       </ul>
-      <div class="price-extra">+ PancakeART pequeño extra: $150 c/u</div>
+      <div class="price-extra">+ PancakeART pequeño extra: <span id="extra-price-display-1">$150</span> c/u</div>
     </div>
   </div>
 
@@ -90,7 +93,7 @@
     <div class="extras-row" onclick="toggleExtra(this,'nb-qty-row')">
       <div class="check-sq">✓</div>
       <span class="extras-label">➕ PancakeART pequeño extra</span>
-      <span class="extras-price">+$150 c/u</span>
+      <span class="extras-price">+<span id="extra-price-display-2">$150</span> c/u</span>
     </div>
     <div class="qty-row" id="nb-qty-row">
       <span class="qty-label">¿Cuántos extras?</span>
@@ -126,7 +129,7 @@
   <div class="price-card premium">
     <div class="price-info">
       <div class="price-name">Nappan Premium Box</div>
-      <div class="price-amount">$850</div>
+      <div class="price-amount" id="price-PREMIUM-BOX">$850</div>
       <ul class="price-includes">
         <li>🎨 PancakeART personalizado extra detallado tamaño jumbo (Aprox. 28 cm)</li>
         <li>🥞 3 PancakeART pequeños</li>
@@ -135,7 +138,7 @@
         <li>🍴 Cubierto y servilleta</li>
         <li>📸 Tú nos mandas el diseño/foto, nosotros lo hacemos</li>
       </ul>
-      <div class="price-extra" style="color:var(--yellow);">+ PancakeART pequeño extra: $150 c/u</div>
+      <div class="price-extra" style="color:var(--yellow);">+ PancakeART pequeño extra: <span id="extra-price-display-3">$150</span> c/u</div>
     </div>
   </div>
 
@@ -180,7 +183,7 @@
     <div class="extras-row" onclick="toggleExtra(this,'pr-qty-row')">
       <div class="check-sq">✓</div>
       <span class="extras-label">➕ PancakeART pequeño extra</span>
-      <span class="extras-price">+$150 c/u</span>
+      <span class="extras-price">+<span id="extra-price-display-4">$150</span> c/u</span>
     </div>
     <div class="qty-row" id="pr-qty-row">
       <span class="qty-label">¿Cuántos extras?</span>
@@ -212,6 +215,12 @@
 
 <script src="utils.js"></script>
 <script>
+  // Precios dinámicos
+  let nappaBoxPrice = 450;
+  let premiumBoxPrice = 850;
+  let nbExtraPrice = 150;    // Extra price for Nappan Box
+  let pbExtraPrice = 150;    // Extra price for Premium Box
+
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -254,6 +263,62 @@
     return `${day} ${months[parseInt(m)-1]} ${y}`;
   }
 
+  async function loadDynamicPrices() {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    try {
+      if (window.NappanDB) {
+        const productsFromDB = await window.NappanDB.loadProducts('nappanbox');
+        let nbProduct = null;
+        let pbProduct = null;
+
+        productsFromDB.forEach(dbProduct => {
+          if (dbProduct.sku === 'NAPPAN-BOX') {
+            nbProduct = dbProduct;
+            nappaBoxPrice = dbProduct.base_price;
+            const el = document.getElementById('price-NAPPAN-BOX');
+            if (el) el.textContent = '$' + dbProduct.base_price;
+          } else if (dbProduct.sku === 'PREMIUM-BOX') {
+            pbProduct = dbProduct;
+            premiumBoxPrice = dbProduct.base_price;
+            const el = document.getElementById('price-PREMIUM-BOX');
+            if (el) el.textContent = '$' + dbProduct.base_price;
+          }
+        });
+
+        // Load extras for Nappan Box
+        if (nbProduct?.id) {
+          const nbExtras = await window.NappanDB.loadExtras(nbProduct.id);
+          if (nbExtras.length > 0) {
+            nbExtraPrice = nbExtras[0].price;
+            document.getElementById('extra-price-display-1').textContent = '$' + nbExtras[0].price;
+            document.getElementById('extra-price-display-2').textContent = '$' + nbExtras[0].price;
+          }
+        }
+
+        // Load extras for Premium Box
+        if (pbProduct?.id) {
+          const pbExtras = await window.NappanDB.loadExtras(pbProduct.id);
+          if (pbExtras.length > 0) {
+            pbExtraPrice = pbExtras[0].price;
+            document.getElementById('extra-price-display-3').textContent = '$' + pbExtras[0].price;
+            document.getElementById('extra-price-display-4').textContent = '$' + pbExtras[0].price;
+          }
+        }
+
+        console.log('✓ Precios Nappan Box cargados de Supabase');
+      }
+    } catch (error) {
+      console.warn('No se pudieron cargar precios dinámicos:', error);
+    }
+  }
+
+  loadDynamicPrices();
+
   function sendNBWhatsApp(type) {
     if (type === 'normal') {
       const name = document.getElementById('nb-name').value.trim();
@@ -270,7 +335,7 @@
       if (!character) { showToast('⚠️ Dinos qué personaje quieres'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
-      const total = 450 + (hasExtra ? extraQty * 150 : 0);
+      const total = nappaBoxPrice + (hasExtra ? extraQty * nbExtraPrice : 0);
 
       let msg = `🎨 *PEDIDO NAPPAN BOX*
 `;
@@ -286,13 +351,13 @@
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
-      msg += `📦 *NAPPAN BOX — $450*
+      msg += `📦 *NAPPAN BOX — $${nappaBoxPrice}*
 `;
       msg += `🎨 *Personaje:* ${character}
 `;
       if (desc) msg += `📝 *Detalles:* ${desc}
 `;
-      if (hasExtra) msg += `➕ *Extras:* ${extraQty}x PancakeART pequeño — $${extraQty * 150}
+      if (hasExtra) msg += `➕ *Extras:* ${extraQty}x PancakeART pequeño — $${extraQty * nbExtraPrice}
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
@@ -304,6 +369,26 @@
 _*Recuerda separar con el 50% de anticipo_ 🙌`;
 
       window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+      // Phase 1: Save order to Supabase (fire-and-forget)
+      if (window.NappanDB) {
+        NappanDB.saveOrder({
+          section: 'nappanbox',
+          customer_name: name,
+          customer_phone: phone || null,
+          delivery_date: date,
+          subtotal: total,
+          total: total,
+          whatsapp_sent: true,
+          notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
+          raw_cart: JSON.stringify({
+            type: 'normal',
+            character,
+            description: desc,
+            extras: hasExtra ? extraQty : 0
+          })
+        }).catch(err => console.warn('Order save failed (non-critical):', err));
+      }
 
     } else {
       const name = document.getElementById('pr-name').value.trim();
@@ -320,7 +405,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       if (!design) { showToast('⚠️ Describe tu diseño'); return; }
       if (!date) { showToast('⚠️ Selecciona una fecha'); return; }
 
-      const total = 850 + (hasExtra ? extraQty * 150 : 0);
+      const total = premiumBoxPrice + (hasExtra ? extraQty * pbExtraPrice : 0);
 
       let msg = `⭐ *PEDIDO NAPPAN PREMIUM BOX*
 `;
@@ -336,13 +421,13 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
-      msg += `📦 *PREMIUM BOX — $850*
+      msg += `📦 *PREMIUM BOX — $${premiumBoxPrice}*
 `;
       msg += `🎨 *Diseño:* ${design}
 `;
       if (ref) msg += `🔗 *Referencia:* ${ref}
 `;
-      if (hasExtra) msg += `➕ *Extras:* ${extraQty}x PancakeART pequeño — $${extraQty * 150}
+      if (hasExtra) msg += `➕ *Extras:* ${extraQty}x PancakeART pequeño — $${extraQty * pbExtraPrice}
 `;
       msg += `━━━━━━━━━━━━━━━━
 `;
@@ -356,6 +441,26 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
       msg += `_Te confirmamos disponibilidad al recibir tu diseño_ 📸`;
 
       window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+      // Phase 1: Save order to Supabase (fire-and-forget)
+      if (window.NappanDB) {
+        NappanDB.saveOrder({
+          section: 'nappanbox',
+          customer_name: name,
+          customer_phone: phone || null,
+          delivery_date: date,
+          subtotal: total,
+          total: total,
+          whatsapp_sent: true,
+          notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,
+          raw_cart: JSON.stringify({
+            type: 'premium',
+            design,
+            reference: ref,
+            extras: hasExtra ? extraQty : 0
+          })
+        }).catch(err => console.warn('Order save failed (non-critical):', err));
+      }
     }
   }
 
