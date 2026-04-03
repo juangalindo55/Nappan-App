@@ -8,6 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=3">
+<!-- Supabase Integration (Phase 1) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
 </head>
 <body class="page-lunchbox">
 <!-- HEADER -->
@@ -51,6 +54,10 @@
       <input type="text" id="clientName" placeholder="Ej. María García" />
     </div>
     <div class="date-field">
+      <label>📱 Tu teléfono (opcional)</label>
+      <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" onblur="lookupCustomerLB(this.value)"/>
+    </div>
+    <div class="date-field">
       <label>📅 Fecha de entrega</label>
       <input type="date" id="deliveryDate" />
     </div>
@@ -82,7 +89,7 @@
       min-height: 160px;
     ">
       <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
-      <span class="price-badge" style="z-index:2;">$125</span>
+      <span class="price-badge" id="price-LUNCHBOX-1" style="z-index:2;">$125</span>
       <div style="position:relative;z-index:1;padding-top:24px;">
         <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 1</div>
       </div>
@@ -164,7 +171,7 @@
       min-height: 160px;
     ">
       <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
-      <span class="price-badge" style="z-index:2;">$130</span>
+      <span class="price-badge" id="price-LUNCHBOX-2" style="z-index:2;">$130</span>
       <div style="position:relative;z-index:1;padding-top:24px;">
         <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 2</div>
       </div>
@@ -282,10 +289,62 @@
   let cartOpen = false;
   const capybaraImg = 'images/pancakeart-capibara.png';
 
+  // Phase 5: Customer recurring detection
+  let currentCustomer = null;
+  let tierDiscount = 0;
+
   const products = {
-    1: { name: 'Lunch Box 1', basePrice: 125, icon: '🐣', extras: { 'Salchipulpos + catsup 🐙': 25 } },
-    2: { name: 'Lunch Box 2', basePrice: 130, icon: '🥐', extras: { 'Upgrade croissant completo 🥐': 0 } }
+    1: { name: 'Lunch Box 1', basePrice: 125, icon: '🐣', extras: { 'Salchipulpos + catsup 🐙': 25 }, sku: 'LUNCHBOX-1' },
+    2: { name: 'Lunch Box 2', basePrice: 130, icon: '🥐', extras: { 'Upgrade croissant completo 🥐': 0 }, sku: 'LUNCHBOX-2' }
   };
+
+  // Load dynamic prices from Supabase
+  async function loadDynamicPrices() {
+    // Esperar a que NappanDB esté disponible
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    try {
+      if (window.NappanDB) {
+        console.log('Cargando precios dinámicos...');
+        const productsFromDB = await window.NappanDB.loadProducts('lunchbox');
+        console.log('Productos desde DB:', productsFromDB);
+
+        productsFromDB.forEach(dbProduct => {
+          console.log('Procesando:', dbProduct.sku, 'Precio:', dbProduct.base_price);
+
+          if (dbProduct.sku === 'LUNCHBOX-1') {
+            products[1].basePrice = dbProduct.base_price;
+            const el = document.getElementById('price-LUNCHBOX-1');
+            console.log('Elemento LUNCHBOX-1:', el);
+            if (el) {
+              el.textContent = '$' + dbProduct.base_price;
+              console.log('✓ Precio LUNCHBOX-1 actualizado a $' + dbProduct.base_price);
+            }
+          } else if (dbProduct.sku === 'LUNCHBOX-2') {
+            products[2].basePrice = dbProduct.base_price;
+            const el = document.getElementById('price-LUNCHBOX-2');
+            console.log('Elemento LUNCHBOX-2:', el);
+            if (el) {
+              el.textContent = '$' + dbProduct.base_price;
+              console.log('✓ Precio LUNCHBOX-2 actualizado a $' + dbProduct.base_price);
+            }
+          }
+        });
+        console.log('✓ Precios cargados de Supabase');
+      } else {
+        console.warn('NappanDB no disponible después de intentos');
+      }
+    } catch (error) {
+      console.warn('No se pudieron cargar precios dinámicos:', error);
+    }
+  }
+
+  // Cargar precios cuando la página esté lista
+  loadDynamicPrices();
 
   function changeQty(id, delta) {
     const el = document.getElementById(id);
@@ -429,8 +488,15 @@
       return;
     }
 
-    const total = cart.reduce((s, i) => s + i.totalPrice, 0);
-    totalEl.textContent = `$${total}`;
+    let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
+    const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+    const total = subtotal - discountAmount;
+
+    if (tierDiscount > 0) {
+      totalEl.textContent = `$${subtotal} → $${total} (${tierDiscount}% desc.)`;
+    } else {
+      totalEl.textContent = `$${total}`;
+    }
     btn.disabled = false;
 
     container.innerHTML = cart.map(item => {
@@ -473,8 +539,66 @@
     setTimeout(() => t.classList.remove('show'), 2600);
   }
 
+  async function lookupCustomerLB(phoneValue) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      currentCustomer = customer;
+      const nameInput = document.getElementById('clientName');
+      if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+      showWelcomeBadge(customer);
+      await applyTierDiscount(customer.membership_tier);
+    }
+  }
+
+  function showWelcomeBadge(customer) {
+    let badgeHtml = `<div class="welcome-badge" style="background:linear-gradient(135deg,#DAA520,#FFD93D);color:#1A1008;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-weight:600;text-align:center;">
+      👋 ¡Bienvenida de regreso, ${customer.name}!<br>
+      <span style="font-size:13px;opacity:0.9;">Tier: <span class="tier-badge tier-${customer.membership_tier}" style="display:inline-block;padding:3px 8px;border-radius:12px;background:rgba(255,255,255,0.3);">${customer.membership_tier}</span> — Descuento: ${tierDiscount}%</span>
+    </div>`;
+    const cartPanel = document.querySelector('.cart-panel');
+    if (cartPanel) {
+      const existing = cartPanel.querySelector('.welcome-badge');
+      if (existing) existing.remove();
+      cartPanel.insertBefore(createElementFromHTML(badgeHtml), cartPanel.firstChild);
+    }
+  }
+
+  function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString;
+    return div.firstChild;
+  }
+
+  async function applyTierDiscount(tier) {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const config = await window.NappanDB.loadAppConfig();
+    if (tier === 'premium') tierDiscount = parseFloat(config.tier_premium_discount || 0);
+    else if (tier === 'business') tierDiscount = parseFloat(config.tier_business_discount || 0);
+    else tierDiscount = 0;
+
+    renderCart();
+  }
+
   function sendWhatsApp() {
     const name = document.getElementById('clientName').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
     const date = document.getElementById('deliveryDate').value;
     const time = document.getElementById('deliveryTime').value;
     const notes = document.getElementById('notes').value.trim();
@@ -483,11 +607,14 @@
     if (!name) { showToast('⚠️ Ingresa tu nombre por favor'); return; }
     if (!date) { showToast('⚠️ Selecciona una fecha de entrega'); return; }
 
-    const total = cart.reduce((s, i) => s + i.totalPrice, 0);
+    let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
+    const discountAmount = Math.round(subtotal * tierDiscount / 100 * 100) / 100;
+    const total = subtotal - discountAmount;
 
     let msg = `🥞 *PEDIDO NAPPANCAKES*\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `👤 *Cliente:* ${name}\n`;
+    if (phone) msg += `📱 *Teléfono:* ${phone}\n`;
     msg += `📅 *Fecha:* ${formatDate(date)}\n`;
     if (time) msg += `⏰ *Hora:* ${time}\n`;
     if (notes) msg += `📍 *Notas:* ${notes}\n`;
@@ -504,11 +631,35 @@
     });
 
     msg += `\n━━━━━━━━━━━━━━━━\n`;
-    msg += `💰 *TOTAL: $${total} MXN*\n`;
+    if (tierDiscount > 0) {
+      msg += `💰 *Subtotal: $${subtotal} MXN*\n`;
+      msg += `🎁 *Descuento (${tierDiscount}%): -$${discountAmount} MXN*\n`;
+      msg += `💰 *TOTAL: $${total} MXN*\n`;
+    } else {
+      msg += `💰 *TOTAL: $${total} MXN*\n`;
+    }
     msg += `\n¡Gracias por tu pedido! 🐻✨`;
 
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
+
+    // Phase 1: Save order to Supabase (fire-and-forget, non-blocking)
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'lunchbox',
+        customer_name: name,
+        customer_phone: phone || null,
+        delivery_date: date,
+        delivery_time: time,
+        delivery_address: notes,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        total: total,
+        whatsapp_sent: true,
+        notes: notes,
+        raw_cart: JSON.parse(JSON.stringify(cart))
+      }).catch(err => console.warn('Order save failed (non-critical):', err));
+    }
   }
 
   function formatDate(dateStr) {
