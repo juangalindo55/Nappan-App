@@ -200,6 +200,10 @@
           <option value="delivered">Entregado</option>
           <option value="cancelled">Cancelado</option>
         </select>
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" id="showDeletedFilter" onchange="applyOrderFilters()" style="width: 18px; height: 18px; cursor: pointer;">
+          Mostrar eliminados
+        </label>
         <button class="btn-export" onclick="exportOrdersCSV()">⬇ CSV</button>
       </div>
 
@@ -362,13 +366,70 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- MODAL: Editar Pedido -->
+<div id="editOrderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <h3 id="editOrderTitle" style="margin: 0 0 20px 0; font-size: 20px; font-weight: 700;">Editar Pedido</h3>
+
+    <!-- Campos básicos -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Cliente</label>
+        <input type="text" id="editName" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+      </div>
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Teléfono</label>
+        <input type="tel" id="editPhone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+      </div>
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Fecha Entrega</label>
+        <input type="date" id="editDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+      </div>
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Total ($)</label>
+        <input type="number" id="editTotal" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+      </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Notas</label>
+      <textarea id="editNotes" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-height: 80px; font-family: Inter, sans-serif;"></textarea>
+    </div>
+
+    <!-- Carrito editable -->
+    <h4 style="margin: 20px 0 10px 0; font-size: 15px; font-weight: 700;">Artículos</h4>
+    <table id="editCartTable" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+      <thead>
+        <tr style="background: #f5f5f5;">
+          <th style="padding: 10px; text-align: left; font-weight: 600; font-size: 13px;">Artículo</th>
+          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 70px;">Cant.</th>
+          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 90px;">Precio</th>
+          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 90px;">Subtotal</th>
+          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 40px;"></th>
+        </tr>
+      </thead>
+      <tbody id="editCartBody"></tbody>
+    </table>
+
+    <button onclick="addCartRow()" style="padding: 8px 15px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 20px;">+ Agregar artículo</button>
+
+    <!-- Acciones -->
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button onclick="closeEditOrder()" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+      <button onclick="saveEditOrder()" style="padding: 10px 20px; background: #DAA520; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Global state
   let allOrders = [];
   let currentPage = 1;
   const PAGE_SIZE = 20;
-  let activeFilters = { search: '', section: '', status: '' };
+  let activeFilters = { search: '', section: '', status: '', showDeleted: false };
   let expandedOrderId = null;
+  let editingOrderId = null;
+  let editingOrderData = null;
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -437,6 +498,7 @@
     activeFilters.search = document.getElementById('searchInput').value.toLowerCase();
     activeFilters.section = document.getElementById('sectionFilter').value;
     activeFilters.status = document.getElementById('statusFilter').value;
+    activeFilters.showDeleted = document.getElementById('showDeletedFilter').checked;
     currentPage = 1;
     renderOrdersTable();
   }
@@ -448,7 +510,8 @@
         (o.order_number || '').toLowerCase().includes(activeFilters.search);
       const matchSection = !activeFilters.section || o.section === activeFilters.section;
       const matchStatus = !activeFilters.status || o.status === activeFilters.status;
-      return matchSearch && matchSection && matchStatus;
+      const matchDeleted = activeFilters.showDeleted || o.status !== 'deleted';
+      return matchSearch && matchSection && matchStatus && matchDeleted;
     });
   }
 
@@ -474,6 +537,7 @@
     html += '<th>Total</th>';
     html += '<th>Status</th>';
     html += '<th>Fecha</th>';
+    html += '<th>Acciones</th>';
     html += '</tr></thead><tbody>';
 
     for (let i = 0; i < page.length; i++) {
@@ -481,8 +545,10 @@
       const date = new Date(order.created_at).toLocaleDateString('es-MX');
       const statusLabel = getStatusLabel(order.status);
       const isExpanded = expandedOrderId === order.id;
+      const isDeleted = order.status === 'deleted';
+      const rowStyle = isDeleted ? 'opacity: 0.6; text-decoration: line-through;' : '';
 
-      html += '<tr>';
+      html += '<tr style="' + rowStyle + '">';
       html += '<td><button class="btn-expand" onclick="toggleOrderDetail(\'' + order.id + '\')">▶</button></td>';
       html += '<td class="order-number">' + (order.order_number || 'N/A') + '</td>';
       html += '<td>' + (order.customer_name || 'N/A') + '</td>';
@@ -496,6 +562,10 @@
       html += '<option value="cancelled" ' + (order.status === 'cancelled' ? 'selected' : '') + '>Cancelado</option>';
       html += '</select></td>';
       html += '<td>' + date + '</td>';
+      html += '<td style="display: flex; gap: 8px; justify-content: center;">';
+      html += '<button onclick="openEditOrder(\'' + order.id + '\')" title="Editar" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>';
+      html += '<button onclick="confirmDeleteOrder(\'' + order.id + '\')" title="Eliminar" style="background: none; border: none; cursor: pointer; font-size: 16px;">🗑️</button>';
+      html += '</td>';
       html += '</tr>';
 
       // Detail row
@@ -514,7 +584,7 @@
         }
 
         html += '<tr class="detail-row show">';
-        html += '<td colspan="7"><div class="detail-content">';
+        html += '<td colspan="8"><div class="detail-content">';
         html += '<div class="detail-grid">';
         html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + phone + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + deliveryDate + '</div></div>';
@@ -576,6 +646,201 @@
       }
     } catch (error) {
       console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function confirmDeleteOrder(orderId) {
+    if (!confirm('¿Eliminar este pedido? Podrás recuperarlo desde "Mostrar eliminados"')) return;
+    await changeOrderStatus(orderId, 'deleted');
+  }
+
+  function openEditOrder(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+      showToast('Pedido no encontrado', 'error');
+      return;
+    }
+
+    editingOrderId = orderId;
+    editingOrderData = { ...order };
+
+    document.getElementById('editOrderTitle').textContent = 'Editar Pedido #' + (order.order_number || orderId.substring(0, 8));
+    document.getElementById('editName').value = order.customer_name || '';
+    document.getElementById('editPhone').value = order.customer_phone || '';
+    document.getElementById('editDate').value = order.delivery_date ? order.delivery_date.substring(0, 10) : '';
+    document.getElementById('editNotes').value = order.notes || '';
+    document.getElementById('editTotal').value = order.total || 0;
+
+    // Renderizar carrito editable
+    renderEditCart(order);
+
+    // Mostrar modal
+    document.getElementById('editOrderModal').style.display = 'flex';
+  }
+
+  function renderEditCart(order) {
+    const tbody = document.getElementById('editCartBody');
+    tbody.innerHTML = '';
+
+    let cart = [];
+    try {
+      if (order.raw_cart) {
+        cart = typeof order.raw_cart === 'string' ? JSON.parse(order.raw_cart) : order.raw_cart;
+        if (!Array.isArray(cart)) cart = [];
+      }
+    } catch (e) {
+      cart = [];
+    }
+
+    cart.forEach((item, idx) => {
+      const name = item.name || item.product_name || '';
+      const qty = item.qty || item.quantity || 1;
+      const price = item.price || item.unit_price || 0;
+      const subtotal = qty * price;
+
+      let html = '<tr>';
+      html += '<td style="padding: 10px;"><input type="text" value="' + name + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: center;"><input type="number" value="' + qty + '" min="1" onchange="updateCartItem(' + idx + ', this.value, document.getElementById(\'price-' + idx + '\').value); updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + price + '" step="0.01" min="0" onchange="updateCartItem(' + idx + ', document.getElementById(\'qty-' + idx + '\').value, this.value); updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + subtotal.toFixed(2) + '</td>';
+      html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
+      html += '</tr>';
+
+      tbody.innerHTML += html;
+
+      // Fijar ID para los inputs
+      setTimeout(() => {
+        const qtyInput = tbody.querySelector('input[type="number"]');
+        if (qtyInput && !qtyInput.id) {
+          qtyInput.id = 'qty-' + idx;
+        }
+      }, 0);
+    });
+
+    updateEditTotal();
+  }
+
+  function addCartRow() {
+    const tbody = document.getElementById('editCartBody');
+    const idx = tbody.children.length;
+
+    let html = '<tr>';
+    html += '<td style="padding: 10px;"><input type="text" placeholder="Nombre del artículo" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="1" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="0" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$0.00</td>';
+    html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
+    html += '</tr>';
+
+    tbody.innerHTML += html;
+  }
+
+  function updateCartItemName(idx, newName) {
+    // Las filas editan directamente en el form
+  }
+
+  function removeCartRow(idx) {
+    const tbody = document.getElementById('editCartBody');
+    tbody.children[idx].remove();
+    updateEditTotal();
+  }
+
+  function updateEditTotal() {
+    const tbody = document.getElementById('editCartBody');
+    let total = 0;
+
+    for (let i = 0; i < tbody.children.length; i++) {
+      const row = tbody.children[i];
+      const inputs = row.querySelectorAll('input[type="number"]');
+      if (inputs.length >= 2) {
+        const qty = parseFloat(inputs[0].value) || 0;
+        const price = parseFloat(inputs[1].value) || 0;
+        total += qty * price;
+
+        // Actualizar subtotal de la fila
+        const subtotalCell = row.children[3];
+        subtotalCell.textContent = '$' + (qty * price).toFixed(2);
+      }
+    }
+
+    document.getElementById('editTotal').value = total.toFixed(2);
+  }
+
+  function closeEditOrder() {
+    document.getElementById('editOrderModal').style.display = 'none';
+    editingOrderId = null;
+    editingOrderData = null;
+  }
+
+  async function saveEditOrder() {
+    if (!editingOrderId) return;
+
+    try {
+      const name = document.getElementById('editName').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      const date = document.getElementById('editDate').value;
+      const notes = document.getElementById('editNotes').value.trim();
+      const total = parseFloat(document.getElementById('editTotal').value) || 0;
+
+      if (!name) {
+        showToast('El nombre del cliente es requerido', 'error');
+        return;
+      }
+
+      // Construir carrito desde la tabla
+      const tbody = document.getElementById('editCartBody');
+      const cart = [];
+
+      for (let i = 0; i < tbody.children.length; i++) {
+        const row = tbody.children[i];
+        const inputs = row.querySelectorAll('input');
+        if (inputs.length >= 3) {
+          const itemName = inputs[0].value.trim();
+          const qty = parseInt(inputs[1].value) || 0;
+          const price = parseFloat(inputs[2].value) || 0;
+
+          if (itemName && qty > 0) {
+            cart.push({
+              name: itemName,
+              qty: qty,
+              price: price
+            });
+          }
+        }
+      }
+
+      const updates = {
+        customer_name: name,
+        customer_phone: phone || null,
+        delivery_date: date || null,
+        notes: notes || null,
+        total: total,
+        raw_cart: JSON.stringify(cart)
+      };
+
+      const { error } = await window.NappanDB.updateOrder(editingOrderId, updates);
+
+      if (error) {
+        showToast('Error al guardar: ' + (error.message || error), 'error');
+      } else {
+        // Actualizar en memoria
+        const order = allOrders.find(o => o.id === editingOrderId);
+        if (order) {
+          order.customer_name = name;
+          order.customer_phone = phone;
+          order.delivery_date = date;
+          order.notes = notes;
+          order.total = total;
+          order.raw_cart = cart;
+        }
+
+        showToast('✓ Pedido actualizado', 'success');
+        closeEditOrder();
+        renderOrdersTable();
+      }
+    } catch (error) {
+      console.error('Error saving order:', error);
       showToast('Error: ' + error.message, 'error');
     }
   }
@@ -1314,8 +1579,8 @@
         allOrders = await window.NappanDB.loadAllOrders({});
       }
 
-      // Filtrar en cliente
-      let orders = allOrders;
+      // Filtrar en cliente (excluir pedidos eliminados y cancelados por defecto)
+      let orders = allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted');
       if (fromVal) orders = orders.filter(o => o.created_at.slice(0,10) >= fromVal);
       if (toVal)   orders = orders.filter(o => o.created_at.slice(0,10) <= toVal);
       if (sectionVal) orders = orders.filter(o => o.section === sectionVal);
@@ -1335,10 +1600,10 @@
       const totalOrders  = orders.length;
       const avgTicket    = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
-      // Clientes recurrentes (contar de TODAS las órdenes, no solo las filtradas)
+      // Clientes recurrentes (contar de TODAS las órdenes válidas, excluyendo canceladas y eliminadas)
       let repeatCustomers = 0;
       const phoneCounts = {};
-      allOrders.forEach(o => {
+      allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted').forEach(o => {
         if (o.customer_phone) {
           phoneCounts[o.customer_phone] = (phoneCounts[o.customer_phone] || 0) + 1;
         }
@@ -1354,7 +1619,7 @@
       // Calcular y mostrar badges comparativos
       if (fromVal || toVal) {
         const prevRange = getPreviousPeriod(fromVal, toVal);
-        let prevOrders = allOrders;
+        let prevOrders = allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted');
         prevOrders = prevOrders.filter(o => o.created_at.slice(0,10) >= prevRange.start && o.created_at.slice(0,10) <= prevRange.end);
         if (sectionVal) prevOrders = prevOrders.filter(o => o.section === sectionVal);
         if (statusVal) prevOrders = prevOrders.filter(o => o.status === statusVal);

@@ -312,6 +312,23 @@ async function updateOrderStatus(orderId, status) {
   return { error };
 }
 
+// Admin: Update order (generic)
+async function updateOrder(orderId, updates) {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+  try {
+    const { data, error } = await supabaseClient
+      .from('orders')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select()
+      .single();
+    return { data, error };
+  } catch (error) {
+    console.error('updateOrder error:', error);
+    return { data: null, error };
+  }
+}
+
 // Admin: Load customers
 async function loadCustomers(filters = {}) {
   if (!supabaseClient) return [];
@@ -484,6 +501,7 @@ window.NappanDB = {
   getSession,
   loadAllOrders,
   updateOrderStatus,
+  updateOrder,
   loadCustomers,
   updateCustomer,
   insertCustomer,
