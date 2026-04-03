@@ -76,7 +76,7 @@
     .detail-field-label { font-weight: 600; color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
     .detail-field-value { color: #2D1B0E; }
     .raw-cart-section { grid-column: 1 / -1; }
-    .raw-cart-list { background: white; padding: 10px; border-radius: 4px; border-left: 3px solid #DAA520; font-size: 13px; font-family: monospace; line-height: 1.6; max-height: 200px; overflow-y: auto; }
+    .raw-cart-list { font-size: 13px; line-height: 1.6; max-height: 400px; overflow-y: auto; }
 
     /* Inline Edit */
     .inline-edit { display: flex; gap: 5px; align-items: center; }
@@ -365,7 +365,7 @@
         try {
           if (order.raw_cart) {
             const cart = typeof order.raw_cart === 'string' ? JSON.parse(order.raw_cart) : order.raw_cart;
-            cartDisplay = JSON.stringify(cart, null, 2);
+            cartDisplay = formatCartForDisplay(cart);
           }
         } catch (e) {
           cartDisplay = 'Error al parsear carrito';
@@ -378,7 +378,7 @@
         html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + deliveryDate + '</div></div>';
         html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + notes + '</div></div>';
         html += '</div>';
-        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Carrito</div><pre class="raw-cart-list">' + cartDisplay + '</pre></div>';
+        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Carrito</div><div class="raw-cart-list">' + cartDisplay + '</div></div>';
         html += '</div></td></tr>';
       }
     }
@@ -489,6 +489,50 @@
       'cancelled': 'Cancelado'
     };
     return labels[status] || status;
+  }
+
+  function formatCartForDisplay(cart) {
+    if (!cart) return 'Carrito vacío';
+
+    // Si es un array de items
+    if (Array.isArray(cart)) {
+      let html = '<ul style="list-style: none; padding: 0;">';
+      cart.forEach((item, idx) => {
+        html += '<li style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 4px; border-left: 3px solid #DAA520;">';
+        html += '<div style="font-weight: 600; margin-bottom: 5px;">' + (item.icon || '🛒') + ' ' + (item.name || 'Item') + '</div>';
+        if (item.qty) html += '<div>Cantidad: <strong>' + item.qty + '</strong></div>';
+        if (item.art) html += '<div>Arte: <strong>' + item.art + '</strong></div>';
+        if (item.fruitType) html += '<div>Tipo: <strong>' + item.fruitType + '</strong></div>';
+        if (item.unitPrice) html += '<div>Precio unitario: <strong>$' + item.unitPrice + '</strong></div>';
+        if (item.totalPrice) html += '<div style="color: #DAA520; font-weight: 600;">Total: $' + item.totalPrice + '</div>';
+        if (item.extras && Array.isArray(item.extras) && item.extras.length > 0) {
+          html += '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;"><strong>Extras:</strong><ul style="list-style: none; padding: 0; margin-top: 5px;">';
+          item.extras.forEach(extra => {
+            html += '<li style="padding: 4px 0;">• ' + extra.label + ' — <strong>$' + extra.price + '</strong></li>';
+          });
+          html += '</ul></div>';
+        }
+        html += '</li>';
+      });
+      html += '</ul>';
+      return html;
+    }
+
+    // Si es un objeto simple (para pedidos especiales como Nappan Box)
+    if (typeof cart === 'object') {
+      let html = '<div style="padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #DAA520;">';
+      for (const key in cart) {
+        if (typeof cart[key] === 'object') {
+          html += '<div style="margin-bottom: 8px;"><strong>' + key + ':</strong> ' + JSON.stringify(cart[key]) + '</div>';
+        } else {
+          html += '<div style="margin-bottom: 8px;"><strong>' + key + ':</strong> ' + cart[key] + '</div>';
+        }
+      }
+      html += '</div>';
+      return html;
+    }
+
+    return 'Formato de carrito no reconocido';
   }
 
   function showToast(message, type) {
