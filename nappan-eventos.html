@@ -8,6 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=4">
+<!-- Supabase Integration (Phase 1) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
 </head>
 <body class="page-eventos">
 <!-- HEADER -->
@@ -156,16 +159,39 @@
 <div class="ev-toast" id="ev-toast"></div>
 
 <script>
-  // ── MAPA DE FOTOS POR TIPO DE EVENTO ──────────────────────────────────────
-  // Cuando tengas las fotos listas, reemplaza null por la ruta: 'images/mi-foto.webp'
-  const GALLERY_PHOTOS = {
-    cumpleanos:   { label: '🎂 Cumpleaños · Así lo hacemos',  img1: null, img2: null },
-    wellness:     { label: '💪 Wellness · Energía en vivo',   img1: 'images/wellness-event.webp', img2: null },
-    corporativos: { label: '🏢 Corporativos · Marca en vivo', img1: null, img2: null },
-    babyshower:   { label: '👶 Baby Shower · Dulces momentos',img1: null, img2: null },
-    graduaciones: { label: '🎓 Graduaciones · El mejor cierre',img1: null, img2: null },
-    ferias:       { label: '🎪 Ferias · Stand que enamora',   img1: null, img2: null },
-  };
+  // GALLERY_PHOTOS se cargará desde Supabase
+  let GALLERY_PHOTOS = {};
+
+  // Cargar galería desde Supabase (o usar valores default si falla)
+  async function loadGalleryPhotos() {
+    try {
+      if (window.NappanDB) {
+        const galleryData = await window.NappanDB.loadGalleryPhotos();
+
+        // Convertir formato de Supabase al formato esperado
+        for (const eventType in galleryData) {
+          const images = galleryData[eventType].images || [];
+          GALLERY_PHOTOS[eventType] = {
+            label: galleryData[eventType].label || eventType,
+            img1: images.length > 0 ? images[0].image_url : null,
+            img2: images.length > 1 ? images[1].image_url : null
+          };
+        }
+        console.log('✓ Galería cargada desde Supabase');
+      }
+    } catch (error) {
+      console.warn('No se pudo cargar galería, usando defaults:', error);
+      // Defaults si Supabase falla
+      GALLERY_PHOTOS = {
+        cumpleanos:   { label: '🎂 Cumpleaños · Así lo hacemos',  img1: null, img2: null },
+        wellness:     { label: '💪 Wellness · Energía en vivo',   img1: 'images/wellness-event.webp', img2: null },
+        corporativos: { label: '🏢 Corporativos · Marca en vivo', img1: null, img2: null },
+      };
+    }
+  }
+
+  // Inicializar galería
+  loadGalleryPhotos();
 
   function selectPill(pillEl, selectValue, galleryKey) {
     // 1. Resaltar pill activo
@@ -272,6 +298,28 @@
     msg += `_Esperamos tu cotización personalizada_ ✨`;
 
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    // Phase 1: Save order to Supabase (fire-and-forget)
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'eventos',
+        customer_name: name,
+        customer_phone: phone || null,
+        event_type: type,
+        guest_count: parseInt(guests),
+        delivery_date: date,
+        delivery_time: time,
+        delivery_address: location,
+        whatsapp_sent: true,
+        notes: `Temática: ${theme}. ${notes || ''}`,
+        raw_cart: JSON.stringify({
+          eventType: type,
+          guests,
+          location,
+          theme
+        })
+      }).catch(err => console.warn('Order save failed (non-critical):', err));
+    }
   }
 
   // Min date = 14 days from today

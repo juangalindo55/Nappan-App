@@ -1,41 +1,83 @@
-# 🗺️ Nappan App - Roadmap & Plan de Desarrollo
+# 🗺️ Nappan App — Roadmap & Plan de Desarrollo
 
-Este archivo sirve para organizar las próximas funcionalidades, mejoras y lanzamientos de la plataforma Nappan.
-
-## 🚀 En Desarrollo (Prioridad Alta)
-- [ ] **nappan-eventos.html**: Creación de la página para "Eventos en Vivo".
-    - [ ] Estructura base HTML (ya tiene estilos en `styles.css`).
-    - [ ] Selector de tipo de evento (Social, Corporativo, Lanzamiento).
-    - [ ] Integración de cotizador por WhatsApp específico para eventos.
-- [ ] **Pulido de UI/UX**:
-    - [ ] Ajustar logos en headers para consistencia visual (como el cambio reciente en Lunchbox).
-    - [ ] Revisar modo oscuro/claro en todas las secciones.
-
-## ⏭️ Próximos Pasos (Feature Backlog)
-- [ ] **Galería Dinámica**: Implementar un carrusel de fotos reales de los pancakes artísticos en las secciones de Box y Eventos.
-- [ ] **Sistema de Cupones**: Agregar un campo de "Código de Descuento" en el carrito que se envíe por WhatsApp.
-- [ ] **Multi-idioma**: Preparar la estructura para Inglés/Español (Monterrey es zona internacional).
-- [ ] **Checkout Mejorado**: Preguntar si es para regalo y permitir agregar una dedicatoria rápida.
-
-## 💡 Ideas en el Tintero (Brainstorming)
-- [ ] **Confirmación Automática**: Explorar integración con APIs de WhatsApp Business para bots más avanzados.
-- [ ] **Localizador**: Mapa interactivo para pick-up si se habilita un punto físico.
-- [ ] **Video Background**: Clips cortos de 3-5 segundos de arte en pancake en el Hero de la página principal.
-
-## ✅ Completado recientemente
-- [x] Reescritura de documentación técnica (`README.md`, `CLAUDE.md`).
-- [x] Integración de imágenes reales en Nappan Fit Bar (Coffee Section).
-- [x] Refactorización del Header de Lunchbox con el nuevo estilo de logo.
-- [x] Definición del sistema tipográfico (Montserrat + Inter).
-- [x] **Custom checkboxes** para selección de Fruta/Gelatina en Lunch Box 1 y 2
-  - Color marrón #8B5E3C con palomilla blanca visible al seleccionar
-  - Validación obligatoria con toast visual
-  - Aplicado a ambos Lunch Boxes con mismo estilo
-- [x] **Actualización de texto PancakeART** en ambos Lunch Boxes
-  - Cambio de "o" a "/" entre "miel" y "Upgrade a Nucolato"
-  - Link a Instagram mantenido en color dorado
-- [x] **Reducción de tamaño de "ARTÍSTICOS!"** en hero (0.75em)
-  - Mantiene jerarquía visual clara con "¡Lunch Boxes"
+> Actualizado: Abril 2026 · Estado real del proyecto.
 
 ---
-*Nota: Este archivo es dinámico y se actualiza a medida que el "vibe coding" nos lleva a nuevas ideas.*
+
+## 🚀 En Desarrollo (Prioridad Alta)
+
+- [ ] **Galería dinámica con fotos reales** en `nappan-eventos.html`
+    - La estructura ya existe (`GALLERY_PHOTOS` en el JS).
+    - Faltan las imágenes reales para cada categoría: cumpleaños, wellness, corporativos, baby shower, graduaciones, ferias.
+    - Reemplazar `null` por rutas `'images/nombre.webp'` cuando tengamos las fotos.
+- [ ] **Actualizar la tarjeta de Eventos** en `index.html`
+    - Cambiar su badge de "Próximamente" → "Nuevo" o eliminarlo.
+    - Confirmar que el link lleva a `nappan-eventos.html`.
+- [ ] **Pulido final de UI/UX transversal**:
+    - Revisar consistencia visual de los 4 headers (logo centrado, back-btn izquierda).
+    - Verificar que el `nav-float-btn` (menú hamburguesa) esté presente en todas las páginas.
+
+---
+
+## ⏭️ Próximos Pasos (Feature Backlog)
+
+- [ ] **Sistema de Cupones**: Agregar campo de "Código de Descuento" en los formularios de pedido que se incluya en el mensaje de WhatsApp.
+- [ ] **Checkout Mejorado**: Preguntar si es regalo y permitir agregar una dedicatoria rápida.
+- [ ] **Multi-idioma**: Preparar estructura para Inglés/Español (Monterrey es zona internacional).
+- [ ] **Chatbot mejorado**: Agregar respuestas con precios orientativos y menú Fit Bar más detallado en el chatbot.
+
+---
+
+## 💡 Ideas en el Tintero (Brainstorming)
+
+- [ ] **Confirmación Automática**: Integración con WhatsApp Business API para bots más avanzados.
+- [ ] **Localizador**: Mapa interactivo para pick-up si se habilita un punto físico.
+- [ ] **Video Background**: Clips de 3–5 segundos de arte en pancake en el Hero del `index.html`.
+- [ ] **Reseñas / Testimonios**: Sección de comentarios reales de clientes en cada página de producto.
+
+---
+
+## ✅ Completado
+
+### Arquitectura & Infraestructura
+- [x] Estructura modular multi-página (index + 4 secciones independientes).
+- [x] Sistema de diseño global en `styles.css` (~73 KB, ~2,100 líneas).
+- [x] `utils.js` con `WA_NUMBER` centralizado.
+- [x] `script.js` con router `goTo()` y toast "coming soon".
+- [x] Reescritura de documentación técnica (`README.md`, `AGENTS.md`, `CLAUDE.md`).
+- [x] Sistema tipográfico definido: Montserrat (H1) + Inter (todo lo demás). Ver `TYPOGRAPHY_SYSTEM.md`.
+
+### Chatbot (`chatbot.js`)
+- [x] Chatbot global auto-inyectado en todas las páginas vía `<script src="chatbot.js">`.
+- [x] Menú de bienvenida con quick-replies para Lunch Box, Nappan Box, Fit Bar, Eventos y Contacto.
+- [x] **Calculadora de envío** integrada: ingresa CP → llama Google Maps Distance Matrix API → devuelve precio.
+    - Cobertura: 0–3 km → $50 · 4–8 km → $85 · 9–15 km → $130 · 16–20 km → $150 · 21–45 km → $200.
+- [x] Clave de Google Maps actualizada en `chatbot.js` (`GOOGLE_MAPS_API_KEY`).
+
+### Nappan Eventos en Vivo (`nappan-eventos.html`) ✅ Live
+- [x] Página creada y funcional (ya no es "Planned").
+- [x] Hero, tarjeta de servicio, sección "¿Cómo funciona?" (3 pasos).
+- [x] **Pills de tipo de evento** con auto-completado del selector del formulario.
+- [x] **Galería dinámica** (estructura lista, espera fotos reales).
+- [x] Formulario completo de cotización (nombre, teléfono, tipo, invitados, fecha, horario, lugar, temática, notas).
+- [x] Validación de campos + fecha mínima a 14 días.
+- [x] Envío por WhatsApp con mensaje formateado en negritas.
+- [x] Menú flotante hamburguesa con navegación a todas las secciones.
+
+### Nappan Lunch Box (`nappan-lunchbox.html`)
+- [x] Header unificado con logo centrado (estilo landing page).
+- [x] **Custom checkboxes** Fruta/Gelatina en Lunch Box 1 y 2 (color marrón `#8B5E3C`, validación obligatoria con toast).
+- [x] Texto PancakeART: separador cambiado de "o" a "/" entre "miel" y "Upgrade a Nucolato".
+- [x] Tamaño de "ARTÍSTICOS!" reducido a 0.75em para mejor jerarquía visual.
+- [x] Link a Instagram en color dorado mantenido.
+
+### Nappan Box (`nappan-box.html`)
+- [x] Página funcional con catálogo Nappan Box + Premium Box.
+
+### Nappan Fit Bar (`nappan-fitbar.html`)
+- [x] Integración de imágenes reales en la sección Coffee (WebP).
+- [x] Logo blanco actualizado en header.
+
+---
+
+*Este archivo es dinámico y se actualiza a medida que el proyecto evoluciona.*

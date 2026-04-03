@@ -12,6 +12,9 @@
   <link rel="preload" href="images/detox-glow.webp" as="image" type="image/webp">
   <link rel="preload" href="images/energy-boost.webp" as="image" type="image/webp">
   <link rel="preload" href="images/golden-power.webp" as="image" type="image/webp">
+  <!-- Supabase Integration (Phase 1) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-client.js"></script>
 </head>
 <body class="page-fitbar">
 
@@ -48,7 +51,7 @@
         <div class="product-info">
           <h3>Cold Protein Latte</h3>
           <p class="product-desc">Espresso + leche + proteína vainilla</p>
-          <div class="product-price">$75</div>
+          <div class="product-price" id="price-FITBAR-COLD-LATTE">$75</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-cold-protein-latte" class="qty-input" value="1" min="1">
@@ -61,7 +64,7 @@
         <div class="product-info">
           <h3>Cold Brew</h3>
           <p class="product-desc">Cold brew puro</p>
-          <div class="product-price">$75</div>
+          <div class="product-price" id="price-FITBAR-COLD-BREW">$75</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-cold-brew" class="qty-input" value="1" min="1">
@@ -74,7 +77,7 @@
         <div class="product-info">
           <h3>Black Coffee</h3>
           <p class="product-desc">Café negro puro</p>
-          <div class="product-price">$35 c/taza</div>
+          <div class="product-price" id="price-FITBAR-BLACK-COFFEE">$35 c/taza</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-black-coffee" class="qty-input" value="1" min="1">
@@ -103,7 +106,7 @@
         <div class="product-info">
           <h3>Detox Glow</h3>
           <p class="product-desc">Desintoxicación natural</p>
-          <div class="product-price">$29</div>
+          <div class="product-price" id="price-FITBAR-DETOX-GLOW">$29</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-detox-glow" class="qty-input" value="1" min="1">
@@ -121,7 +124,7 @@
         <div class="product-info">
           <h3>Energy Boost</h3>
           <p class="product-desc">Energía y vitalidad</p>
-          <div class="product-price">$29</div>
+          <div class="product-price" id="price-FITBAR-ENERGY-BOOST">$29</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-energy-boost" class="qty-input" value="1" min="1">
@@ -139,7 +142,7 @@
         <div class="product-info">
           <h3>Golden Power</h3>
           <p class="product-desc">Fuerza y resistencia</p>
-          <div class="product-price">$29</div>
+          <div class="product-price" id="price-FITBAR-GOLDEN-POWER">$29</div>
         </div>
         <div class="product-footer">
           <input type="number" id="qty-golden-power" class="qty-input" value="1" min="1">
@@ -163,7 +166,7 @@
         <div class="product-info">
           <h3>Power Pancakes</h3>
           <p class="product-desc">Stack de pancakes proteicos</p>
-          <div class="product-price">$90–$110</div>
+          <div class="product-price" id="price-FITBAR-POWER-PANCAKES">$90–$110</div>
           <p class="product-note">✨ Elige toppings</p>
         </div>
         <div class="product-footer">
@@ -177,7 +180,7 @@
         <div class="product-info">
           <h3>Protein Minis</h3>
           <p class="product-desc">Porciones mini de pancakes</p>
-          <div class="product-price">$55</div>
+          <div class="product-price" id="price-FITBAR-PROTEIN-MINIS">$55</div>
           <p class="product-note">Perfectas para compartir</p>
         </div>
         <div class="product-footer">
@@ -201,7 +204,7 @@
         <div class="combo-icon">☕</div>
         <h3>Combo Fit</h3>
         <p class="combo-items">☕ Coffee + 🥞 Pancakes</p>
-        <div class="combo-price">$135</div>
+        <div class="combo-price" id="price-FITBAR-COMBO-FIT">$135</div>
         <div class="product-footer">
           <input type="number" id="qty-combo-fit" class="qty-input" value="1" min="1">
           <button class="add-btn combo-btn" onclick="addToCartShot('Combo Fit', 135, 'qty-combo-fit')">+ Agregar</button>
@@ -212,7 +215,7 @@
         <div class="combo-icon">🍹</div>
         <h3>Combo Shots</h3>
         <p class="combo-items">🍹 Shots + 🥞 Pancakes</p>
-        <div class="combo-price">$75</div>
+        <div class="combo-price" id="price-FITBAR-COMBO-SHOTS">$75</div>
         <div class="product-footer">
           <input type="number" id="qty-combo-shots" class="qty-input" value="1" min="1">
           <button class="add-btn combo-btn" onclick="addToCartShot('Combo Shots', 75, 'qty-combo-shots')">+ Agregar</button>
@@ -277,11 +280,73 @@
   // PROTEIN FIT BAR - FUNCIONES JAVASCRIPT
   // ============================================
 
+  // Load dynamic prices from Supabase
+  async function loadDynamicPrices() {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    try {
+      if (window.NappanDB) {
+        const productsFromDB = await window.NappanDB.loadProducts('fitbar');
+        productsFromDB.forEach(dbProduct => {
+          const skuMap = {
+            'FITBAR-COLD-LATTE': { elId: 'price-FITBAR-COLD-LATTE', name: 'Cold Protein Latte' },
+            'FITBAR-COLD-BREW': { elId: 'price-FITBAR-COLD-BREW', name: 'Cold Brew' },
+            'FITBAR-BLACK-COFFEE': { elId: 'price-FITBAR-BLACK-COFFEE', name: 'Black Coffee' },
+            'FITBAR-DETOX-GLOW': { elId: 'price-FITBAR-DETOX-GLOW', name: 'Detox Glow' },
+            'FITBAR-ENERGY-BOOST': { elId: 'price-FITBAR-ENERGY-BOOST', name: 'Energy Boost' },
+            'FITBAR-GOLDEN-POWER': { elId: 'price-FITBAR-GOLDEN-POWER', name: 'Golden Power' },
+            'FITBAR-POWER-PANCAKES': { elId: 'price-FITBAR-POWER-PANCAKES', name: 'Power Pancakes' },
+            'FITBAR-PROTEIN-MINIS': { elId: 'price-FITBAR-PROTEIN-MINIS', name: 'Protein Minis' },
+            'FITBAR-COMBO-FIT': { elId: 'price-FITBAR-COMBO-FIT', name: 'Combo Fit' },
+            'FITBAR-COMBO-SHOTS': { elId: 'price-FITBAR-COMBO-SHOTS', name: 'Combo Shots' }
+          };
+
+          const mapping = skuMap[dbProduct.sku];
+          if (mapping) {
+            // Actualizar el HTML del badge
+            const el = document.getElementById(mapping.elId);
+            if (el) {
+              el.textContent = '$' + dbProduct.base_price;
+            }
+            // Actualizar el objeto de precios para el carrito
+            productPrices[mapping.name] = dbProduct.base_price;
+          }
+        });
+        console.log('✓ Precios Fit Bar cargados de Supabase');
+      }
+    } catch (error) {
+      console.warn('No se pudieron cargar precios dinámicos:', error);
+    }
+  }
+
+  // Mapa de precios para usar en addToCartShot
+  const productPrices = {
+    'Cold Protein Latte': 75,
+    'Cold Brew': 75,
+    'Black Coffee': 35,
+    'Detox Glow': 29,
+    'Energy Boost': 29,
+    'Golden Power': 29,
+    'Power Pancakes': 90,
+    'Protein Minis': 55,
+    'Combo Fit': 135,
+    'Combo Shots': 75
+  };
+
+  loadDynamicPrices();
+
   // CARRITO DE COMPRAS
   let cartPFB = [];
 
   // Agregar producto con cantidad (para Boost Shots)
   function addToCartShot(productName, price, qtyInputId, imagePath = null) {
+    // Usar el precio dinámico del objeto productPrices
+    const dynamicPrice = productPrices[productName] || price;
+
     const qtyInput = document.getElementById(qtyInputId);
     const quantity = parseInt(qtyInput.value) || 1;
 
@@ -304,7 +369,7 @@
     for (let i = 0; i < quantity; i++) {
       cartPFB.push({
         name: productName,
-        price: price,
+        price: dynamicPrice,
         category: 'shots',
         image: image,
         id: Date.now() + i
@@ -469,6 +534,22 @@
 
     // Abrir WhatsApp
     window.open(whatsappURL, '_blank');
+
+    // Phase 1: Save order to Supabase (fire-and-forget)
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'fitbar',
+        customer_name: clientName,
+        customer_phone: null,
+        delivery_date: deliveryDate,
+        delivery_time: deliveryTime,
+        subtotal: total,
+        total: total,
+        whatsapp_sent: true,
+        notes: specialNotes,
+        raw_cart: JSON.parse(JSON.stringify(cartPFB))
+      }).catch(err => console.warn('Order save failed (non-critical):', err));
+    }
 
     // Limpiar formulario
     setTimeout(() => {

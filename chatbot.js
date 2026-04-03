@@ -376,7 +376,7 @@
         const distance = await this.fetchDistance(cp);
         if (distance === null) throw new Error('No distance');
 
-        const cost = this.calculateShippingCost(distance);
+        const cost = await this.calculateShippingCost(distance);
         if (cost === null) {
           this.addMessage('bot', `📍 La distancia calculada es de ${distance.toFixed(1)} km. Lamentablemente, queda fuera de nuestra cobertura actual (máximo 45 km).`);
           this.addQuickReplies([{ text: '← Ver menú', action: 'welcome' }]);
@@ -438,7 +438,30 @@
       });
     }
 
-    calculateShippingCost(km) {
+    async calculateShippingCost(km) {
+      try {
+        if (window.NappanDB) {
+          const config = await window.NappanDB.loadAppConfig();
+          const tiers = [];
+          for (let i = 1; i <= 5; i++) {
+            const tierKm = parseInt(config['shipping_tier_' + i + '_km'] || 0);
+            const tierPrice = parseInt(config['shipping_tier_' + i + '_price'] || 0);
+            if (tierKm > 0 && tierPrice > 0) {
+              tiers.push({ km: tierKm, price: tierPrice });
+            }
+          }
+          if (tiers.length > 0) {
+            for (const tier of tiers) {
+              if (km <= tier.km) return tier.price;
+            }
+            return null;
+          }
+        }
+      } catch (error) {
+        console.warn('Error loading shipping rates:', error);
+      }
+
+      // Fallback
       if (km <= 3) return 50;
       if (km <= 8) return 85;
       if (km <= 15) return 130;
@@ -447,8 +470,23 @@
       return null;
     }
 
-    openWhatsApp() {
-      const number = typeof WA_NUMBER !== 'undefined' ? WA_NUMBER : '528123509768';
+    async openWhatsApp() {
+      let number = '528123509768'; // Default
+
+      try {
+        if (window.NappanDB) {
+          const configNum = await window.NappanDB.getConfigValue('whatsapp_number');
+          if (configNum) number = configNum;
+        } else if (typeof WA_NUMBER !== 'undefined') {
+          number = WA_NUMBER;
+        }
+      } catch (error) {
+        console.warn('Error loading WhatsApp number:', error);
+        if (typeof WA_NUMBER !== 'undefined') {
+          number = WA_NUMBER;
+        }
+      }
+
       const msg = encodeURIComponent('Hola Nappan, me gustaría saber más sobre sus productos y servicios.');
       window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
     }
