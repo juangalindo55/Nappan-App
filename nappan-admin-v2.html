@@ -208,6 +208,25 @@
         <button onclick="saveExtras()" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Extras</button>
       </div>
 
+      <!-- Descuentos por Membresía -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 5px;">Descuentos por Membresía</h3>
+        <p style="font-size: 13px; color: #999; margin-bottom: 15px;">
+          Se aplican automáticamente cuando se detecta un cliente recurrente según su tier.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px; text-transform: uppercase;">🥇 Descuento Premium (%)</label>
+            <input type="number" id="configPremiumDiscount" min="0" max="100" placeholder="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px; text-transform: uppercase;">🏆 Descuento Business (%)</label>
+            <input type="number" id="configBusinessDiscount" min="0" max="100" placeholder="15" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif;">
+          </div>
+        </div>
+        <button onclick="saveTierDiscounts()" class="btn" style="width: auto; padding: 10px 20px;">Guardar Descuentos</button>
+      </div>
+
       <!-- Galería de Eventos -->
       <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
         <h3 style="font-size: 16px; margin-bottom: 15px;">Galería de Eventos</h3>
@@ -655,6 +674,8 @@
       const config = await window.NappanDB.loadAppConfig();
 
       document.getElementById('configWhatsapp').value = config.whatsapp_number || '';
+      document.getElementById('configPremiumDiscount').value = config.tier_premium_discount || '';
+      document.getElementById('configBusinessDiscount').value = config.tier_business_discount || '';
 
       let shippingHtml = '';
       for (let i = 1; i <= 5; i++) {
@@ -766,6 +787,30 @@
         showToast('Error guardando: ' + error.message, 'error');
       } else {
         showToast('✓ WhatsApp actualizado', 'success');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function saveTierDiscounts() {
+    const premium = document.getElementById('configPremiumDiscount').value.trim();
+    const business = document.getElementById('configBusinessDiscount').value.trim();
+
+    if (!premium || !business) {
+      showToast('Ingresa ambos descuentos', 'error');
+      return;
+    }
+
+    try {
+      const { error: e1 } = await window.NappanDB.updateConfigValue('tier_premium_discount', premium);
+      const { error: e2 } = await window.NappanDB.updateConfigValue('tier_business_discount', business);
+
+      if (e1 || e2) {
+        showToast('Error guardando descuentos', 'error');
+      } else {
+        showToast('✓ Descuentos actualizados', 'success');
       }
     } catch (error) {
       console.error('Error:', error);
