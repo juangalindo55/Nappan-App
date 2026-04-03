@@ -555,8 +555,8 @@
       currentCustomer = customer;
       const nameInput = document.getElementById('clientName');
       if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
-      showWelcomeBadge(customer);
       await applyTierDiscount(customer.membership_tier);
+      showWelcomeBadge(customer);
     }
   }
 
