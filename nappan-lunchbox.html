@@ -145,15 +145,17 @@
 
       <div class="extras-section">
         <div class="extras-title">➕ Extras</div>
-        <div class="extra-option" onclick="toggleExtra(this)" data-price="25">
-          <div class="check-box">✓</div>
-          <span class="extra-label">🐙 Salchipulpos + catsup</span>
-          <span class="extra-price">+$25</span>
-        </div>
-        <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
-          <div class="check-box">✓</div>
-          <span class="extra-label">🍫 Upgrade a Nucolato</span>
-          <span class="extra-price">+$5</span>
+        <div id="extras-list-1">
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="25">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🐙 Salchipulpos + catsup</span>
+            <span class="extra-price">+$25</span>
+          </div>
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🍫 Upgrade a Nucolato</span>
+            <span class="extra-price">+$5</span>
+          </div>
         </div>
       </div>
 
@@ -229,15 +231,17 @@
 
       <div class="extras-section">
         <div class="extras-title">➕ Extras</div>
-        <div class="extra-option" onclick="toggleExtra(this)" data-price="20">
-          <div class="check-box">✓</div>
-          <span class="extra-label">🥐 Upgrade a croissant completo</span>
-          <span class="extra-price">+$20</span>
-        </div>
-        <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
-          <div class="check-box">✓</div>
-          <span class="extra-label">🍫 Upgrade a Nucolato</span>
-          <span class="extra-price">+$5</span>
+        <div id="extras-list-2">
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="20">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🥐 Upgrade a croissant completo</span>
+            <span class="extra-price">+$20</span>
+          </div>
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🍫 Upgrade a Nucolato</span>
+            <span class="extra-price">+$5</span>
+          </div>
         </div>
       </div>
 
@@ -329,27 +333,40 @@
         const productsFromDB = await window.NappanDB.loadProducts('lunchbox');
         console.log('Productos desde DB:', productsFromDB);
 
-        productsFromDB.forEach(dbProduct => {
-          console.log('Procesando:', dbProduct.sku, 'Precio:', dbProduct.base_price);
+        for (const dbProduct of productsFromDB) {
+          let boxId = null;
+          if (dbProduct.sku === 'LUNCHBOX-1') boxId = 1;
+          else if (dbProduct.sku === 'LUNCHBOX-2') boxId = 2;
 
-          if (dbProduct.sku === 'LUNCHBOX-1') {
-            products[1].basePrice = dbProduct.base_price;
-            const el = document.getElementById('price-LUNCHBOX-1');
-            console.log('Elemento LUNCHBOX-1:', el);
+          if (boxId) {
+            products[boxId].basePrice = dbProduct.base_price;
+            const el = document.getElementById(`price-LUNCHBOX-${boxId}`);
             if (el) {
               el.textContent = '$' + dbProduct.base_price;
-              console.log('✓ Precio LUNCHBOX-1 actualizado a $' + dbProduct.base_price);
+              console.log(`✓ Precio LUNCHBOX-${boxId} actualizado a $` + dbProduct.base_price);
             }
-          } else if (dbProduct.sku === 'LUNCHBOX-2') {
-            products[2].basePrice = dbProduct.base_price;
-            const el = document.getElementById('price-LUNCHBOX-2');
-            console.log('Elemento LUNCHBOX-2:', el);
-            if (el) {
-              el.textContent = '$' + dbProduct.base_price;
-              console.log('✓ Precio LUNCHBOX-2 actualizado a $' + dbProduct.base_price);
+            
+            // Cargar extras dinámicamente
+            try {
+              const extrasArray = await window.NappanDB.loadExtras(dbProduct.id);
+              if (extrasArray && extrasArray.length > 0) {
+                const extrasContainer = document.getElementById(`extras-list-${boxId}`);
+                if (extrasContainer) {
+                  extrasContainer.innerHTML = extrasArray.map(ex => `
+                    <div class="extra-option" onclick="toggleExtra(this)" data-price="${ex.price}">
+                      <div class="check-box">✓</div>
+                      <span class="extra-label">${ex.label}</span>
+                      <span class="extra-price">+$${ex.price}</span>
+                    </div>
+                  `).join('');
+                  console.log(`✓ Extras LUNCHBOX-${boxId} actualizados`);
+                }
+              }
+            } catch(e) {
+              console.warn(`Error al cargar extras para LUNCHBOX-${boxId}:`, e);
             }
           }
-        });
+        }
         console.log('✓ Precios cargados de Supabase');
       } else {
         console.warn('NappanDB no disponible después de intentos');
@@ -573,16 +590,47 @@
   // ── CALCULADORA DE ENVÍO ───────────────────────────────────
   const SHIPPING_ORIGIN = 'Cumbres, Monterrey, 64349, Mexico';
 
+  // Tarifas dinámicas cargadas de admin
+  let shippingTiers = [
+    { km: 3, price: 50 },
+    { km: 8, price: 85 },
+    { km: 15, price: 130 },
+    { km: 20, price: 150 },
+    { km: 45, price: 200 }
+  ];
+
+  async function loadShippingTiers() {
+    try {
+      const config = await window.NappanDB.loadAppConfig();
+      const tiers = [];
+      for (let i = 1; i <= 5; i++) {
+        const km = config['shipping_tier_' + i + '_km'];
+        const price = config['shipping_tier_' + i + '_price'];
+        if (km !== undefined && km !== null && price !== undefined && price !== null) {
+          tiers.push({ km: parseFloat(km), price: parseFloat(price) });
+        }
+      }
+      if (tiers.length > 0) {
+        shippingTiers = tiers;
+      }
+    } catch (e) {
+      console.log('Usando tarifas de envío por defecto');
+    }
+  }
+
   function getShippingCost(km) {
-    if (km <= 3)  return 50;
-    if (km <= 8)  return 85;
-    if (km <= 15) return 130;
-    if (km <= 20) return 150;
-    if (km <= 45) return 200;
+    for (const tier of shippingTiers) {
+      if (km <= tier.km) return tier.price;
+    }
     return null;
   }
 
-  function calculateShipping() {
+  async function calculateShipping() {
+    // Cargar tarifas si aún son las por defecto
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
     const cpInput  = document.getElementById('deliveryCP');
     const resultEl = document.getElementById('shippingResult');
     const cp = cpInput ? cpInput.value.trim() : '';
@@ -674,6 +722,11 @@
     }
 
     if (!window.NappanDB) return;
+
+    // Cargar tarifas de envío dinámicas (una sola vez)
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
 
     const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
     if (customer) {
