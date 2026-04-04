@@ -87,6 +87,15 @@
         <label>📍 Notas especiales</label>
         <textarea id="nb-notes" placeholder="Domicilio de entrega, ocasión, detalles del evento..." style="min-height:70px;"></textarea>
       </div>
+      <div class="form-field" style="flex:100%">
+        <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="nb-deliveryCP" placeholder="Ej. 64349" maxlength="5" inputmode="numeric"
+          style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-family:inherit;font-size:14px;" />
+          <button onclick="calculateNBShipping()" style="padding:10px 16px;background:#DAA520;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1A1008'" onmouseout="this.style.background='#DAA520'">Calcular 🗺️</button>
+        </div>
+        <div id="nb-shippingResult" style="margin-top:8px;font-size:13px;font-weight:500;min-height:18px;"></div>
+      </div>
     </div>
 
     <!-- EXTRAS -->
@@ -177,6 +186,15 @@
         <label>📍 Notas especiales</label>
         <textarea id="pr-notes" placeholder="Domicilio de entrega, ocasión, detalles..." style="min-height:70px;"></textarea>
       </div>
+      <div class="form-field" style="flex:100%">
+        <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="pr-deliveryCP" placeholder="Ej. 64349" maxlength="5" inputmode="numeric"
+          style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-family:inherit;font-size:14px;" />
+          <button onclick="calculatePrShipping()" style="padding:10px 16px;background:#DAA520;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1A1008'" onmouseout="this.style.background='#DAA520'">Calcular 🗺️</button>
+        </div>
+        <div id="pr-shippingResult" style="margin-top:8px;font-size:13px;font-weight:500;min-height:18px;"></div>
+      </div>
     </div>
 
     <!-- EXTRAS -->
@@ -220,6 +238,11 @@
   let premiumBoxPrice = 850;
   let nbExtraPrice = 150;    // Extra price for Nappan Box
   let pbExtraPrice = 150;    // Extra price for Premium Box
+
+  // ── Estado de envío ────────────────────────────────────────
+  let shippingCost  = 0;    // 0 = no calculado / fuera de zona
+  let shippingLabel = '';   // 'calculated' | 'out_of_range' | 'error' | ''
+  let shippingCP    = '';   // CP capturado
 
   // Phase 5: Customer recurring detection
   let currentCustomer = null;
@@ -274,6 +297,193 @@
     document.getElementById('panel-' + tab).classList.add('active');
     event.target.classList.add('active');
     window.scrollTo(0, 0);
+  }
+
+  // ── CALCULADORA DE ENVÍO ───────────────────────────────────
+  const SHIPPING_ORIGIN = 'Cumbres, Monterrey, 64349, Mexico';
+
+  // Tarifas dinámicas cargadas de admin
+  let shippingTiers = [
+    { km: 3, price: 50 },
+    { km: 8, price: 85 },
+    { km: 15, price: 130 },
+    { km: 20, price: 150 },
+    { km: 45, price: 200 }
+  ];
+
+  async function loadShippingTiers() {
+    try {
+      const config = await window.NappanDB.loadAppConfig();
+      const tiers = [];
+      for (let i = 1; i <= 5; i++) {
+        const km = config['shipping_tier_' + i + '_km'];
+        const price = config['shipping_tier_' + i + '_price'];
+        if (km !== undefined && km !== null && price !== undefined && price !== null) {
+          tiers.push({ km: parseFloat(km), price: parseFloat(price) });
+        }
+      }
+      if (tiers.length > 0) {
+        shippingTiers = tiers;
+      }
+    } catch (e) {
+      console.log('Usando tarifas de envío por defecto');
+    }
+  }
+
+  function getShippingCost(km) {
+    for (const tier of shippingTiers) {
+      if (km <= tier.km) return tier.price;
+    }
+    return null;
+  }
+
+  async function calculateNBShipping() {
+    // Cargar tarifas si aún son las por defecto
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
+    const cpInput  = document.getElementById('nb-deliveryCP');
+    const resultEl = document.getElementById('nb-shippingResult');
+    const cp = cpInput ? cpInput.value.trim() : '';
+
+    if (!/^\d{5}$/.test(cp)) {
+      if (resultEl) resultEl.innerHTML = '<span style="color:#c0392b;">❌ Ingresa un CP válido de 5 dígitos</span>';
+      return;
+    }
+
+    shippingCP = cp;
+    if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
+
+    // Timeout global si el SDK nunca carga
+    clearTimeout(window._shippingTimeout);
+    window._shippingTimeout = setTimeout(() => {
+      shippingCost  = 0;
+      shippingLabel = 'error';
+      if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+    }, 8000);
+
+    const tryCalc = () => {
+      if (!window.google || !window.google.maps) {
+        setTimeout(tryCalc, 500);
+        return;
+      }
+      clearTimeout(window._shippingTimeout);
+
+      const apiTimeout = setTimeout(() => {
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+      }, 6000);
+
+      const service = new window.google.maps.DistanceMatrixService();
+      service.getDistanceMatrix({
+        origins: [SHIPPING_ORIGIN],
+        destinations: [cp + ', Mexico'],
+        travelMode: 'DRIVING',
+        unitSystem: window.google.maps.UnitSystem.METRIC
+      }, (response, status) => {
+        clearTimeout(apiTimeout);
+
+        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+          const distanceKm = response.rows[0].elements[0].distance.value / 1000;
+          const cost = getShippingCost(distanceKm);
+
+          if (cost !== null) {
+            shippingCost = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
+          } else {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          }
+        } else {
+          shippingCost = 0;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+        }
+      });
+    };
+    tryCalc();
+  }
+
+  async function calculatePrShipping() {
+    // Cargar tarifas si aún son las por defecto
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
+    const cpInput  = document.getElementById('pr-deliveryCP');
+    const resultEl = document.getElementById('pr-shippingResult');
+    const cp = cpInput ? cpInput.value.trim() : '';
+
+    if (!/^\d{5}$/.test(cp)) {
+      if (resultEl) resultEl.innerHTML = '<span style="color:#c0392b;">❌ Ingresa un CP válido de 5 dígitos</span>';
+      return;
+    }
+
+    shippingCP = cp;
+    if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
+
+    // Timeout global si el SDK nunca carga
+    clearTimeout(window._shippingTimeout);
+    window._shippingTimeout = setTimeout(() => {
+      shippingCost  = 0;
+      shippingLabel = 'error';
+      if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+    }, 8000);
+
+    const tryCalc = () => {
+      if (!window.google || !window.google.maps) {
+        setTimeout(tryCalc, 500);
+        return;
+      }
+      clearTimeout(window._shippingTimeout);
+
+      const apiTimeout = setTimeout(() => {
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+      }, 6000);
+
+      const service = new window.google.maps.DistanceMatrixService();
+      service.getDistanceMatrix({
+        origins: [SHIPPING_ORIGIN],
+        destinations: [cp + ', Mexico'],
+        travelMode: 'DRIVING',
+        unitSystem: window.google.maps.UnitSystem.METRIC
+      }, (response, status) => {
+        clearTimeout(apiTimeout);
+
+        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+          const distanceKm = response.rows[0].elements[0].distance.value / 1000;
+          const cost = getShippingCost(distanceKm);
+
+          if (cost !== null) {
+            shippingCost = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
+          } else {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          }
+        } else {
+          shippingCost = 0;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+        }
+      });
+    };
+    tryCalc();
+  }
+
+  // Cargar Google Maps si no está cargado
+  if (!window.google || !window.google.maps) {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDJjQMaR9J8Q0lCQyWWHT6zPc8Zs-5-7CE`;
+    document.head.appendChild(script);
   }
 
   function toggleExtra(el, qtyRowId) {
@@ -385,7 +595,8 @@
 
       const subtotal = nappaBoxPrice + (hasExtra ? extraQty * nbExtraPrice : 0);
       const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
-      const total = subtotal - discountAmount;
+      const productsTotal = subtotal - discountAmount;
+      const total = productsTotal + shippingCost;
 
       let msg = `🎨 *PEDIDO NAPPAN BOX*
 `;
@@ -417,10 +628,24 @@
         msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN
 `;
       }
+      if (shippingLabel === 'calculated' && shippingCost > 0) {
+        msg += `🚚 *Envío (CP ${shippingCP}):* $${shippingCost} MXN
+`;
+      } else {
+        msg += `🚚 *Envío:* Por cotizar
+`;
+      }
       msg += `💰 *TOTAL ESTIMADO: $${total} MXN*
 `;
       if (notes) msg += `📍 *Notas:* ${notes}
 `;
+
+      // Agregar nota si el envío no fue calculado
+      if (shippingLabel !== 'calculated') {
+        msg += `
+⚠️ *Nota:* El total mostrado no incluye envío. Será cotizado una vez confirmado el pedido.`;
+      }
+
       msg += `
 _*Recuerda separar con el 50% de anticipo_ 🙌`;
 
@@ -436,6 +661,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
         delivery_date: date,
         subtotal: subtotal,
         discount_amount: discountAmount,
+        shipping_cost: shippingCost,
         total: total,
         whatsapp_sent: true,
         notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
@@ -473,7 +699,8 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
 
       const subtotal = premiumBoxPrice + (hasExtra ? extraQty * pbExtraPrice : 0);
       const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
-      const total = subtotal - discountAmount;
+      const productsTotal = subtotal - discountAmount;
+      const total = productsTotal + shippingCost;
 
       let msg = `⭐ *PEDIDO NAPPAN PREMIUM BOX*
 `;
@@ -505,10 +732,24 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
         msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN
 `;
       }
+      if (shippingLabel === 'calculated' && shippingCost > 0) {
+        msg += `🚚 *Envío (CP ${shippingCP}):* $${shippingCost} MXN
+`;
+      } else {
+        msg += `🚚 *Envío:* Por cotizar
+`;
+      }
       msg += `💰 *TOTAL ESTIMADO: $${total} MXN*
 `;
       if (notes) msg += `📍 *Notas:* ${notes}
 `;
+
+      // Agregar nota si el envío no fue calculado
+      if (shippingLabel !== 'calculated') {
+        msg += `
+⚠️ *Nota:* El total mostrado no incluye envío. Será cotizado una vez confirmado el pedido.`;
+      }
+
       msg += `
 _*Recuerda separar con el 50% de anticipo_ 🙌
 `;
@@ -526,6 +767,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
         delivery_date: date,
         subtotal: subtotal,
         discount_amount: discountAmount,
+        shipping_cost: shippingCost,
         total: total,
         whatsapp_sent: true,
         notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,

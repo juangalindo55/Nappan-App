@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-5 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts.** Current priority: **Phase 6.2 - query optimization and batch loading for Admin V2**.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-6.2 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization.** Next: Phase 7 - advanced analytics and mobile app.
 
 ## Running Locally
 
@@ -156,9 +156,32 @@ Current baseline after Phase 6.1:
   - `loadProductsWithExtras()`
   - `onAuthStateChange()`
 
-### Current Implementation Priority
+### Phase 6.2 Completion Summary (Admin Security & Performance)
 
-Phase 6.2 should optimize read paths before moving analytics to backend RPCs. Future work should prioritize:
+**Completed work:**
+
+- ✅ **XSS Prevention**: 22 instances of user-controlled data now escaped via `escapeHtml()` function using browser's native DOM parser
+  - Applied to all innerHTML locations: orders, products, customers, config, stats
+  - Prevents injection attacks on customer names, notes, product names, extras, gallery titles
+  
+- ✅ **Cache Management**: Implemented cache invalidation system
+  - Orders tab caches loaded data (2000+ row dataset)
+  - 12 mutation functions now clear cache after Supabase writes
+  - Other tabs (products, customers, config, stats) load fresh as needed
+  - Eliminates stale data display and unnecessary reloads
+  
+- ✅ **Tab Loading Guards**: Added `ensureOrdersLoaded()` guard pattern
+  - Orders tab skips reload if already cached
+  - Reduces redundant API calls and UI flicker
+  - Other tabs remain lightweight with fresh loads
+
+- ✅ **Backward Compatibility**: All changes maintain existing HTML structure and API surface
+  - No breaking changes to data models or Supabase methods
+  - Dashboard functionality fully preserved
+
+### Future Implementation Priority (Phase 7+)
+
+Next work should prioritize:
 
 - Splitting admin logic into modules by domain:
   - `auth`
@@ -172,13 +195,9 @@ Phase 6.2 should optimize read paths before moving analytics to backend RPCs. Fu
 - Keeping the HTML file as a dashboard shell, not the main implementation surface
 - Replacing inline event handlers with centralized listeners
 - Reducing direct `innerHTML` rendering for complex dynamic views
-- Avoiding repeated full-table reloads when only one domain changed
-- Optimizing repeated reads through cache buckets and explicit invalidation
 - Adding admin-oriented bundled fetch methods in `supabase-client.js`
-- Keeping analytics client-side for this step while consuming only cached `orders`
-- Deferring heavy analytics work to Supabase RPC / aggregated queries until after query optimization
+- Moving analytics work to Supabase RPC / aggregated queries
 - Treating `order_items` as the long-term analytics source over `raw_cart`
-- Avoiding schema changes in Phase 6.2
 
 ### Admin Development Rules
 

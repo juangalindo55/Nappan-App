@@ -239,6 +239,8 @@
       <p class="empty-cart">Tu carrito está vacío</p>
     </div>
 
+    <div id="shippingRow" style="display:none;justify-content:space-between;align-items:center;padding:8px 0 4px;font-size:13px;color:#555;border-top:1px solid #f0e6d3;margin-top:4px;"></div>
+
     <div class="cart-total">
       <span>Total:</span>
       <span id="cart-total">$0</span>
@@ -264,6 +266,15 @@
       <div class="date-field">
         <label>⏰ Hora aproximada</label>
         <input type="time" id="deliveryTime" />
+      </div>
+      <div class="date-field" style="flex:100%">
+        <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="deliveryCP" placeholder="Ej. 64349" maxlength="5" inputmode="numeric"
+          style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-family:inherit;font-size:14px;" />
+          <button onclick="calculateShipping()" style="padding:10px 16px;background:#DAA520;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1A1008'" onmouseout="this.style.background='#DAA520'">Calcular 🗺️</button>
+        </div>
+        <div id="shippingResult" style="margin-top:8px;font-size:13px;font-weight:500;min-height:18px;"></div>
       </div>
       <div class="date-field field-full">
         <label>📝 Notas especiales (opcional)</label>
@@ -346,6 +357,11 @@
   };
 
   loadDynamicPrices();
+
+  // ── Estado de envío ────────────────────────────────────────
+  let shippingCost  = 0;    // 0 = no calculado / fuera de zona
+  let shippingLabel = '';   // 'calculated' | 'out_of_range' | 'error' | ''
+  let shippingCP    = '';   // CP capturado
 
   // CARRITO DE COMPRAS
   let cartPFB = [];
@@ -450,12 +466,27 @@
     // Calcular total
     const subtotal = cartPFB.reduce((sum, item) => sum + item.price, 0);
     const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
-    const finalTotal = subtotal - discountAmount;
+    const productsTotal = subtotal - discountAmount;
+    const total = productsTotal + shippingCost;
+
+    // Fila de envío en el carrito
+    const shippingRow = document.getElementById('shippingRow');
+    if (shippingRow) {
+      if (shippingLabel === 'calculated' && shippingCost > 0) {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío (CP ${shippingCP})</span><span style="font-weight:600;color:#2e7d32;">+$${shippingCost} MXN</span>`;
+      } else if (shippingLabel === 'out_of_range' || shippingLabel === 'error') {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío</span><span style="color:#E6AC00;font-weight:500;">Por cotizar</span>`;
+      } else {
+        shippingRow.style.display = 'none';
+      }
+    }
 
     if (tierDiscount > 0) {
-      totalElement.textContent = `$${subtotal} → $${finalTotal} (${tierDiscount}% desc.)`;
+      totalElement.textContent = `$${subtotal} → $${total} (${tierDiscount}% desc.)`;
     } else {
-      totalElement.textContent = `$${finalTotal}`;
+      totalElement.textContent = `$${total}`;
     }
   }
 
@@ -541,6 +572,125 @@
     }
   }
 
+  // ── CALCULADORA DE ENVÍO ───────────────────────────────────
+  const SHIPPING_ORIGIN = 'Cumbres, Monterrey, 64349, Mexico';
+
+  // Tarifas dinámicas cargadas de admin
+  let shippingTiers = [
+    { km: 3, price: 50 },
+    { km: 8, price: 85 },
+    { km: 15, price: 130 },
+    { km: 20, price: 150 },
+    { km: 45, price: 200 }
+  ];
+
+  async function loadShippingTiers() {
+    try {
+      const config = await window.NappanDB.loadAppConfig();
+      const tiers = [];
+      for (let i = 1; i <= 5; i++) {
+        const km = config['shipping_tier_' + i + '_km'];
+        const price = config['shipping_tier_' + i + '_price'];
+        if (km !== undefined && km !== null && price !== undefined && price !== null) {
+          tiers.push({ km: parseFloat(km), price: parseFloat(price) });
+        }
+      }
+      if (tiers.length > 0) {
+        shippingTiers = tiers;
+      }
+    } catch (e) {
+      console.log('Usando tarifas de envío por defecto');
+    }
+  }
+
+  function getShippingCost(km) {
+    for (const tier of shippingTiers) {
+      if (km <= tier.km) return tier.price;
+    }
+    return null;
+  }
+
+  async function calculateShipping() {
+    // Cargar tarifas si aún son las por defecto
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
+    const cpInput  = document.getElementById('deliveryCP');
+    const resultEl = document.getElementById('shippingResult');
+    const cp = cpInput ? cpInput.value.trim() : '';
+
+    if (!/^\d{5}$/.test(cp)) {
+      if (resultEl) resultEl.innerHTML = '<span style="color:#c0392b;">❌ Ingresa un CP válido de 5 dígitos</span>';
+      return;
+    }
+
+    shippingCP = cp;
+    if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
+
+    // Timeout global si el SDK nunca carga
+    clearTimeout(window._shippingTimeout);
+    window._shippingTimeout = setTimeout(() => {
+      shippingCost  = 0;
+      shippingLabel = 'error';
+      if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+      updateCart();
+    }, 8000);
+
+    const tryCalc = () => {
+      if (!window.google || !window.google.maps) {
+        setTimeout(tryCalc, 500);
+        return;
+      }
+      clearTimeout(window._shippingTimeout);
+
+      const apiTimeout = setTimeout(() => {
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        updateCart();
+      }, 6000);
+
+      const service = new window.google.maps.DistanceMatrixService();
+      service.getDistanceMatrix({
+        origins: [SHIPPING_ORIGIN],
+        destinations: [cp + ', Mexico'],
+        travelMode: 'DRIVING',
+        unitSystem: window.google.maps.UnitSystem.METRIC
+      }, (response, status) => {
+        clearTimeout(apiTimeout);
+
+        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+          const distanceKm = response.rows[0].elements[0].distance.value / 1000;
+          const cost = getShippingCost(distanceKm);
+
+          if (cost !== null) {
+            shippingCost = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
+          } else {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          }
+        } else {
+          shippingCost = 0;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+        }
+        updateCart();
+      });
+    };
+    tryCalc();
+  }
+
+  // Cargar Google Maps si no está cargado
+  if (!window.google || !window.google.maps) {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDJjQMaR9J8Q0lCQyWWHT6zPc8Zs-5-7CE`;
+    document.head.appendChild(script);
+  }
+
   // Calcular monto faltante para el mínimo de $999
   function calculateMinimumNeeded() {
     const MINIMUM_ORDER = 999;
@@ -622,20 +772,29 @@
     });
 
     const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
-    const finalTotal = subtotal - discountAmount;
+    const productsTotal = subtotal - discountAmount;
+    const total = productsTotal + shippingCost;
 
     message += '\n━━━━━━━━━━━━━━━━━━━━━━━\n';
     if (tierDiscount > 0) {
       message += `💰 *Subtotal: $${subtotal} MXN*\n`;
       message += `🎁 *Descuento (${tierDiscount}%): -$${discountAmount} MXN*\n`;
-      message += `💰 *TOTAL: $${finalTotal} MXN*\n`;
-    } else {
-      message += `💰 *TOTAL: $${finalTotal} MXN*\n`;
     }
+    if (shippingLabel === 'calculated' && shippingCost > 0) {
+      message += `🚚 *Envío (CP ${shippingCP}):* $${shippingCost} MXN\n`;
+    } else {
+      message += `🚚 *Envío:* Por cotizar\n`;
+    }
+    message += `💰 *TOTAL: $${total} MXN*\n`;
     message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
 
     if (specialNotes) {
       message += `📝 *Notas especiales:*\n${specialNotes}\n\n`;
+    }
+
+    // Agregar nota si el envío no fue calculado
+    if (shippingLabel !== 'calculated') {
+      message += `⚠️ *Nota:* El total mostrado no incluye envío. Será cotizado una vez confirmado el pedido.\n\n`;
     }
 
     message += `✨ Pedido generado desde Nappan Fit Edition`;
@@ -653,7 +812,8 @@
       delivery_time: deliveryTime,
       subtotal: subtotal,
       discount_amount: discountAmount,
-      total: finalTotal,
+      shipping_cost: shippingCost,
+      total: total,
       whatsapp_sent: true,
       notes: specialNotes,
       raw_cart: JSON.parse(JSON.stringify(cartPFB))

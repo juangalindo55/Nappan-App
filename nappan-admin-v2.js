@@ -28,6 +28,30 @@
     get statsCache() { return { ...statsCache }; }
   };
 
+  // HTML Escape function for XSS prevention
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Cache state and invalidation (only for Orders tab which has real cache logic)
+  let cacheState = {
+    ordersLoaded: false
+  };
+
+  function invalidateCache(section) {
+    if (section === 'orders' || section === 'all') {
+      cacheState.ordersLoaded = false;
+      allOrders = [];
+      currentPage = 1;
+    }
+    if (section === 'stats') {
+      statsCache = { orders: [], date: null };
+    }
+  }
+
   function getDb() {
     if (!window.NappanDB) {
       throw new Error('Supabase client no disponible');
@@ -59,9 +83,10 @@
     }));
   }
 
-  function showDashboardShell() {
+  async function showDashboardShell() {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('dashboardSection').style.display = 'block';
+    await ensureOrdersLoaded();
   }
 
   function showLoginShell() {
@@ -186,9 +211,9 @@
 
       html += '<tr style="' + rowStyle + '">';
       html += '<td><button class="btn-expand" onclick="toggleOrderDetail(\'' + order.id + '\')">▶</button></td>';
-      html += '<td class="order-number">' + (order.order_number || 'N/A') + '</td>';
-      html += '<td>' + (order.customer_name || 'N/A') + '</td>';
-      html += '<td>' + (order.section || 'N/A') + '</td>';
+      html += '<td class="order-number">' + escapeHtml(order.order_number || 'N/A') + '</td>';
+      html += '<td>' + escapeHtml(order.customer_name || 'N/A') + '</td>';
+      html += '<td>' + escapeHtml(order.section || 'N/A') + '</td>';
       html += '<td>$' + (order.total || 0) + '</td>';
       html += '<td><select onchange="changeOrderStatus(\'' + order.id + '\', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">';
       html += '<option value="pending" ' + (order.status === 'pending' ? 'selected' : '') + '>Pendiente</option>';
@@ -229,11 +254,11 @@
         html += '<tr class="detail-row show">';
         html += '<td colspan="8"><div class="detail-content">';
         html += '<div class="detail-grid">';
-        html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + phone + '</div></div>';
-        html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + deliveryDate + '</div></div>';
-        html += '<div class="detail-field"><div class="detail-field-label">📅 Creado</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + createdAt + '</div></div>';
-        html += '<div class="detail-field"><div class="detail-field-label">✏️ Último cambio</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + updatedAt + '</div></div>';
-        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + notes + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + escapeHtml(phone) + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + escapeHtml(deliveryDate) + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">📅 Creado</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(createdAt) + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">✏️ Último cambio</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(updatedAt) + '</div></div>';
+        html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + escapeHtml(notes) + '</div></div>';
         html += '</div>';
         html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Carrito</div><div class="raw-cart-list">' + cartDisplay + '</div></div>';
         html += '</div></td></tr>';
@@ -288,6 +313,7 @@
         if (order) order.status = newStatus;
         showToast('✓ Estado actualizado', 'success');
         renderOrdersTable();
+        invalidateCache('stats');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -459,7 +485,7 @@
                           product.section === 'fitbar' ? '💪 Fit Bar' :
                           product.section === 'eventos' ? '🎉 Eventos' : 'Otro';
 
-      btn.innerHTML = '<div style="font-weight: 600;">' + product.name + '</div>' +
+      btn.innerHTML = '<div style="font-weight: 600;">' + escapeHtml(product.name) + '</div>' +
                      '<div style="font-size: 12px; color: #999;">' + sectionLabel + ' • $' + (product.base_price || 0).toFixed(2) + '</div>';
       btn.onclick = () => addProductToCart(product);
 
@@ -480,7 +506,7 @@
     const idx = tbody.children.length;
 
     let html = '<tr>';
-    html += '<td style="padding: 10px;"><input type="text" value="' + product.name + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px;"><input type="text" value="' + escapeHtml(product.name) + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
     html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="1" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
     html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + (product.base_price || 0) + '" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
     html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + (product.base_price || 0).toFixed(2) + '</td>';
@@ -598,6 +624,7 @@
         showToast('✓ Pedido actualizado', 'success');
         closeEditOrder();
         renderOrdersTable();
+        invalidateCache('stats');
       }
     } catch (error) {
       console.error('Error saving order:', error);
@@ -666,16 +693,16 @@
       let html = '<ul style="list-style: none; padding: 0;">';
       cart.forEach((item, idx) => {
         html += '<li style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 4px; border-left: 3px solid #DAA520;">';
-        html += '<div style="font-weight: 600; margin-bottom: 5px;">' + (item.icon || '🛒') + ' ' + (item.name || 'Item') + '</div>';
+        html += '<div style="font-weight: 600; margin-bottom: 5px;">' + (item.icon || '🛒') + ' ' + escapeHtml(item.name || 'Item') + '</div>';
         if (item.qty) html += '<div>Cantidad: <strong>' + item.qty + '</strong></div>';
-        if (item.art) html += '<div>Arte: <strong>' + item.art + '</strong></div>';
-        if (item.fruitType) html += '<div>Tipo: <strong>' + item.fruitType + '</strong></div>';
+        if (item.art) html += '<div>Arte: <strong>' + escapeHtml(item.art) + '</strong></div>';
+        if (item.fruitType) html += '<div>Tipo: <strong>' + escapeHtml(item.fruitType) + '</strong></div>';
         if (item.unitPrice) html += '<div>Precio unitario: <strong>$' + item.unitPrice + '</strong></div>';
         if (item.totalPrice) html += '<div style="color: #DAA520; font-weight: 600;">Total: $' + item.totalPrice + '</div>';
         if (item.extras && Array.isArray(item.extras) && item.extras.length > 0) {
           html += '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;"><strong>Extras:</strong><ul style="list-style: none; padding: 0; margin-top: 5px;">';
           item.extras.forEach(extra => {
-            html += '<li style="padding: 4px 0;">• ' + extra.label + ' — <strong>$' + extra.price + '</strong></li>';
+            html += '<li style="padding: 4px 0;">• ' + escapeHtml(extra.label) + ' — <strong>$' + extra.price + '</strong></li>';
           });
           html += '</ul></div>';
         }
@@ -690,9 +717,9 @@
       let html = '<div style="padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #DAA520;">';
       for (const key in cart) {
         if (typeof cart[key] === 'object') {
-          html += '<div style="margin-bottom: 8px;"><strong>' + key + ':</strong> ' + JSON.stringify(cart[key]) + '</div>';
+          html += '<div style="margin-bottom: 8px;"><strong>' + escapeHtml(key) + ':</strong> ' + escapeHtml(JSON.stringify(cart[key])) + '</div>';
         } else {
-          html += '<div style="margin-bottom: 8px;"><strong>' + key + ':</strong> ' + cart[key] + '</div>';
+          html += '<div style="margin-bottom: 8px;"><strong>' + escapeHtml(key) + ':</strong> ' + escapeHtml(cart[key]) + '</div>';
         }
       }
       html += '</div>';
@@ -710,6 +737,20 @@
     setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
+  // Cache-aware order loading
+  async function ensureOrdersLoaded({ force = false } = {}) {
+    if (cacheState.ordersLoaded && !force) return;
+    document.getElementById('tableContainer').innerHTML = '<div class="loading">Cargando pedidos...</div>';
+    try {
+      allOrders = await getDb().loadAllOrders({});
+      cacheState.ordersLoaded = true;
+      renderOrdersTable();
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      document.getElementById('tableContainer').innerHTML = '<div class="loading">Error cargando pedidos</div>';
+    }
+  }
+
   function switchTabTo(tabName, btnEl) {
     document.querySelectorAll('[id$="-tab"]').forEach(el => {
       el.style.display = 'none';
@@ -718,10 +759,15 @@
       el.classList.remove('active');
     });
 
-    document.getElementById(tabName + '-tab').style.display = 'block';
-    btnEl.classList.add('active');
+    const tab = document.getElementById(tabName + '-tab');
+    if (tab) {
+      tab.style.display = 'block';
+      btnEl?.classList.add('active');
+    }
 
-    if (tabName === 'config') {
+    if (tabName === 'pedidos') {
+      ensureOrdersLoaded();
+    } else if (tabName === 'config') {
       loadConfig();
     } else if (tabName === 'productos') {
       loadProductsList();
@@ -754,9 +800,9 @@
 
       allProducts.forEach(product => {
         html += '<tr id="prod-row-' + product.id + '">';
-        html += '<td>' + (product.section || 'N/A') + '</td>';
-        html += '<td>' + (product.name || 'N/A') + '</td>';
-        html += '<td style="font-family: monospace; font-size: 12px;">' + (product.sku || 'N/A') + '</td>';
+        html += '<td>' + escapeHtml(product.section || 'N/A') + '</td>';
+        html += '<td>' + escapeHtml(product.name || 'N/A') + '</td>';
+        html += '<td style="font-family: monospace; font-size: 12px;">' + escapeHtml(product.sku || 'N/A') + '</td>';
         html += '<td id="price-cell-' + product.id + '" style="font-weight: 600; color: #DAA520;">$' + (product.base_price || 0) + '</td>';
         html += '<td><button class="btn" style="padding: 8px 12px; font-size: 13px;" onclick="startEditProductPrice(\'' + product.id + '\', ' + product.base_price + ')">Editar</button></td>';
         html += '</tr>';
@@ -801,6 +847,7 @@
         cellEl.innerHTML = '$' + newPrice;
         cellEl.style.fontWeight = '600';
         cellEl.style.color = '#DAA520';
+        invalidateCache('stats');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -870,10 +917,10 @@
         const extras = product.extras || [];
         if (extras && extras.length > 0) {
           extrasHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
-          extrasHtml += '<h4 style="margin-bottom: 10px;">' + product.name + ' (' + product.section + ')</h4>';
+          extrasHtml += '<h4 style="margin-bottom: 10px;">' + escapeHtml(product.name) + ' (' + escapeHtml(product.section) + ')</h4>';
           extras.forEach((extra, idx) => {
             extrasHtml += '<div style="margin-bottom: 10px;">';
-            extrasHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">' + extra.label + '</label>';
+            extrasHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">' + escapeHtml(extra.label) + '</label>';
             extrasHtml += '<input type="number" class="extra-price" data-extra-id="' + extra.id + '" value="' + extra.price + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
             extrasHtml += '</div>';
           });
@@ -908,6 +955,7 @@
       }
 
       showToast('✓ Extras guardados', 'success');
+      invalidateCache('config');
       await loadExtrasForConfig();
     } catch (error) {
       console.error('Error:', error);
@@ -929,6 +977,7 @@
         showToast('Error guardando: ' + error.message, 'error');
       } else {
         showToast('✓ WhatsApp actualizado', 'success');
+        invalidateCache('config');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -953,6 +1002,7 @@
         showToast('Error guardando descuentos', 'error');
       } else {
         showToast('✓ Descuentos actualizados', 'success');
+        invalidateCache('config');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -983,6 +1033,7 @@
 
       if (success) {
         showToast('✓ Tarifas guardadas', 'success');
+        invalidateCache('config');
       } else {
         showToast('Error guardando algunas tarifas', 'error');
       }
@@ -1011,6 +1062,7 @@
 
       if (success) {
         showToast('✓ Galería actualizada', 'success');
+        invalidateCache('config');
         await loadConfig();
       } else {
         showToast('Error guardando algunas fotos', 'error');
@@ -1107,8 +1159,8 @@
       const lastOrder = customer.last_order_at ? new Date(customer.last_order_at).toLocaleDateString('es-MX') : '—';
       const totalSpent = parseFloat(customer.total_spent || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       html += '<tr>';
-      html += '<td id="phone-' + customer.id + '">' + (customer.phone || '—') + '</td>';
-      html += '<td id="name-' + customer.id + '">' + (customer.name || '—') + '</td>';
+      html += '<td id="phone-' + customer.id + '">' + escapeHtml(customer.phone || '—') + '</td>';
+      html += '<td id="name-' + customer.id + '">' + escapeHtml(customer.name || '—') + '</td>';
       html += '<td><select onchange="changeCustomerTier(\'' + customer.id + '\', this.value)">';
       html += '<option value="individual" ' + (customer.membership_tier === 'individual' ? 'selected' : '') + '>Individual</option>';
       html += '<option value="premium" ' + (customer.membership_tier === 'premium' ? 'selected' : '') + '>Premium</option>';
@@ -1117,7 +1169,7 @@
       html += '<td style="text-align:center;"><strong>' + (customer.order_count || 0) + '</strong></td>';
       html += '<td style="text-align:right;">$' + totalSpent + '</td>';
       html += '<td style="font-size:13px;color:#666;">' + lastOrder + '</td>';
-      html += '<td><button class="btn" style="padding:6px 10px; font-size:12px;" onclick="startEditCustomer(\'' + customer.id + '\', \'name\', \'' + (customer.name || '').replace(/'/g, "\\'") + '\', document.getElementById(\'name-' + customer.id + '\'))">✏️</button> ';
+      html += '<td><button class="btn" style="padding:6px 10px; font-size:12px;" onclick="startEditCustomer(\'' + customer.id + '\', \'name\', \'' + escapeHtml(customer.name || '').replace(/'/g, "\\'") + '\', document.getElementById(\'name-' + customer.id + '\'))">✏️</button> ';
       html += '<button class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="deleteCustomerRow(\'' + customer.id + '\')">🗑️</button></td>';
       html += '</tr>';
     });
@@ -1127,7 +1179,7 @@
   }
 
   function startEditCustomer(id, field, currentVal, cellEl) {
-    cellEl.innerHTML = '<input type="text" id="input-' + id + '" value="' + currentVal + '" style="padding:6px; border:1px solid #DAA520; border-radius:4px;"> <button class="btn-confirm" style="padding:4px 8px; font-size:11px;" onclick="confirmEditCustomer(\'' + id + '\', \'' + field + '\')">✓</button> <button class="btn-cancel" style="padding:4px 8px; font-size:11px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="cancelEditCustomer(\'' + id + '\', \'' + field + '\', \'' + currentVal + '\')">✗</button>';
+    cellEl.innerHTML = '<input type="text" id="input-' + id + '" value="' + escapeHtml(currentVal) + '" style="padding:6px; border:1px solid #DAA520; border-radius:4px;"> <button class="btn-confirm" style="padding:4px 8px; font-size:11px;" onclick="confirmEditCustomer(\'' + id + '\', \'' + field + '\')">✓</button> <button class="btn-cancel" style="padding:4px 8px; font-size:11px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="cancelEditCustomer(\'' + id + '\', \'' + field + '\', \'' + escapeHtml(currentVal) + '\')">✗</button>';
     document.getElementById('input-' + id).focus();
   }
 
@@ -1150,6 +1202,7 @@
         if (customer) customer[field] = newVal;
         showToast('✓ ' + field.charAt(0).toUpperCase() + field.slice(1) + ' actualizado', 'success');
         renderCustomersTable();
+        invalidateCache('stats');
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1170,6 +1223,7 @@
         const customer = allCustomers.find(c => c.id === id);
         if (customer) customer.membership_tier = newTier;
         showToast('✓ Tier actualizado', 'success');
+        invalidateCache('stats');
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1187,6 +1241,7 @@
         allCustomers = allCustomers.filter(c => c.id !== id);
         showToast('✓ Cliente eliminado', 'success');
         renderCustomersTable();
+        invalidateCache('stats');
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1222,7 +1277,9 @@
       } else {
         showToast('✓ Cliente agregado', 'success');
         hideAddCustomerForm();
-        await loadCustomersList();
+        invalidateCache('customers');
+        invalidateCache('stats');
+        await ensureCustomersLoaded({ force: true });
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
