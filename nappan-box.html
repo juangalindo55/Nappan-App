@@ -479,12 +479,6 @@
     tryCalc();
   }
 
-  // Cargar Google Maps si no está cargado
-  if (!window.google || !window.google.maps) {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDJjQMaR9J8Q0lCQyWWHT6zPc8Zs-5-7CE`;
-    document.head.appendChild(script);
-  }
 
   function toggleExtra(el, qtyRowId) {
     el.classList.toggle('selected');
