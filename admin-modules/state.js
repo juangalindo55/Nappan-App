@@ -241,4 +241,5 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = AdminState;
 }
 
+export { AdminState };
 export default AdminState;
