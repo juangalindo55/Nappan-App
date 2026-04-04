@@ -59,7 +59,7 @@ const Stats = {
       }
 
       // Compute all stats
-      const data = this.computeStats();
+      const data = await this.computeStats();
 
       // Cache the results
       AdminState.stats.data = data;
@@ -75,221 +75,52 @@ const Stats = {
   },
 
   /**
-   * Compute all KPIs from orders in AdminState
-   * Filters out deleted/cancelled orders
+   * Compute all KPIs using Supabase RPC functions
+   * Calls all 7 RPC functions in parallel for efficiency
+   * Maintains exact same return interface as before (backward compatible)
    *
-   * @returns {Object} Computed stats object with all KPIs
+   * @returns {Promise<Object>} Computed stats object with all KPIs
    */
-  computeStats() {
-    // Get all orders from state (excludes deleted orders based on caller filter)
-    const orders = AdminState.getOrders();
-
-    // Filter out deleted orders
-    const activeOrders = orders.filter(o => o.status !== 'deleted' && o.status !== 'cancelled');
-
-    return {
-      totalOrders: activeOrders.length,
-      totalRevenue: this._calculateTotalRevenue(activeOrders),
-      averageOrder: this._calculateAverageOrder(activeOrders),
-      ordersBySection: this.groupBySection(activeOrders),
-      ordersByStatus: this.groupByStatus(activeOrders),
-      revenueBySection: this.revenueBySection(activeOrders),
-      ordersByHour: this.groupByHour(activeOrders),
-      topProducts: this.topProducts(activeOrders),
-      topCustomers: this.topCustomers(activeOrders)
-    };
-  },
-
-  /**
-   * Calculate total revenue from orders
-   * @private
-   * @param {Array} orders - Array of orders
-   * @returns {number} Total revenue
-   */
-  _calculateTotalRevenue(orders) {
-    return orders.reduce((sum, order) => sum + (parseFloat(order.total) || 0), 0);
-  },
-
-  /**
-   * Calculate average order value
-   * @private
-   * @param {Array} orders - Array of orders
-   * @returns {number} Average order value (rounded), or 0 if no orders
-   */
-  _calculateAverageOrder(orders) {
-    if (orders.length === 0) return 0;
-    const totalRevenue = this._calculateTotalRevenue(orders);
-    return Math.round(totalRevenue / orders.length);
-  },
-
-  /**
-   * Group orders by section
-   * Returns count of orders per section
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Object} Object with section names as keys and order counts as values
-   * Example: { lunchbox: 5, nappanbox: 3, fitbar: 8 }
-   */
-  groupBySection(orders) {
-    return orders.reduce((acc, order) => {
-      const section = order.section || 'otro';
-      acc[section] = (acc[section] || 0) + 1;
-      return acc;
-    }, {});
-  },
-
-  /**
-   * Group orders by status
-   * Returns count of orders per status
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Object} Object with status names as keys and order counts as values
-   * Example: { pending: 2, confirmed: 5, delivered: 8 }
-   */
-  groupByStatus(orders) {
-    return orders.reduce((acc, order) => {
-      const status = order.status || 'pending';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-  },
-
-  /**
-   * Sum revenue by section
-   * Returns total revenue per section
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Object} Object with section names as keys and revenue sums as values
-   * Example: { lunchbox: 500.50, nappanbox: 250.00, fitbar: 1200.00 }
-   */
-  revenueBySection(orders) {
-    return orders.reduce((acc, order) => {
-      const section = order.section || 'otro';
-      acc[section] = (acc[section] || 0) + (parseFloat(order.total) || 0);
-      return acc;
-    }, {});
-  },
-
-  /**
-   * Group order count by hour (0-23)
-   * Returns count of orders placed per hour
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Object} Object with hour (0-23) as keys and order counts as values
-   * Example: { 0: 2, 1: 0, ..., 9: 5, ..., 23: 1 }
-   */
-  groupByHour(orders) {
-    // Initialize all hours 0-23 with 0 count
-    const hourMap = {};
-    for (let h = 0; h < 24; h++) {
-      hourMap[h] = 0;
-    }
-
-    // Count orders by hour
-    orders.forEach(order => {
-      try {
-        const hour = new Date(order.created_at).getHours();
-        hourMap[hour]++;
-      } catch (e) {
-        // Skip orders with invalid timestamps
-      }
-    });
-
-    return hourMap;
-  },
-
-  /**
-   * Get top 10 products by count
-   * Parses cart items from orders and counts occurrences
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Array} Array of top 10 products: [{ name, count }, ...]
-   * Sorted by count descending
-   */
-  topProducts(orders) {
-    const productMap = {};
-
-    orders.forEach(order => {
-      // Parse raw_cart to extract products
-      const products = this._parseProducts(order.raw_cart);
-      products.forEach(product => {
-        const name = product.name || product.producto || 'Producto sin nombre';
-        if (!productMap[name]) {
-          productMap[name] = 0;
-        }
-        productMap[name]++;
-      });
-    });
-
-    // Sort by count descending and return top 10
-    return Object.entries(productMap)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-  },
-
-  /**
-   * Get top 10 customers by spending
-   * Groups orders by phone, sums total and counts orders
-   *
-   * @param {Array} orders - Array of orders
-   * @returns {Array} Array of top 10 customers: [{ phone, name, total, count }, ...]
-   * Sorted by total spending descending
-   */
-  topCustomers(orders) {
-    const customerMap = {};
-
-    orders.forEach(order => {
-      const key = order.customer_phone || 'desconocido';
-      if (!customerMap[key]) {
-        customerMap[key] = {
-          phone: order.customer_phone || '',
-          name: order.customer_name || 'Desconocido',
-          total: 0,
-          count: 0
-        };
-      }
-      customerMap[key].total += parseFloat(order.total) || 0;
-      customerMap[key].count++;
-    });
-
-    // Sort by total descending and return top 10
-    return Object.values(customerMap)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-  },
-
-  /**
-   * Parse products from raw_cart JSON string
-   * Handles both array and individual product formats
-   *
-   * @private
-   * @param {string|Array} rawCart - Raw cart data (JSON string or array)
-   * @returns {Array} Array of parsed product objects
-   */
-  _parseProducts(rawCart) {
-    if (!rawCart) return [];
+  async computeStats() {
+    const db = this.getDb();
 
     try {
-      // If it's a string, try to parse it
-      let cart = rawCart;
-      if (typeof rawCart === 'string') {
-        cart = JSON.parse(rawCart);
-      }
+      // Call all RPC functions in parallel
+      const [
+        kpis,
+        ordersBySection,
+        ordersByStatus,
+        revenueBySection,
+        ordersByHour,
+        topProducts,
+        topCustomers
+      ] = await Promise.all([
+        db.getStatsKpis(),
+        db.getOrdersBySection(),
+        db.getOrdersByStatus(),
+        db.getRevenueBySection(),
+        db.getOrdersByHour(),
+        db.getTopProducts(10),
+        db.getTopCustomers(10)
+      ]);
 
-      // Handle both array and single object
-      if (Array.isArray(cart)) {
-        return cart;
-      } else if (typeof cart === 'object') {
-        return [cart];
-      }
-      return [];
-    } catch (e) {
-      // If parsing fails, return empty array
-      console.warn('Failed to parse raw_cart:', rawCart, e);
-      return [];
+      return {
+        totalOrders: kpis.total_orders,
+        totalRevenue: kpis.total_revenue,
+        averageOrder: kpis.average_order,
+        ordersBySection,
+        ordersByStatus,
+        revenueBySection,
+        ordersByHour,
+        topProducts,
+        topCustomers
+      };
+    } catch (error) {
+      console.error('Error computing stats from RPC:', error);
+      throw error;
     }
   },
+
 
   /**
    * Render charts (placeholder for Phase 7)
