@@ -12,7 +12,7 @@
 - Authentication (email/password)
 - Tab: Pedidos - filters, search, inline status edit, expandable details, pagination, CSV export
 - Tab: Productos - inline price editing
-- Tab: Configuracion - WhatsApp, shipping rates, extras, gallery, tier discounts
+- Tab: Configuración - WhatsApp, shipping rates, extras, gallery, tier discounts
 - Tab: Clientes - CRUD (view, edit, add, delete customers)
 
 ### Phase 3: Dynamic Config (Complete)
@@ -20,7 +20,7 @@
 - Dynamic WhatsApp number loading
 - Shipping rates configurable (5 tiers)
 - Event gallery dynamic loading
-- All editable from Admin > Configuracion
+- All editable from Admin > Configuración
 
 ### Phase 4: Dynamic Pricing (Complete)
 - `products` table with SKU and `base_price`
@@ -37,7 +37,7 @@
 - RPC function `find_customer_by_phone` (public, `SECURITY DEFINER`)
 - Trigger `sync_customer_stats` for auto-upsert on new orders
 - Lunch Box: phone field + customer lookup on blur + welcome badge + tier discounts applied
-- Tier discount config in Admin > Configuracion > Descuentos por Membresia
+- Tier discount config in Admin > Configuración > Descuentos por Membresía
 - Fit Bar: phone field + lookup + welcome badge + tier pricing applied to cart
 - Nappan Box: phone lookup + welcome badge + tier pricing applied to both Normal/Premium boxes
 - Eventos en Vivo remains excluded from Phase 5 because it is an open quotation flow
@@ -50,6 +50,40 @@
 - Move heavy dashboard analytics from client-side loops to backend RPC aggregation
 - Standardize dashboard state management, rendering, and auth/session flow
 - Prepare `order_items` to become the canonical analytics source
+
+#### Phase 6.1: Admin Shell Modularization + State Cleanup (Completed)
+- `nappan-admin-v2.html` now acts as the admin shell/layout instead of holding the full implementation
+- Admin logic moved into `nappan-admin-v2.js`
+- Admin-specific styles extracted to `admin-v2.css`
+- Shared dashboard state exposed via `window.NappanAdminState`
+- Auth flow hardened from polling to session bootstrap + auth state listener
+- Initial batch helpers added in `supabase-client.js`:
+  - `loadProductsForSections()`
+  - `loadProductsWithExtras()`
+  - `onAuthStateChange()`
+- Visible admin copy normalized to Spanish labels such as `Estado`, `Configuración`, `Estadísticas`, `Teléfono` and `Galería`
+
+#### Phase 6.2: Query Optimization + Batch Loading (Active)
+- Add a tab-scoped cache/store on top of `window.NappanAdminState` for:
+  - `orders`
+  - `products`
+  - `productsWithExtras`
+  - `customers`
+  - `config`
+  - `gallery`
+  - `statsInput`
+- Define cache invalidation rules per admin action:
+  - order status/edit/delete/recover invalidates `orders`, `customers`, and `statsInput`
+  - product or extra edits invalidate `products`, `productsWithExtras`, and order edit selector data
+  - config, shipping, gallery, and tier writes invalidate only the affected config buckets
+  - customer CRUD invalidates `customers` and `statsInput`
+- Replace repeated full `orders` reloads so `Pedidos`, `Clientes`, and `Estadísticas` reuse the same cached canonical dataset unless explicitly invalidated
+- Add admin-oriented batch methods in `supabase-client.js`:
+  - `loadAdminBootstrap()`
+  - `loadAdminConfigBundle()`
+- Refactor each tab to one `ensureXLoaded({ force })` data path plus one render path
+- Keep analytics client-side in this step, but make them consume only cached `orders`
+- Do not introduce schema changes or backend analytics RPC migration in 6.2
 
 #### Optimization Track
 - **Admin modularization**
@@ -79,12 +113,12 @@
   - Add safer update flows for config mutations and error feedback
 
 #### Follow-up Checklist
-- [ ] Admin shell split from business logic
-- [ ] Shared dashboard state store defined
+- [x] Admin shell split from business logic
+- [x] Shared dashboard state store defined
 - [ ] Orders/products/customers/config loads optimized
 - [ ] Stats moved to backend aggregation
 - [ ] `order_items` analytics path defined
-- [ ] Auth/session lifecycle hardened
+- [x] Auth/session lifecycle hardened
 - [ ] Regression test pass on all admin tabs
 
 ---
@@ -94,7 +128,9 @@
 ### Core
 - `index.html` - Landing page with admin link in footer
 - `supabase-client.js` - Supabase client API (`window.NappanDB`)
-- `nappan-admin-v2.html` - Admin dashboard (auth-gated)
+- `nappan-admin-v2.html` - Admin shell (auth-gated)
+- `nappan-admin-v2.js` - Admin dashboard logic and state handling
+- `admin-v2.css` - Admin-specific extracted styles
 - `supabase-schema.sql` - DDL for all tables + RLS + triggers
 - `supabase-phase5-schema.sql` - Phase 5: customers table + RPC + trigger
 - `supabase-phase6-schema.sql` - Phase 6 analytics RPC baseline
@@ -109,10 +145,9 @@
 
 ## Next Steps
 
-1. Admin V2 modularization and dashboard state cleanup
-2. Supabase query optimization and batch loading
-3. Server-side analytics integration for Admin > Estadisticas
-4. Optional polish - PWA, service worker, enhanced mobile UX
+1. Phase 6.2 - Supabase query optimization and batch loading
+2. Server-side analytics integration for Admin > Estadísticas
+3. Optional polish - PWA, service worker, enhanced mobile UX
 
 ---
 

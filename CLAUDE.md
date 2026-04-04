@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-5 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts.** Current priority: **Admin V2 optimization + analytics hardening**.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-5 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts.** Current priority: **Phase 6.2 - query optimization and batch loading for Admin V2**.
 
 ## Running Locally
 
@@ -114,7 +114,7 @@ All functions are exported from `supabase-client.js`.
 
 - Customers are detected by phone on blur
 - Membership tiers: `individual`, `premium`, `business`
-- Discounts are configurable from Admin > Configuracion > Descuentos por Membresia
+- Discounts are configurable from Admin > Configuración > Descuentos por Membresía
 
 ## WhatsApp Integration
 
@@ -138,14 +138,27 @@ Current admin includes:
 - Pedidos - filters, status updates, expandable details, pagination, CSV export
 - Productos - inline price editing
 - Clientes - CRUD operations
-- Configuracion - WhatsApp, shipping, extras, gallery, tier discounts
-- Estadisticas - client-rendered KPIs and charts (to be optimized)
+- Configuración - WhatsApp, shipping, extras, gallery, tier discounts
+- Estadísticas - client-rendered KPIs and charts (to be optimized)
 
 **Access:** Discrete admin link in `index.html` footer (not visible on section pages).
 
 ### Admin Architecture Priority
 
-`nappan-admin-v2.html` currently contains too much UI, state, rendering, analytics and CRUD logic in one file. Future work should prioritize:
+Current baseline after Phase 6.1:
+
+- `nappan-admin-v2.html` is the admin shell/layout
+- `nappan-admin-v2.js` contains admin logic, state handling, rendering, CRUD flows, and client-side analytics
+- `admin-v2.css` contains extracted admin-specific styles
+- `window.NappanAdminState` is the shared dashboard state surface
+- `supabase-client.js` already exposes:
+  - `loadProductsForSections()`
+  - `loadProductsWithExtras()`
+  - `onAuthStateChange()`
+
+### Current Implementation Priority
+
+Phase 6.2 should optimize read paths before moving analytics to backend RPCs. Future work should prioritize:
 
 - Splitting admin logic into modules by domain:
   - `auth`
@@ -160,8 +173,12 @@ Current admin includes:
 - Replacing inline event handlers with centralized listeners
 - Reducing direct `innerHTML` rendering for complex dynamic views
 - Avoiding repeated full-table reloads when only one domain changed
-- Moving heavy analytics work to Supabase RPC / aggregated queries
+- Optimizing repeated reads through cache buckets and explicit invalidation
+- Adding admin-oriented bundled fetch methods in `supabase-client.js`
+- Keeping analytics client-side for this step while consuming only cached `orders`
+- Deferring heavy analytics work to Supabase RPC / aggregated queries until after query optimization
 - Treating `order_items` as the long-term analytics source over `raw_cart`
+- Avoiding schema changes in Phase 6.2
 
 ### Admin Development Rules
 
@@ -170,8 +187,10 @@ When modifying the admin:
 2. Prefer adding or extending methods in `supabase-client.js` for dashboard-oriented data access.
 3. Avoid sequential per-section fetch loops when batch or parallel loading is possible.
 4. Reuse loaded dashboard state whenever possible and define explicit cache invalidation after writes.
-5. For analytics, prefer normalized or server-side aggregation instead of parsing `raw_cart` in multiple places.
+5. In Phase 6.2, keep analytics client-side but make them consume cached canonical `orders` data only.
 6. Keep auth/session handling centralized and deterministic.
+7. Refactor each tab toward one `ensureXLoaded({ force })` data path plus one render path.
+8. Prefer bundled admin fetches such as `loadAdminBootstrap()` and `loadAdminConfigBundle()` over scattered top-level reads.
 
 ## Development Rules
 

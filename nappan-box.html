@@ -366,7 +366,7 @@
 
   loadDynamicPrices();
 
-  function sendNBWhatsApp(type) {
+  async function sendNBWhatsApp(type) {
     if (type === 'normal') {
       const name = document.getElementById('nb-name').value.trim();
       const phone = document.getElementById('nb-phone').value.trim();
@@ -424,28 +424,36 @@
       msg += `
 _*Recuerda separar con el 50% de anticipo_ 🙌`;
 
-      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-
-      // Phase 1: Save order to Supabase (fire-and-forget)
-      if (window.NappanDB) {
-        NappanDB.saveOrder({
-          section: 'nappanbox',
-          customer_name: name,
-          customer_phone: phone || null,
-          delivery_date: date,
-          subtotal: subtotal,
-          discount_amount: discountAmount,
-          total: total,
-          whatsapp_sent: true,
-          notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
-          raw_cart: JSON.stringify({
-            type: 'normal',
-            character,
-            description: desc,
-            extras: hasExtra ? extraQty : 0
-          })
-        }).catch(err => console.warn('Order save failed (non-critical):', err));
+      if (!window.NappanDB) {
+        showToast('❌ No se pudo conectar para guardar tu pedido');
+        return;
       }
+
+      const saveResult = await NappanDB.saveOrder({
+        section: 'nappanbox',
+        customer_name: name,
+        customer_phone: phone || null,
+        delivery_date: date,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        total: total,
+        whatsapp_sent: true,
+        notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
+        raw_cart: JSON.stringify({
+          type: 'normal',
+          character,
+          description: desc,
+          extras: hasExtra ? extraQty : 0
+        })
+      });
+
+      if (!saveResult) {
+        console.warn('Order save failed before WhatsApp handoff');
+        showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo');
+        return;
+      }
+
+      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 
     } else {
       const name = document.getElementById('pr-name').value.trim();
@@ -506,28 +514,36 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
 `;
       msg += `_Te confirmamos disponibilidad al recibir tu diseño_ 📸`;
 
-      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-
-      // Phase 1: Save order to Supabase (fire-and-forget)
-      if (window.NappanDB) {
-        NappanDB.saveOrder({
-          section: 'nappanbox',
-          customer_name: name,
-          customer_phone: phone || null,
-          delivery_date: date,
-          subtotal: subtotal,
-          discount_amount: discountAmount,
-          total: total,
-          whatsapp_sent: true,
-          notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,
-          raw_cart: JSON.stringify({
-            type: 'premium',
-            design,
-            reference: ref,
-            extras: hasExtra ? extraQty : 0
-          })
-        }).catch(err => console.warn('Order save failed (non-critical):', err));
+      if (!window.NappanDB) {
+        showToast('No se pudo conectar para guardar tu pedido');
+        return;
       }
+
+      const saveResult = await NappanDB.saveOrder({
+        section: 'nappanbox',
+        customer_name: name,
+        customer_phone: phone || null,
+        delivery_date: date,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        total: total,
+        whatsapp_sent: true,
+        notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,
+        raw_cart: JSON.stringify({
+          type: 'premium',
+          design,
+          reference: ref,
+          extras: hasExtra ? extraQty : 0
+        })
+      });
+
+      if (!saveResult) {
+        console.warn('Order save failed before WhatsApp handoff');
+        showToast('No se pudo guardar tu pedido. Intenta de nuevo');
+        return;
+      }
+
+      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
     }
   }
 
@@ -569,3 +585,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
 </script>
 </body>
 </html>
+
+
+
+

@@ -538,7 +538,7 @@
   }
 
   // ENVIAR PEDIDO POR WHATSAPP
-  function sendPFBWhatsApp() {
+  async function sendPFBWhatsApp() {
     if (cartPFB.length === 0) {
       showToast('⚠️ Debes agregar al menos un producto', 'warning');
       return;
@@ -618,28 +618,36 @@
 
     message += `✨ Pedido generado desde Nappan Fit Edition`;
 
+    if (!window.NappanDB) {
+      showToast('❌ No se pudo conectar para guardar tu pedido', 'warning');
+      return;
+    }
+
+    const saveResult = await NappanDB.saveOrder({
+      section: 'fitbar',
+      customer_name: clientName,
+      customer_phone: clientPhone || null,
+      delivery_date: deliveryDate,
+      delivery_time: deliveryTime,
+      subtotal: subtotal,
+      discount_amount: discountAmount,
+      total: finalTotal,
+      whatsapp_sent: true,
+      notes: specialNotes,
+      raw_cart: JSON.parse(JSON.stringify(cartPFB))
+    });
+
+    if (!saveResult) {
+      console.warn('Order save failed before WhatsApp handoff');
+      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo', 'warning');
+      return;
+    }
+
     // URL de WhatsApp
     const whatsappURL = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
 
     // Abrir WhatsApp
     window.open(whatsappURL, '_blank');
-
-    // Phase 1: Save order to Supabase (fire-and-forget)
-    if (window.NappanDB) {
-      NappanDB.saveOrder({
-        section: 'fitbar',
-        customer_name: clientName,
-        customer_phone: clientPhone || null,
-        delivery_date: deliveryDate,
-        delivery_time: deliveryTime,
-        subtotal: subtotal,
-        discount_amount: discountAmount,
-        total: finalTotal,
-        whatsapp_sent: true,
-        notes: specialNotes,
-        raw_cart: JSON.parse(JSON.stringify(cartPFB))
-      }).catch(err => console.warn('Order save failed (non-critical):', err));
-    }
 
     // Limpiar formulario
     setTimeout(() => {

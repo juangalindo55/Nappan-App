@@ -8,6 +8,25 @@ const supabaseAnonKey = 'sb_publishable_d958WcFSLNa6yVan61MiWQ_e7FS8NL1';
 
 let supabaseClient = null;
 
+async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
+  if (!supabaseClient) return { customer_id: null, error: 'Supabase not initialized' };
+
+  const cleanPhone = (orderPayload.customer_phone || '').replace(/\D/g, '') || null;
+  if (!cleanPhone) {
+    return { customer_id: null, error: null };
+  }
+
+  const { data, error } = await supabaseClient.rpc('sync_public_customer_from_order', {
+    p_order_id: orderId,
+    p_phone: cleanPhone,
+    p_name: orderPayload.customer_name || 'Cliente',
+    p_total: orderPayload.total || 0,
+    p_order_created_at: orderCreatedAt || new Date().toISOString()
+  });
+
+  return { customer_id: data || null, error };
+}
+
 // Initialize Supabase
 if (typeof window.supabase === 'undefined') {
   console.error('❌ Supabase CDN not loaded!');
@@ -28,12 +47,13 @@ async function saveOrder(orderPayload) {
   }
 
   try {
+    const cleanPhone = (orderPayload.customer_phone || '').replace(/\D/g, '') || null;
     const { data: order, error: orderError } = await supabaseClient
       .from('orders')
       .insert([{
         section: orderPayload.section,
         customer_name: orderPayload.customer_name,
-        customer_phone: orderPayload.customer_phone || null,
+        customer_phone: cleanPhone,
         delivery_date: orderPayload.delivery_date || null,
         delivery_time: orderPayload.delivery_time || null,
         delivery_address: orderPayload.delivery_address || null,
@@ -48,7 +68,7 @@ async function saveOrder(orderPayload) {
         raw_cart: orderPayload.raw_cart || {},
         status: 'pending'
       }])
-      .select('id, order_number')
+      .select('id, order_number, created_at')
       .single();
 
     if (orderError) {
@@ -58,46 +78,24 @@ async function saveOrder(orderPayload) {
 
     console.log('✓ Order saved:', order.order_number);
 
-    // Auto-create/update customer if phone provided
-    if (orderPayload.customer_phone) {
-      const cleanPhone = orderPayload.customer_phone.replace(/\D/g, '');
-      if (cleanPhone) {
-        const { data: existing, error: checkError } = await supabaseClient
-          .from('customers')
-          .select('id, name')
-          .eq('phone', cleanPhone)
-          .maybeSingle();
+    let customerSyncError = null;
 
-        if (!checkError && !existing) {
-          // Customer doesn't exist, create it
-          const { error: insertError } = await supabaseClient
-            .from('customers')
-            .insert([{
-              phone: cleanPhone,
-              name: orderPayload.customer_name || 'Cliente',
-              membership_tier: 'individual'
-            }]);
-          if (insertError) {
-            console.warn('⚠️ Customer auto-create failed:', insertError);
-          } else {
-            console.log('✓ Cliente registrado automáticamente:', cleanPhone);
-          }
-        } else if (!checkError && existing) {
-          // Customer exists, update name if different
-          if (existing.name !== orderPayload.customer_name) {
-            const { error: updateError } = await supabaseClient
-              .from('customers')
-              .update({ name: orderPayload.customer_name })
-              .eq('phone', cleanPhone);
-            if (updateError) {
-              console.warn('⚠️ Customer name update failed:', updateError);
-            }
-          }
-        }
+    if (cleanPhone) {
+      const customerSync = await syncCustomerFromOrder(order.id, orderPayload, order.created_at);
+      customerSyncError = customerSync.error;
+
+      if (customerSyncError) {
+        console.error('âŒ Customer sync failed after order insert:', customerSyncError);
+      } else {
+        console.log('âœ“ Customer synced for phone:', cleanPhone);
       }
     }
 
-    return { order_id: order.id, order_number: order.order_number };
+    return {
+      order_id: order.id,
+      order_number: order.order_number,
+      customer_synced: !customerSyncError
+    };
   } catch (error) {
     console.error('❌ saveOrder error:', error);
     return null;
@@ -150,6 +148,12 @@ async function loadProducts(section) {
   }
 }
 
+async function loadProductsForSections(sections = []) {
+  if (!supabaseClient) return [];
+  const groups = await Promise.all((sections || []).map(section => loadProducts(section)));
+  return groups.flat();
+}
+
 // Load product extras
 async function loadExtras(productId) {
   if (!supabaseClient) return [];
@@ -167,6 +171,17 @@ async function loadExtras(productId) {
     console.error('loadExtras failed:', error);
     return [];
   }
+}
+
+async function loadProductsWithExtras(sections = []) {
+  if (!supabaseClient) return [];
+  const products = await loadProductsForSections(sections);
+  const extrasGroups = await Promise.all(products.map(product => loadExtras(product.id)));
+
+  return products.map((product, index) => ({
+    ...product,
+    extras: extrasGroups[index] || []
+  }));
 }
 
 // Load art options
@@ -277,6 +292,16 @@ async function getSession() {
   if (!supabaseClient) return { session: null, error: 'Supabase not initialized' };
   const { data, error } = await supabaseClient.auth.getSession();
   return { session: data.session, error };
+}
+
+function onAuthStateChange(callback) {
+  if (!supabaseClient) {
+    return { data: { subscription: { unsubscribe() {} } } };
+  }
+
+  return supabaseClient.auth.onAuthStateChange((event, session) => {
+    callback(session, event);
+  });
 }
 
 // Admin: Load all orders
@@ -491,7 +516,9 @@ window.NappanDB = {
   loadAppConfig,
   getConfigValue,
   loadProducts,
+  loadProductsForSections,
   loadExtras,
+  loadProductsWithExtras,
   loadArtOptions,
   loadGalleryPhotos,
   loadActivePricingRules,
@@ -499,6 +526,7 @@ window.NappanDB = {
   signIn,
   signOut,
   getSession,
+  onAuthStateChange,
   loadAllOrders,
   updateOrderStatus,
   updateOrder,
@@ -514,3 +542,4 @@ window.NappanDB = {
 };
 
 console.log('✓ NappanDB API ready');
+

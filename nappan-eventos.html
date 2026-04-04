@@ -279,7 +279,7 @@
     }
   }
 
-  function sendEventoWhatsApp() {
+  async function sendEventoWhatsApp() {
     const name     = document.getElementById('ev-name').value.trim();
     const phone    = document.getElementById('ev-phone').value.trim();
     const type     = document.getElementById('ev-type').value;
@@ -315,29 +315,37 @@
     }
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `_Esperamos tu cotización personalizada_ ✨`;
+    if (!window.NappanDB) {
+      showToast('No se pudo conectar para guardar tu pedido');
+      return;
+    }
+
+    const saveResult = await NappanDB.saveOrder({
+      section: 'eventos',
+      customer_name: name,
+      customer_phone: phone || null,
+      event_type: type,
+      guest_count: parseInt(guests),
+      delivery_date: date,
+      delivery_time: time,
+      delivery_address: location,
+      whatsapp_sent: true,
+      notes: `Temática: ${theme}. ${notes || ''}`,
+      raw_cart: JSON.stringify({
+        eventType: type,
+        guests,
+        location,
+        theme
+      })
+    });
+
+    if (!saveResult) {
+      console.warn('Order save failed before WhatsApp handoff');
+      showToast('No se pudo guardar tu pedido. Intenta de nuevo');
+      return;
+    }
 
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-
-    // Phase 1: Save order to Supabase (fire-and-forget)
-    if (window.NappanDB) {
-      NappanDB.saveOrder({
-        section: 'eventos',
-        customer_name: name,
-        customer_phone: phone || null,
-        event_type: type,
-        guest_count: parseInt(guests),
-        delivery_date: date,
-        delivery_time: time,
-        delivery_address: location,
-        whatsapp_sent: true,
-        notes: `Temática: ${theme}. ${notes || ''}`,
-        raw_cart: JSON.stringify({
-          eventType: type,
-          guests,
-          location,
-          theme
-        })
-      }).catch(err => console.warn('Order save failed (non-critical):', err));
     }
   }
 
@@ -376,3 +384,5 @@
 </script>
 </body>
 </html>
+
+
