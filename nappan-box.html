@@ -669,7 +669,9 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
           type: 'normal',
           character,
           description: desc,
-          extras: hasExtra ? extraQty : 0
+          extras: hasExtra ? extraQty : 0,
+          base_price: nappaBoxPrice,
+          extra_price: hasExtra ? extraQty * nbExtraPrice : 0
         })
       });
 
@@ -775,7 +777,9 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
           type: 'premium',
           design,
           reference: ref,
-          extras: hasExtra ? extraQty : 0
+          extras: hasExtra ? extraQty : 0,
+          base_price: premiumBoxPrice,
+          extra_price: hasExtra ? extraQty * pmExtraPrice : 0
         })
       });
 

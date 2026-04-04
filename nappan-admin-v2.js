@@ -402,10 +402,13 @@
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.type) {
           // Convertir formato Nappan Box a array para mostrar
           const desc = parsed.character || parsed.design || 'Diseño personalizado';
+          // Leer precio del raw_cart (pedidos nuevos) o inferir por tipo (pedidos anteriores)
+          const NAPPANBOX_PRICES = { normal: 450, premium: 850 };
+          const basePrice = parsed.base_price || NAPPANBOX_PRICES[parsed.type] || 0;
           cart = [{
             name: (parsed.type === 'normal' ? '🎨 Normal - ' : '⭐ Premium - ') + desc,
             qty: 1,
-            price: 0,
+            price: basePrice,
             description: parsed.type === 'normal'
               ? `Personaje: ${parsed.character}, ${parsed.description}`
               : `Diseño: ${parsed.design}, Referencia: ${parsed.reference}`,
