@@ -32,6 +32,7 @@
   <div class="pfb-tag">Eat Clean · Feel Strong</div>
   <img src="images/logo-white-solo.webp" alt="Nappan" class="pfb-hero-logo"/>
   <p>Proteína funcional • Lista para llevar • Hecha con amor</p>
+  <p class="pfb-hero-note">Servicio para Eventos - Pedido Mínimo $1000 MXN</p>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -227,7 +228,10 @@
   <!-- RESUMEN DE PEDIDO -->
   <div class="order-summary">
     <div class="summary-header">
-      <h2>📋 Tu Pedido</h2>
+      <div class="summary-title-with-note">
+        <h2>📋 Tu Pedido</h2>
+        <span class="cart-service-note">| Servicio para Eventos - Pedido Mínimo $1000</span>
+      </div>
       <button class="clear-cart-btn" onclick="clearCart()" id="clearCartBtn">Limpiar</button>
     </div>
 
@@ -367,7 +371,7 @@
       'Cold Brew': 'images/cold-brew.webp',
       'Black Coffee': 'images/black-coffee.webp',
       'Power Pancakes': null,
-      'Protein Minis': null,
+      'Protein Minis': 'images/Protein Minipancakes.webp',
       'Combo Fit': null,
       'Combo Shots': null
     };
@@ -537,10 +541,28 @@
     }
   }
 
+  // Calcular monto faltante para el mínimo de $999
+  function calculateMinimumNeeded() {
+    const MINIMUM_ORDER = 999;
+    const subtotal = cartPFB.reduce((sum, item) => sum + item.price, 0);
+    const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+    const finalTotal = subtotal - discountAmount;
+    const amountNeeded = MINIMUM_ORDER - finalTotal;
+
+    return amountNeeded > 0 ? Math.round(amountNeeded * 100) / 100 : 0;
+  }
+
   // ENVIAR PEDIDO POR WHATSAPP
   async function sendPFBWhatsApp() {
     if (cartPFB.length === 0) {
       showToast('⚠️ Debes agregar al menos un producto', 'warning');
+      return;
+    }
+
+    // Validar mínimo de pedido ($999)
+    const amountNeeded = calculateMinimumNeeded();
+    if (amountNeeded > 0) {
+      showToast(`⚠️ Agrega $${amountNeeded} a tu pedido para completar el carrito`, 'warning');
       return;
     }
 

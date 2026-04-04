@@ -1582,6 +1582,14 @@ body.page-fitbar .pfb-hero p {
       font-style: italic;
     }
 
+body.page-fitbar .pfb-hero-note {
+      font-size: 14px;
+      color: #FFD93D;
+      margin-top: 12px;
+      font-weight: 600;
+      font-style: normal;
+    }
+
     /* SECTION HEADERS */
 body.page-fitbar .section-header {
       text-align: center;
@@ -1671,7 +1679,7 @@ body.page-fitbar .product-image.img-cold-protein-latte { background-image: url('
 body.page-fitbar .product-image.img-cold-brew          { background-image: url('images/cold-brew.webp'); background-size: cover; background-position: center; }
 body.page-fitbar .product-image.img-black-coffee       { background-image: url('images/black-coffee.webp'); background-size: cover; background-position: center; }
 body.page-fitbar .product-image.img-power-pancakes     { background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%); }
-body.page-fitbar .product-image.img-protein-minis      { background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); }
+body.page-fitbar .product-image.img-protein-minis      { background-image: url('images/Protein Minipancakes.webp'); background-size: cover; background-position: center; }
 
 body.page-fitbar .field-full { grid-column: 1 / -1; }
 
@@ -1880,11 +1888,27 @@ body.page-fitbar .summary-header {
       margin-bottom: 20px;
     }
 
+body.page-fitbar .summary-title-with-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
 body.page-fitbar .summary-header h2 {
       font-family: var(--font-display);
       font-size: 24px;
       margin: 0;
       color: #1a1a1a;
+    }
+
+body.page-fitbar .cart-service-note {
+      font-size: 14px;
+      color: #1a1a1a;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      background: none;
     }
 
 body.page-fitbar .clear-cart-btn {
