@@ -323,6 +323,26 @@
 
 <script src="nappan-admin-v2.js"></script>
 
+<script type="module">
+// Import new modules and expose them globally for use by nappan-admin-v2.js
+import { AdminState } from './admin-modules/state.js';
+import { UI } from './admin-modules/ui.js';
+import { Auth } from './admin-modules/auth.js';
+import { Orders } from './admin-modules/orders.js';
+import { Products } from './admin-modules/products.js';
+import { Customers } from './admin-modules/customers.js';
+import { Config } from './admin-modules/config.js';
+import { Stats } from './admin-modules/stats.js';
+
+window.AdminState = AdminState;
+window.Auth = Auth;
+window.UI = UI;
+window.Orders = Orders;
+window.Products = Products;
+window.Customers = Customers;
+window.Config = Config;
+window.Stats = Stats;
+</script>
+
 </body>
 </html>
-

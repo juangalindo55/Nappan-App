@@ -1627,3 +1627,55 @@
   }
   // ---- END PHASE 6 ----
 
+  // Expose all functions to window for inline onclick handlers
+  // Required because <script type="module"> scopes functions locally
+  Object.assign(window, {
+    handleLogin,
+    handleLogout,
+    switchTabTo,
+    // Orders tab
+    applyOrderFilters,
+    toggleOrderDetail,
+    changeOrderStatus,
+    confirmDeleteOrder,
+    cancelDeleteConfirm,
+    confirmDeleteFinal,
+    recoverDeletedOrder,
+    openEditOrder,
+    closeEditOrder,
+    saveEditOrder,
+    addCartRow,
+    showProductSelector,
+    closeProductSelector,
+    addProductToCart,
+    updateCartItemName,
+    updateCartItem,
+    removeCartRow,
+    nextPage,
+    previousPage,
+    exportOrdersCSV,
+    // Products tab
+    startEditProductPrice,
+    confirmEditProductPrice,
+    cancelEditProductPrice,
+    // Customers tab
+    showAddCustomerForm,
+    hideAddCustomerForm,
+    saveNewCustomer,
+    startEditCustomer,
+    confirmEditCustomer,
+    cancelEditCustomer,
+    deleteCustomerRow,
+    // Config tab
+    saveWhatsapp,
+    saveShipping,
+    saveTierDiscounts,
+    saveExtras,
+    saveGallery,
+    // Stats tab
+    loadStats,
+    resetStatsDate,
+    setQuickDateRange,
+    exportStatsCSV,
+  });
+
