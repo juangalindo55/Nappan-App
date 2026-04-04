@@ -48,28 +48,24 @@ async function saveOrder(orderPayload) {
 
   try {
     const cleanPhone = (orderPayload.customer_phone || '').replace(/\D/g, '') || null;
-    const { data: order, error: orderError } = await supabaseClient
-      .from('orders')
-      .insert([{
-        section: orderPayload.section,
-        customer_name: orderPayload.customer_name,
-        customer_phone: cleanPhone,
-        delivery_date: orderPayload.delivery_date || null,
-        delivery_time: orderPayload.delivery_time || null,
-        delivery_address: orderPayload.delivery_address || null,
-        event_type: orderPayload.event_type || null,
-        guest_count: orderPayload.guest_count || null,
-        subtotal: orderPayload.subtotal || 0,
-        discount_amount: orderPayload.discount_amount || 0,
-        shipping_cost: orderPayload.shipping_cost || 0,
-        total: orderPayload.total || 0,
-        whatsapp_sent: orderPayload.whatsapp_sent || true,
-        notes: orderPayload.notes || null,
-        raw_cart: orderPayload.raw_cart || {},
-        status: 'pending'
-      }])
-      .select('id, order_number, created_at')
-      .single();
+
+    const { data: order, error: orderError } = await supabaseClient.rpc('public_save_order', {
+      p_section: orderPayload.section,
+      p_customer_name: orderPayload.customer_name,
+      p_customer_phone: cleanPhone,
+      p_delivery_date: orderPayload.delivery_date || null,
+      p_delivery_time: orderPayload.delivery_time || null,
+      p_delivery_address: orderPayload.delivery_address || null,
+      p_event_type: orderPayload.event_type || null,
+      p_guest_count: orderPayload.guest_count || null,
+      p_subtotal: orderPayload.subtotal || 0,
+      p_discount_amount: orderPayload.discount_amount || 0,
+      p_shipping_cost: orderPayload.shipping_cost || 0,
+      p_total: orderPayload.total || 0,
+      p_whatsapp_sent: orderPayload.whatsapp_sent || true,
+      p_notes: orderPayload.notes || null,
+      p_raw_cart: orderPayload.raw_cart || {}
+    });
 
     if (orderError) {
       console.error('❌ Order insert failed:', orderError);
@@ -85,9 +81,9 @@ async function saveOrder(orderPayload) {
       customerSyncError = customerSync.error;
 
       if (customerSyncError) {
-        console.error('âŒ Customer sync failed after order insert:', customerSyncError);
+        console.error('❌ Customer sync failed after order insert:', customerSyncError);
       } else {
-        console.log('âœ“ Customer synced for phone:', cleanPhone);
+        console.log('✓ Customer synced for phone:', cleanPhone);
       }
     }
 
@@ -509,6 +505,143 @@ async function updateExtraPrice(extraId, newPrice) {
   }
 }
 
+// Phase 7: Analytics RPC methods for KPI computation
+
+// Get basic statistics KPIs (totalOrders, totalRevenue, averageOrder)
+async function getStatsKpis() {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_stats_kpis');
+    if (error) throw new Error(`RPC get_stats_kpis failed: ${error.message}`);
+
+    // RPC returns array with one row, extract it
+    const row = data && data.length > 0 ? data[0] : {};
+    return {
+      total_orders: row.total_orders || 0,
+      total_revenue: row.total_revenue || 0,
+      average_order: row.average_order || 0
+    };
+  } catch (error) {
+    console.error('getStatsKpis error:', error);
+    throw error;
+  }
+}
+
+// Get orders grouped by section
+async function getOrdersBySection() {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_orders_by_section');
+    if (error) throw new Error(`RPC get_orders_by_section failed: ${error.message}`);
+
+    // Convert to object format matching stats.js output: { section: count }
+    const result = {};
+    (data || []).forEach(row => {
+      result[row.section] = row.order_count;
+    });
+    return result;
+  } catch (error) {
+    console.error('getOrdersBySection error:', error);
+    throw error;
+  }
+}
+
+// Get orders grouped by status
+async function getOrdersByStatus() {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_orders_by_status');
+    if (error) throw new Error(`RPC get_orders_by_status failed: ${error.message}`);
+
+    const result = {};
+    (data || []).forEach(row => {
+      result[row.status] = row.order_count;
+    });
+    return result;
+  } catch (error) {
+    console.error('getOrdersByStatus error:', error);
+    throw error;
+  }
+}
+
+// Get revenue grouped by section
+async function getRevenueBySection() {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_revenue_by_section');
+    if (error) throw new Error(`RPC get_revenue_by_section failed: ${error.message}`);
+
+    const result = {};
+    (data || []).forEach(row => {
+      result[row.section] = row.revenue_sum;
+    });
+    return result;
+  } catch (error) {
+    console.error('getRevenueBySection error:', error);
+    throw error;
+  }
+}
+
+// Get orders grouped by hour (0-23)
+async function getOrdersByHour() {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_orders_by_hour');
+    if (error) throw new Error(`RPC get_orders_by_hour failed: ${error.message}`);
+
+    const result = {};
+    (data || []).forEach(row => {
+      result[row.hour_of_day] = row.order_count;
+    });
+    return result;
+  } catch (error) {
+    console.error('getOrdersByHour error:', error);
+    throw error;
+  }
+}
+
+// Get top products by count
+async function getTopProducts(limit = 10) {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_top_products', { limit_count: limit });
+    if (error) throw new Error(`RPC get_top_products failed: ${error.message}`);
+
+    return (data || []).map(row => ({
+      name: row.product_name,
+      count: row.product_count
+    }));
+  } catch (error) {
+    console.error('getTopProducts error:', error);
+    throw error;
+  }
+}
+
+// Get top customers by revenue
+async function getTopCustomers(limit = 10) {
+  if (!supabaseClient) return { error: 'Supabase not initialized' };
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_top_customers', { limit_count: limit });
+    if (error) throw new Error(`RPC get_top_customers failed: ${error.message}`);
+
+    return (data || []).map(row => ({
+      name: row.customer_name,
+      count: row.order_count,
+      revenue: row.total_revenue
+    }));
+  } catch (error) {
+    console.error('getTopCustomers error:', error);
+    throw error;
+  }
+}
+
 // Export API
 window.NappanDB = {
   client: supabaseClient,
@@ -538,7 +671,15 @@ window.NappanDB = {
   updateConfigValue,
   updateGalleryPhoto,
   updateProductPrice,
-  updateExtraPrice
+  updateExtraPrice,
+  // Analytics RPC methods
+  getStatsKpis,
+  getOrdersBySection,
+  getOrdersByStatus,
+  getRevenueBySection,
+  getOrdersByHour,
+  getTopProducts,
+  getTopCustomers
 };
 
 console.log('✓ NappanDB API ready');
