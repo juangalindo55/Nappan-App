@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-6.2 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization.** Next: Phase 7 - advanced analytics and mobile app.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-6.3 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization.** Next: Phase 7 - render functions, event handler refactoring, analytics backend optimization.
 
 ## Running Locally
 
@@ -156,48 +156,77 @@ Current baseline after Phase 6.1:
   - `loadProductsWithExtras()`
   - `onAuthStateChange()`
 
-### Phase 6.2 Completion Summary (Admin Security & Performance)
-
-**Completed work:**
-
-- ✅ **XSS Prevention**: 22 instances of user-controlled data now escaped via `escapeHtml()` function using browser's native DOM parser
-  - Applied to all innerHTML locations: orders, products, customers, config, stats
-  - Prevents injection attacks on customer names, notes, product names, extras, gallery titles
+- ✅ **Security & RLS Fix**: Resolved "new row violates row-level security policy" error (42501) occurring with new Supabase `sb_publishable_` keys.
+  - Replaced direct `INSERT...RETURNING` (which required public SELECT access) with a `SECURITY DEFINER` RPC function `public_save_order`.
+  - This allows anonymous users to save orders and receive the order number safely without compromising database security.
   
-- ✅ **Cache Management**: Implemented cache invalidation system
-  - Orders tab caches loaded data (2000+ row dataset)
-  - 12 mutation functions now clear cache after Supabase writes
-  - Other tabs (products, customers, config, stats) load fresh as needed
-  - Eliminates stale data display and unnecessary reloads
-  
-- ✅ **Tab Loading Guards**: Added `ensureOrdersLoaded()` guard pattern
-  - Orders tab skips reload if already cached
-  - Reduces redundant API calls and UI flicker
-  - Other tabs remain lightweight with fresh loads
+- ✅ **Directory Cleanup**: Audited and removed 17 obsolete files (~2.7 MB) to maintain repository hygiene.
+  - Deleted: `nappan-admin.html` (V1), obsolete images, redundant docs, and old SQL migration scripts.
+  - Updated `.gitignore` to prevent tracking of Windows system files like `desktop.ini`.
 
-- ✅ **Backward Compatibility**: All changes maintain existing HTML structure and API surface
-  - No breaking changes to data models or Supabase methods
-  - Dashboard functionality fully preserved
+### Admin Modules (Phase 6.3 - Completed)
+
+8 domain-specific modules now handle all admin logic:
+
+**`admin-modules/state.js`** (244 lines)
+- Centralized state store with all admin data (orders, products, customers, config, stats, auth)
+- Cache invalidation rules with dependency tracking (products/orders → stats)
+- Safe getters that return deep copies to prevent mutations
+- Exported as both named (`AdminState`) and default export
+
+**`admin-modules/ui.js`** (150 lines)
+- `showToast(message, type)` - Toast notifications (info/success/error)
+- `escapeHtml(text)` - XSS prevention for user data
+- `clearElement()`, `setLoading()`, `setEmpty()`, `setError()` - State indicators
+
+**`admin-modules/auth.js`** (98 lines)
+- `init()` - Auth state listener setup
+- `login(email, password)` - Sign-in with AdminState tracking
+- `logout()` - Sign-out + full state invalidation
+- `showDashboard()` / `showLogin()` - UI visibility toggle
+
+**`admin-modules/orders.js`** (176 lines)
+- `load()` - Fetch + cache orders
+- `applyFilters()` / `setFilter()` - Search, section, status, deleted flag
+- `getCurrentPageOrders()` / `nextPage()` / `previousPage()` - Pagination (20 per page)
+- `updateStatus()` / `saveEdit()` / `delete()` / `recover()` - CRUD operations
+- `exportCSV()` - Download filtered orders as CSV
+
+**`admin-modules/products.js`** (147 lines)
+- `load()` - Fetch all products + extras in parallel
+- `updatePrice(productId, newPrice)` - Inline price editing
+- Exports all to `window.Products`
+
+**`admin-modules/customers.js`** (72 lines)
+- `load()` / `insert()` / `update()` / `delete()` - Full CRUD
+- Cache + state management via AdminState
+- Exports to `window.Customers`
+
+**`admin-modules/config.js`** (99 lines)
+- `load()` - Fetch all 5 config sections in parallel (WhatsApp, shipping, extras, gallery, tier discounts)
+- `saveWhatsapp()` / `saveShipping()` / `saveTierDiscounts()` - Save mutations
+- Safe JSON parsing with fallbacks
+
+**`admin-modules/stats.js`** (316 lines)
+- `load()` - Ensure dependencies (orders, products), compute KPIs
+- `computeStats()` - Return object with: totalOrders, totalRevenue, averageOrder, ordersBySection, revenueBySection, ordersByStatus, ordersByHour, topProducts (top 10), topCustomers (top 10)
+- Helper methods for grouping/aggregating
+
+**Integration:**
+- All modules expose to `window` for backward compatibility
+- Imported via `<script type="module">` in HTML
+- Existing `nappan-admin-v2.js` functions still used for all UI rendering/interactions
+- No breaking changes to dashboard functionality
 
 ### Future Implementation Priority (Phase 7+)
 
 Next work should prioritize:
 
-- Splitting admin logic into modules by domain:
-  - `auth`
-  - `orders`
-  - `products`
-  - `customers`
-  - `config`
-  - `stats`
-  - `ui`
-  - `state`
-- Keeping the HTML file as a dashboard shell, not the main implementation surface
-- Replacing inline event handlers with centralized listeners
-- Reducing direct `innerHTML` rendering for complex dynamic views
-- Adding admin-oriented bundled fetch methods in `supabase-client.js`
-- Moving analytics work to Supabase RPC / aggregated queries
-- Treating `order_items` as the long-term analytics source over `raw_cart`
+- **Rendering phase** - Add `render()` methods to each module, convert innerHTML patterns to safe DOM builders
+- **Event handler refactor** - Replace 50+ inline `onclick` handlers with centralized event listeners
+- **Analytics backend** - Move KPI computation from Stats.js to Supabase RPC functions
+- **CSS extraction** - Pull admin-specific styles from global `styles.css` into `admin-modules/` scope
+- **Parallelization** - Identify remaining sequential operations and parallelize where safe
 
 ### Admin Development Rules
 

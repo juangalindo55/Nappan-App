@@ -1,6 +1,6 @@
 # Plan: Nappan App - Roadmap & Implementation Status
 
-## Project Status: Phases 1-5 Complete / Phase 6 In Progress
+## Project Status: Phases 1-6.3 Complete / Phase 7 Pending
 
 ### Phase 1: Order Capture (Complete)
 - Supabase PostgreSQL integration via CDN
@@ -42,84 +42,49 @@
 - Nappan Box: phone lookup + welcome badge + tier pricing applied to both Normal/Premium boxes
 - Eventos en Vivo remains excluded from Phase 5 because it is an open quotation flow
 
-### Phase 6: Admin V2 Optimization + Analytics (In Progress)
+#### Phase 6.2: Query Optimization, Security & Directory Cleanup (Completed)
+- ✅ **Security & RLS Fix**: Switched public `saveOrder()` path from direct PostgreSQL `INSERT` to a `SECURITY DEFINER` RPC function `public_save_order()`.
+  - Fixes 401/42501 Unauthorized errors caused by new Supabase `sb_publishable_` key format restrictions on `INSERT ... RETURNING` (which requires SELECT access).
+- ✅ **Directory Cleanup**: Audited and removed 17 obsolete redundant files to maintain hygiene.
+  - Removed outdated Admin V1, unused images, and old SQL migration scripts.
+- Tab-scoped cache/store added on top of `window.NappanAdminState` for orders, products, customers, and config.
+- Implemented cache invalidation for all mutation actions (status changes, product edits, config writes).
+- Auth flow hardened from polling to session bootstrap + auth state listener.
+- Visible admin copy normalized to Spanish labels (`Estado`, `Configuración`, `Estadísticas`, `Teléfono`).
 
-#### Goals
-- Refactor `nappan-admin-v2.html` into a maintainable modular admin shell
-- Improve Supabase query efficiency and reduce redundant data loading
-- Move heavy dashboard analytics from client-side loops to backend RPC aggregation
-- Standardize dashboard state management, rendering, and auth/session flow
-- Prepare `order_items` to become the canonical analytics source
+#### Phase 6.3: Admin Dashboard Modularization (Completed)
 
-#### Phase 6.1: Admin Shell Modularization + State Cleanup (Completed)
-- `nappan-admin-v2.html` now acts as the admin shell/layout instead of holding the full implementation
-- Admin logic moved into `nappan-admin-v2.js`
-- Admin-specific styles extracted to `admin-v2.css`
-- Shared dashboard state exposed via `window.NappanAdminState`
-- Auth flow hardened from polling to session bootstrap + auth state listener
-- Initial batch helpers added in `supabase-client.js`:
-  - `loadProductsForSections()`
-  - `loadProductsWithExtras()`
-  - `onAuthStateChange()`
-- Visible admin copy normalized to Spanish labels such as `Estado`, `Configuración`, `Estadísticas`, `Teléfono` and `Galería`
+✅ **8 new modules created in `admin-modules/`:**
+- `state.js` (244 lines) - Centralized state store with cache invalidation rules
+- `ui.js` (150 lines) - Toast, HTML escape, loading/empty/error states
+- `auth.js` (98 lines) - Login, logout, session management
+- `orders.js` (176 lines) - Load, filter, paginate, edit, delete, CSV export
+- `products.js` (147 lines) - Load with extras, price editing
+- `customers.js` (72 lines) - Full CRUD for customers
+- `config.js` (99 lines) - WhatsApp, shipping, tier discounts management
+- `stats.js` (316 lines) - KPI computation, aggregations, analytics
 
-#### Phase 6.2: Query Optimization + Batch Loading (Active)
-- Add a tab-scoped cache/store on top of `window.NappanAdminState` for:
-  - `orders`
-  - `products`
-  - `productsWithExtras`
-  - `customers`
-  - `config`
-  - `gallery`
-  - `statsInput`
-- Define cache invalidation rules per admin action:
-  - order status/edit/delete/recover invalidates `orders`, `customers`, and `statsInput`
-  - product or extra edits invalidate `products`, `productsWithExtras`, and order edit selector data
-  - config, shipping, gallery, and tier writes invalidate only the affected config buckets
-  - customer CRUD invalidates `customers` and `statsInput`
-- Replace repeated full `orders` reloads so `Pedidos`, `Clientes`, and `Estadísticas` reuse the same cached canonical dataset unless explicitly invalidated
-- Add admin-oriented batch methods in `supabase-client.js`:
-  - `loadAdminBootstrap()`
-  - `loadAdminConfigBundle()`
-- Refactor each tab to one `ensureXLoaded({ force })` data path plus one render path
-- Keep analytics client-side in this step, but make them consume only cached `orders`
-- Do not introduce schema changes or backend analytics RPC migration in 6.2
+✅ **Integration to existing dashboard:**
+- Modules exposed globally via `window` for backward compatibility
+- All 8 modules loaded as ES6 imports in `<script type="module">`
+- Existing `nappan-admin-v2.js` functions exposed to `window` for inline onclick handlers
+- 100% functional parity with Phase 6.2 dashboard
 
-#### Optimization Track
-- **Admin modularization**
-  - Split admin logic into domains: `auth`, `orders`, `products`, `customers`, `config`, `stats`, `ui`, `state`
-  - Keep `nappan-admin-v2.html` as layout shell only
-  - Extract admin-specific CSS and remove repeated inline styling
+✅ **Architecture benefits:**
+- Separation of concerns: each module handles one domain
+- Centralized cache invalidation with dependency tracking
+- Reusable UI helpers (toast, escape, state indicators)
+- Ready for Phase 7 render function expansion
 
-- **Rendering and UI**
-  - Replace inline `onclick` / `onchange` / `onsubmit` handlers with centralized event listeners
-  - Reduce large `innerHTML` string rendering and add safe DOM rendering helpers
-  - Standardize loading, empty, error and confirmation states across tabs
+---
 
-- **Data layer optimization**
-  - Replace sequential per-section loads with parallelized queries
-  - Eliminate N+1 patterns for products/extras/config views
-  - Add dashboard-oriented API methods in `supabase-client.js`
-  - Define cache invalidation rules per tab and action
+#### Future Optimization Track (Phase 7+)
 
-- **Analytics**
-  - Extend or adopt `get_dashboard_stats()` for KPIs, top products, top customers and trends
-  - Reduce dependence on client-side aggregation over `allOrders`
-  - Migrate analytics progressively toward normalized `order_items`
-
-- **Robustness**
-  - Replace auth polling with session bootstrap + auth state listener
-  - Improve validation, phone normalization and numeric/date input handling
-  - Add safer update flows for config mutations and error feedback
-
-#### Follow-up Checklist
-- [x] Admin shell split from business logic
-- [x] Shared dashboard state store defined
-- [ ] Orders/products/customers/config loads optimized
-- [ ] Stats moved to backend aggregation
-- [ ] `order_items` analytics path defined
-- [x] Auth/session lifecycle hardened
-- [ ] Regression test pass on all admin tabs
+- **Rendering phase** - Add `render()` methods to each module, replace innerHTML patterns
+- **Event handler refactor** - Replace inline onclick with centralized event listeners
+- **Analytics backend** - Move KPI computation to Supabase RPC functions
+- **CSS modularization** - Extract module-specific styles from global `styles.css`
+- **Data layer optimization** - Parallelize remaining sequential loads
 
 ---
 
@@ -132,8 +97,6 @@
 - `nappan-admin-v2.js` - Admin dashboard logic and state handling
 - `admin-v2.css` - Admin-specific extracted styles
 - `supabase-schema.sql` - DDL for all tables + RLS + triggers
-- `supabase-phase5-schema.sql` - Phase 5: customers table + RPC + trigger
-- `supabase-phase6-schema.sql` - Phase 6 analytics RPC baseline
 
 ### Section Pages
 - `nappan-lunchbox.html` - Complete (phone field + lookup + tier pricing)
