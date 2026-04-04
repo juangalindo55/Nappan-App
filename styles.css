@@ -137,38 +137,15 @@ body.page-home {
     overflow-x: hidden;
   }
 
-  /* HEADER */
-body.page-home #page-home header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    height: 130px;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000000;
-  }
-
-body.page-home #page-home .logo-img {
-    height: 120px;
-    width: auto;
-    mix-blend-mode: normal;
-    border-radius: 0;
-    display: block;
-  }
-
   /* HERO */
 body.page-home #page-home .hero {
-    min-height: 50vh;
+    min-height: 58vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     text-align: center;
-    padding: 136px 24px 60px;
+    padding: 88px 24px 60px;
     position: relative;
     background: radial-gradient(ellipse at 50% 30%, rgba(255,217,61,0.12) 0%, transparent 70%),
                 radial-gradient(ellipse at 80% 80%, rgba(255,140,66,0.08) 0%, transparent 50%),
@@ -195,7 +172,7 @@ body.page-home .hero-tag {
     text-transform: uppercase;
     padding: 6px 18px;
     border-radius: 50px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     animation: fadeUp 0.8s ease both;
   }
 
@@ -219,7 +196,7 @@ body.page-home .hero p {
     max-width: 420px;
     line-height: 1.7;
     letter-spacing: 0.2px;
-    margin-bottom: 48px;
+    margin-bottom: 56px;
     animation: fadeUp 0.8s 0.2s ease both;
   }
 
