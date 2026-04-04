@@ -11,4 +11,9 @@ build/
 
 # Archivos temporales de Windows
 Thumbs.db
+desktop.ini
+
 .claude/
+
+# Git worktrees
+.worktrees/
