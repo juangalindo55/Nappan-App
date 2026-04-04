@@ -152,6 +152,14 @@ body.page-home #page-home .hero {
                 var(--dark);
   }
 
+body.page-home .hero-logo {
+    width: min(320px, 72vw);
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 18px;
+    animation: fadeUp 0.8s ease both;
+  }
+
 body.page-home #page-home .hero::before {
     content: '';
     position: absolute;
