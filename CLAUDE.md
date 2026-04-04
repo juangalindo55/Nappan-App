@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-6.3 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization.** Next: Phase 7 - render functions, event handler refactoring, analytics backend optimization.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-7 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization, analytics backend migration to RPC functions.** Next: Phase 7.2+ - event handler refactoring, CSS extraction, rendering phase.
 
 ## Running Locally
 
@@ -109,6 +109,7 @@ All functions are exported from `supabase-client.js`.
 
 - **Public:** `saveOrder()`, `loadProducts()`, `loadExtras()`, `loadAppConfig()`, `findCustomerByPhone()`
 - **Admin:** `loadCustomers()`, `updateCustomer()`, `insertCustomer()`, `deleteCustomer()`, `updateOrderStatus()`, and related dashboard methods
+- **Analytics (Phase 7):** `getStatsKpis()`, `getOrdersBySection()`, `getOrdersByStatus()`, `getRevenueBySection()`, `getOrdersByHour()`, `getTopProducts(limit)`, `getTopCustomers(limit)` — all RPC-backed
 
 ### Tier Pricing
 
@@ -207,10 +208,10 @@ Current baseline after Phase 6.1:
 - `saveWhatsapp()` / `saveShipping()` / `saveTierDiscounts()` - Save mutations
 - Safe JSON parsing with fallbacks
 
-**`admin-modules/stats.js`** (316 lines)
-- `load()` - Ensure dependencies (orders, products), compute KPIs
-- `computeStats()` - Return object with: totalOrders, totalRevenue, averageOrder, ordersBySection, revenueBySection, ordersByStatus, ordersByHour, topProducts (top 10), topCustomers (top 10)
-- Helper methods for grouping/aggregating
+**`admin-modules/stats.js`** (147 lines — Phase 7 optimized)
+- `load()` - Ensure dependencies, fetch KPIs from RPC functions
+- `computeStats()` - Calls 7 RPC functions in parallel (async), returns: totalOrders, totalRevenue, averageOrder, ordersBySection, revenueBySection, ordersByStatus, ordersByHour, topProducts (top 10), topCustomers (top 10)
+- All client-side helper methods removed (computation now in PostgreSQL via RPC)
 
 **Integration:**
 - All modules expose to `window` for backward compatibility
@@ -218,15 +219,16 @@ Current baseline after Phase 6.1:
 - Existing `nappan-admin-v2.js` functions still used for all UI rendering/interactions
 - No breaking changes to dashboard functionality
 
-### Future Implementation Priority (Phase 7+)
+### Future Implementation Priority (Phase 7.2+)
 
 Next work should prioritize:
 
-- **Rendering phase** - Add `render()` methods to each module, convert innerHTML patterns to safe DOM builders
-- **Event handler refactor** - Replace 50+ inline `onclick` handlers with centralized event listeners
-- **Analytics backend** - Move KPI computation from Stats.js to Supabase RPC functions
-- **CSS extraction** - Pull admin-specific styles from global `styles.css` into `admin-modules/` scope
-- **Parallelization** - Identify remaining sequential operations and parallelize where safe
+- **Phase 7.2: Event handler refactor** - Replace 50+ inline `onclick` handlers with centralized event listeners
+- **Phase 7.3: CSS extraction** - Pull admin-specific styles from global `styles.css` into `admin-modules/` scope
+- **Phase 7.4: Rendering phase** - Add `render()` methods to each module, convert innerHTML patterns to safe DOM builders
+- **Phase 7.5: Parallelization** - Identify remaining sequential operations and parallelize where safe
+
+✅ **Phase 7.1 Complete:** Analytics backend migrated to Supabase RPC functions. Stats.js now orchestrates 7 parallel RPC calls instead of computing KPIs client-side.
 
 ### Admin Development Rules
 

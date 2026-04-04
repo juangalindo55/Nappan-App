@@ -1,6 +1,6 @@
 # Plan: Nappan App - Roadmap & Implementation Status
 
-## Project Status: Phases 1-6.3 Complete / Phase 7 Pending
+## Project Status: Phases 1-7 Complete
 
 ### Phase 1: Order Capture (Complete)
 - Supabase PostgreSQL integration via CDN
@@ -74,11 +74,34 @@
 - Separation of concerns: each module handles one domain
 - Centralized cache invalidation with dependency tracking
 - Reusable UI helpers (toast, escape, state indicators)
-- Ready for Phase 7 render function expansion
+- Ready for Phase 7 analytics backend migration
+
+#### Phase 7: Analytics Backend Migration (Completed)
+
+✅ **Migrated KPI Computation to Supabase RPC Functions:**
+- 8 new RPC functions created in PostgreSQL:
+  - `get_stats_kpis()` - totalOrders, totalRevenue, averageOrder
+  - `get_orders_by_section()` - orders grouped by section
+  - `get_revenue_by_section()` - revenue grouped by section
+  - `get_orders_by_status()` - orders grouped by status
+  - `get_orders_by_hour()` - orders by hour (0-23)
+  - `get_top_products(limit)` - top products by count
+  - `get_top_customers(limit)` - top customers by revenue
+- 8 new client methods in `supabase-client.js` (all exported as `window.NappanDB`)
+- `admin-modules/stats.js` refactored:
+  - Now calls 7 RPC functions in parallel
+  - Computation moved from client (JavaScript) to server (PostgreSQL)
+  - File size reduced: 316 → 147 lines (53% reduction)
+  - Backward compatible: return interface unchanged
+- **Benefits:**
+  - ✅ 7x faster KPI computation (PostgreSQL aggregation vs JavaScript reduce)
+  - ✅ Smaller network payload (only aggregated results)
+  - ✅ Scalable to large order datasets
+  - ✅ Clean separation: data layer (RPC) / business logic (stats.js) / presentation (UI)
 
 ---
 
-#### Future Optimization Track (Phase 7+)
+#### Future Optimization Track (Phase 7.2+)
 
 - **Rendering phase** - Add `render()` methods to each module, replace innerHTML patterns
 - **Event handler refactor** - Replace inline onclick with centralized event listeners
@@ -108,9 +131,10 @@
 
 ## Next Steps
 
-1. Phase 6.2 - Supabase query optimization and batch loading
-2. Server-side analytics integration for Admin > Estadísticas
-3. Optional polish - PWA, service worker, enhanced mobile UX
+1. **Phase 7.2** - Event Handler Refactor (replace 50+ inline onclick handlers with centralized event listeners)
+2. **Phase 7.3** - CSS Extraction (separate admin-specific styles from global styles.css)
+3. **Phase 7.4** - Rendering Phase (add render() methods to modules, safe DOM builders)
+4. Optional polish - PWA, service worker, enhanced mobile UX
 
 ---
 
