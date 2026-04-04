@@ -42,7 +42,7 @@
 
   <div class="dashboard-container">
     <!-- TABS -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
+    <div class="tabs-bar" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
       <button onclick="switchTabTo('pedidos', this)" class="tab-btn active">📋 Pedidos</button>
       <button onclick="switchTabTo('productos', this)" class="tab-btn">💰 Productos</button>
       <button onclick="switchTabTo('clientes', this)" class="tab-btn">👥 Clientes</button>
@@ -100,7 +100,7 @@
 
     <!-- TAB: CLIENTES -->
     <div id="clientes-tab" class="tab-content" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div class="customers-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2>Clientes</h2>
         <button class="btn" onclick="showAddCustomerForm()" style="width: auto; padding: 10px 20px;">+ Agregar Cliente</button>
       </div>
@@ -108,7 +108,7 @@
       <!-- Formulario de nuevo cliente -->
       <div id="addCustomerForm" style="display: none; background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
         <h3 style="margin-bottom: 15px;">Nuevo Cliente</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div class="add-customer-form" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
           <input type="tel" id="newCustPhone" placeholder="Teléfono (sin espacios)" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           <input type="text" id="newCustName" placeholder="Nombre completo" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           <select id="newCustTier" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
@@ -134,7 +134,7 @@
       <!-- WhatsApp -->
       <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
         <h3 style="font-size: 16px; margin-bottom: 15px;">WhatsApp</h3>
-        <div style="display: flex; gap: 10px; align-items: flex-end;">
+        <div class="config-wa-row" style="display: flex; gap: 10px; align-items: flex-end;">
           <div style="flex: 1;">
             <label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 8px; text-transform: uppercase;">Número (sin +)</label>
             <input type="text" id="configWhatsapp" placeholder="528123509768" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Inter', sans-serif;">
@@ -238,11 +238,11 @@
 
 <!-- MODAL: Editar Pedido -->
 <div id="editOrderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-panel" style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
     <h3 id="editOrderTitle" style="margin: 0 0 20px 0; font-size: 20px; font-weight: 700;">Editar Pedido</h3>
 
     <!-- Campos básicos -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div class="edit-order-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
       <div>
         <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #666;">Cliente</label>
         <input type="text" id="editName" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
@@ -268,14 +268,14 @@
 
     <!-- Carrito editable -->
     <h4 style="margin: 20px 0 10px 0; font-size: 15px; font-weight: 700;">Artículos</h4>
-    <table id="editCartTable" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+    <table id="editCartTable" style="width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed;">
       <thead>
         <tr style="background: #f5f5f5;">
           <th style="padding: 10px; text-align: left; font-weight: 600; font-size: 13px;">Artículo</th>
-          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 70px;">Cant.</th>
-          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 90px;">Precio</th>
-          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 90px;">Subtotal</th>
-          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 40px;"></th>
+          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 15%;">Cant.</th>
+          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 20%;">Precio</th>
+          <th style="padding: 10px; text-align: right; font-weight: 600; font-size: 13px; width: 20%;">Subtotal</th>
+          <th style="padding: 10px; text-align: center; font-weight: 600; font-size: 13px; width: 10%;"></th>
         </tr>
       </thead>
       <tbody id="editCartBody"></tbody>
@@ -293,7 +293,7 @@
 
 <!-- MODAL: Seleccionar Producto -->
 <div id="selectProductModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1002; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-panel" style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
     <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700;">Seleccionar Producto</h3>
     <div id="productSelector" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
       <!-- Se rellena dinámicamente -->
@@ -306,7 +306,7 @@
 
 <!-- MODAL: Confirmar eliminación -->
 <div id="confirmDeleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-panel" style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
     <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #d32f2f;">🗑️ Eliminar Pedido</h3>
     <p style="margin: 0 0 20px 0; font-size: 14px; color: #666;">
       ¿Estás seguro de que quieres eliminar el pedido de <strong id="confirmDeleteCustomer">—</strong>?

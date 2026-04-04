@@ -194,7 +194,7 @@
     html += '<th></th>';
     html += '<th>Pedido</th>';
     html += '<th>Cliente</th>';
-    html += '<th>Sección</th>';
+    html += '<th class="hide-mobile">Sección</th>';
     html += '<th>Total</th>';
     html += '<th>Estado</th>';
     html += '<th>Fecha</th>';
@@ -213,7 +213,7 @@
       html += '<td><button class="btn-expand" onclick="toggleOrderDetail(\'' + order.id + '\')">▶</button></td>';
       html += '<td class="order-number">' + escapeHtml(order.order_number || 'N/A') + '</td>';
       html += '<td>' + escapeHtml(order.customer_name || 'N/A') + '</td>';
-      html += '<td>' + escapeHtml(order.section || 'N/A') + '</td>';
+      html += '<td class="hide-mobile">' + escapeHtml(order.section || 'N/A') + '</td>';
       html += '<td>$' + (order.total || 0) + '</td>';
       html += '<td><select onchange="changeOrderStatus(\'' + order.id + '\', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">';
       html += '<option value="pending" ' + (order.status === 'pending' ? 'selected' : '') + '>Pendiente</option>';
