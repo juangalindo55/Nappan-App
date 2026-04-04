@@ -210,12 +210,12 @@
       const rowStyle = isDeleted ? 'opacity: 0.6; text-decoration: line-through;' : '';
 
       html += '<tr style="' + rowStyle + '">';
-      html += '<td><button class="btn-expand" onclick="toggleOrderDetail(\'' + order.id + '\')">▶</button></td>';
+      html += '<td><button type="button" class="btn-expand" data-action="toggle-order-detail" data-order-id="' + order.id + '">▶</button></td>';
       html += '<td class="order-number">' + escapeHtml(order.order_number || 'N/A') + '</td>';
       html += '<td>' + escapeHtml(order.customer_name || 'N/A') + '</td>';
       html += '<td class="hide-mobile">' + escapeHtml(order.section || 'N/A') + '</td>';
       html += '<td>$' + (order.total || 0) + '</td>';
-      html += '<td><select onchange="changeOrderStatus(\'' + order.id + '\', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">';
+      html += '<td><select data-action="change-order-status" data-order-id="' + order.id + '" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">';
       html += '<option value="pending" ' + (order.status === 'pending' ? 'selected' : '') + '>Pendiente</option>';
       html += '<option value="confirmed" ' + (order.status === 'confirmed' ? 'selected' : '') + '>Confirmado</option>';
       html += '<option value="in_progress" ' + (order.status === 'in_progress' ? 'selected' : '') + '>En Progreso</option>';
@@ -225,10 +225,10 @@
       html += '<td>' + date + '</td>';
       html += '<td style="display: flex; gap: 8px; justify-content: center;">';
       if (isDeleted) {
-        html += '<button onclick="recoverDeletedOrder(\'' + order.id + '\')" title="Recuperar" style="background: none; border: none; cursor: pointer; font-size: 16px;">↩️</button>';
+        html += '<button type="button" data-action="recover-deleted-order" data-order-id="' + order.id + '" title="Recuperar" style="background: none; border: none; cursor: pointer; font-size: 16px;">↩️</button>';
       } else {
-        html += '<button onclick="openEditOrder(\'' + order.id + '\')" title="Editar" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>';
-        html += '<button onclick="confirmDeleteOrder(\'' + order.id + '\')" title="Eliminar" style="background: none; border: none; cursor: pointer; font-size: 16px;">🗑️</button>';
+        html += '<button type="button" data-action="open-edit-order" data-order-id="' + order.id + '" title="Editar" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>';
+        html += '<button type="button" data-action="confirm-delete-order" data-order-id="' + order.id + '" title="Eliminar" style="background: none; border: none; cursor: pointer; font-size: 16px;">🗑️</button>';
       }
       html += '</td>';
       html += '</tr>';
@@ -236,6 +236,7 @@
       // Detail row
       if (isExpanded) {
         const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
+        const deliveryTime = order.delivery_time || order.deliveryTime || 'No especificada';
         const phone = order.customer_phone || 'No proporcionado';
         const notes = order.notes || 'Sin notas';
         let cartDisplay = 'Carrito vacío';
@@ -256,6 +257,7 @@
         html += '<div class="detail-grid">';
         html += '<div class="detail-field"><div class="detail-field-label">Teléfono</div><div class="detail-field-value">' + escapeHtml(phone) + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">Fecha de Entrega</div><div class="detail-field-value">' + escapeHtml(deliveryDate) + '</div></div>';
+        html += '<div class="detail-field"><div class="detail-field-label">Hora Aproximada</div><div class="detail-field-value">' + escapeHtml(deliveryTime) + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">📅 Creado</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(createdAt) + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">✏️ Último cambio</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(updatedAt) + '</div></div>';
         html += '<div class="detail-field raw-cart-section"><div class="detail-field-label">Notas</div><div class="detail-field-value">' + escapeHtml(notes) + '</div></div>';
@@ -371,6 +373,7 @@
     document.getElementById('editName').value = order.customer_name || '';
     document.getElementById('editPhone').value = order.customer_phone || '';
     document.getElementById('editDate').value = order.delivery_date ? order.delivery_date.substring(0, 10) : '';
+    document.getElementById('editTime').value = order.delivery_time || order.deliveryTime || '';
     document.getElementById('editNotes').value = order.notes || '';
     document.getElementById('editTotal').value = order.total || 0;
 
@@ -434,18 +437,18 @@
       const subtotal = qty * price;
 
       let html = '<tr>';
-      html += '<td style="padding: 10px;"><input type="text" value="' + name + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-      html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="' + qty + '" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-      html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + price + '" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px;"><input data-action="cart-item-name" data-row-index="' + idx + '" type="text" value="' + name + '" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: center;"><input data-action="cart-item-qty" data-row-index="' + idx + '" type="number" id="qty-' + idx + '" value="' + qty + '" min="1" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+      html += '<td style="padding: 10px; text-align: right;"><input data-action="cart-item-price" data-row-index="' + idx + '" type="number" id="price-' + idx + '" value="' + price + '" step="0.01" min="0" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
       html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + subtotal.toFixed(2) + '</td>';
-      html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
+      html += '<td style="padding: 10px; text-align: center;"><button type="button" data-action="remove-cart-row" data-row-index="' + idx + '" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
       html += '</tr>';
 
       tbody.innerHTML += html;
 
       // Si hay descripción (formato Nappan Box), mostrarla en otra fila
       if (item.description) {
-        html = '<tr style="background: #f9f9f9;">';
+        html = '<tr class="cart-description-row" style="background: #f9f9f9;">';
         html += '<td colspan="5" style="padding: 8px 10px; font-size: 12px; color: #666; font-style: italic;">' + item.description;
         if (item.extras > 0) {
           html += ' + ' + item.extras + ' extras';
@@ -490,7 +493,9 @@
 
       btn.innerHTML = '<div style="font-weight: 600;">' + escapeHtml(product.name) + '</div>' +
                      '<div style="font-size: 12px; color: #999;">' + sectionLabel + ' • $' + (product.base_price || 0).toFixed(2) + '</div>';
-      btn.onclick = () => addProductToCart(product);
+      btn.type = 'button';
+      btn.dataset.action = 'select-edit-product';
+      btn.dataset.productId = product.id;
 
       selector.appendChild(btn);
     });
@@ -509,11 +514,11 @@
     const idx = tbody.children.length;
 
     let html = '<tr>';
-    html += '<td style="padding: 10px;"><input type="text" value="' + escapeHtml(product.name) + '" onchange="updateCartItemName(' + idx + ', this.value)" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-    html += '<td style="padding: 10px; text-align: center;"><input type="number" id="qty-' + idx + '" value="1" min="1" onchange="updateEditTotal();" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
-    html += '<td style="padding: 10px; text-align: right;"><input type="number" id="price-' + idx + '" value="' + (product.base_price || 0) + '" step="0.01" min="0" onchange="updateEditTotal();" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px;"><input data-action="cart-item-name" data-row-index="' + idx + '" type="text" value="' + escapeHtml(product.name) + '" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: center;"><input data-action="cart-item-qty" data-row-index="' + idx + '" type="number" id="qty-' + idx + '" value="1" min="1" style="width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
+    html += '<td style="padding: 10px; text-align: right;"><input data-action="cart-item-price" data-row-index="' + idx + '" type="number" id="price-' + idx + '" value="' + (product.base_price || 0) + '" step="0.01" min="0" style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></td>';
     html += '<td style="padding: 10px; text-align: right; font-weight: 600;">$' + (product.base_price || 0).toFixed(2) + '</td>';
-    html += '<td style="padding: 10px; text-align: center;"><button onclick="removeCartRow(' + idx + ')" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
+    html += '<td style="padding: 10px; text-align: center;"><button type="button" data-action="remove-cart-row" data-row-index="' + idx + '" style="background: none; border: none; cursor: pointer; color: #d32f2f;">🗑️</button></td>';
     html += '</tr>';
 
     tbody.innerHTML += html;
@@ -529,9 +534,25 @@
     updateEditTotal();
   }
 
-  function removeCartRow(idx) {
+  function removeCartRow(target) {
     const tbody = document.getElementById('editCartBody');
-    tbody.children[idx].remove();
+    let row = null;
+
+    if (typeof target === 'number') {
+      const button = tbody.querySelector('[data-action="remove-cart-row"][data-row-index="' + target + '"]');
+      row = button ? button.closest('tr') : null;
+    } else if (target && typeof target.closest === 'function') {
+      row = target.closest('tr');
+    }
+
+    if (!row) return;
+
+    const nextRow = row.nextElementSibling;
+    row.remove();
+    if (nextRow && nextRow.classList.contains('cart-description-row')) {
+      nextRow.remove();
+    }
+
     updateEditTotal();
   }
 
@@ -569,6 +590,7 @@
       const name = document.getElementById('editName').value.trim();
       const phone = document.getElementById('editPhone').value.trim();
       const date = document.getElementById('editDate').value;
+      const time = document.getElementById('editTime').value.trim();
       const notes = document.getElementById('editNotes').value.trim();
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
 
@@ -603,6 +625,7 @@
         customer_name: name,
         customer_phone: phone || null,
         delivery_date: date || null,
+        delivery_time: time || null,
         notes: notes || null,
         total: total,
         raw_cart: JSON.stringify(cart)
@@ -619,6 +642,7 @@
           order.customer_name = name;
           order.customer_phone = phone;
           order.delivery_date = date;
+          order.delivery_time = time;
           order.notes = notes;
           order.total = total;
           order.raw_cart = cart;
@@ -807,7 +831,7 @@
         html += '<td>' + escapeHtml(product.name || 'N/A') + '</td>';
         html += '<td style="font-family: monospace; font-size: 12px;">' + escapeHtml(product.sku || 'N/A') + '</td>';
         html += '<td id="price-cell-' + product.id + '" style="font-weight: 600; color: #DAA520;">$' + (product.base_price || 0) + '</td>';
-        html += '<td><button class="btn" style="padding: 8px 12px; font-size: 13px;" onclick="startEditProductPrice(\'' + product.id + '\', ' + product.base_price + ')">Editar</button></td>';
+        html += '<td><button type="button" class="btn" style="padding: 8px 12px; font-size: 13px;" data-action="start-edit-product-price" data-product-id="' + product.id + '" data-current-price="' + (product.base_price || 0) + '">Editar</button></td>';
         html += '</tr>';
       });
 
@@ -821,7 +845,7 @@
 
   function startEditProductPrice(productId, currentPrice) {
     const cellEl = document.getElementById('price-cell-' + productId);
-    cellEl.innerHTML = '<div class="inline-edit"><span>$</span><input type="number" id="input-' + productId + '" value="' + currentPrice + '" min="0" step="0.01"><button class="btn-confirm" onclick="confirmEditProductPrice(\'' + productId + '\')">✓</button><button class="btn-cancel" onclick="cancelEditProductPrice(\'' + productId + '\', ' + currentPrice + ')">✗</button></div>';
+    cellEl.innerHTML = '<div class="inline-edit"><span>$</span><input type="number" id="input-' + productId + '" value="' + currentPrice + '" min="0" step="0.01"><button type="button" class="btn-confirm" data-action="confirm-edit-product-price" data-product-id="' + productId + '">✓</button><button type="button" class="btn-cancel" data-action="cancel-edit-product-price" data-product-id="' + productId + '" data-current-price="' + currentPrice + '">✗</button></div>';
     document.getElementById('input-' + productId).focus();
   }
 
@@ -914,6 +938,7 @@
   async function loadExtrasForConfig() {
     try {
       const allProducts = await loadProductsWithExtras();
+      const appConfig = await window.NappanDB.loadAppConfig();
 
       let extrasHtml = '';
       for (const product of allProducts) {
@@ -922,8 +947,11 @@
           extrasHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
           extrasHtml += '<h4 style="margin-bottom: 10px;">' + escapeHtml(product.name) + ' (' + escapeHtml(product.section) + ')</h4>';
           extras.forEach((extra, idx) => {
+            const labelKey = 'extra_label_' + product.sku + '_' + (idx + 1);
+            const labelValue = appConfig[labelKey] || extra.label;
             extrasHtml += '<div style="margin-bottom: 10px;">';
-            extrasHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">' + escapeHtml(extra.label) + '</label>';
+            extrasHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">' + escapeHtml(labelValue) + '</label>';
+            extrasHtml += '<input type="text" class="extra-label" data-config-key="' + escapeHtml(labelKey) + '" value="' + escapeHtml(labelValue) + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 8px;">';
             extrasHtml += '<input type="number" class="extra-price" data-extra-id="' + extra.id + '" value="' + extra.price + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
             extrasHtml += '</div>';
           });
@@ -939,10 +967,23 @@
 
   async function saveExtras() {
     try {
+      const labelInputs = document.querySelectorAll('.extra-label');
       const inputs = document.querySelectorAll('.extra-price');
-      if (inputs.length === 0) {
+      if (inputs.length === 0 && labelInputs.length === 0) {
         showToast('No hay extras para guardar', 'error');
         return;
+      }
+
+      for (const input of labelInputs) {
+        const configKey = input.dataset.configKey;
+        const label = input.value.trim();
+
+        if (configKey) {
+          const { error } = await window.NappanDB.updateConfigValue(configKey, label);
+          if (error) {
+            console.error('Error saving extra label:', error);
+          }
+        }
       }
 
       for (const input of inputs) {
@@ -1164,7 +1205,7 @@
       html += '<tr>';
       html += '<td id="phone-' + customer.id + '">' + escapeHtml(customer.phone || '—') + '</td>';
       html += '<td id="name-' + customer.id + '">' + escapeHtml(customer.name || '—') + '</td>';
-      html += '<td><select onchange="changeCustomerTier(\'' + customer.id + '\', this.value)">';
+      html += '<td><select data-action="change-customer-tier" data-customer-id="' + customer.id + '">';
       html += '<option value="individual" ' + (customer.membership_tier === 'individual' ? 'selected' : '') + '>Individual</option>';
       html += '<option value="premium" ' + (customer.membership_tier === 'premium' ? 'selected' : '') + '>Premium</option>';
       html += '<option value="business" ' + (customer.membership_tier === 'business' ? 'selected' : '') + '>Business</option>';
@@ -1172,8 +1213,8 @@
       html += '<td style="text-align:center;"><strong>' + (customer.order_count || 0) + '</strong></td>';
       html += '<td style="text-align:right;">$' + totalSpent + '</td>';
       html += '<td style="font-size:13px;color:#666;">' + lastOrder + '</td>';
-      html += '<td><button class="btn" style="padding:6px 10px; font-size:12px;" onclick="startEditCustomer(\'' + customer.id + '\', \'name\', \'' + escapeHtml(customer.name || '').replace(/'/g, "\\'") + '\', document.getElementById(\'name-' + customer.id + '\'))">✏️</button> ';
-      html += '<button class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="deleteCustomerRow(\'' + customer.id + '\')">🗑️</button></td>';
+      html += '<td><button type="button" class="btn" style="padding:6px 10px; font-size:12px;" data-action="start-edit-customer" data-customer-id="' + customer.id + '" data-field="name">✏️</button> ';
+      html += '<button type="button" class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" data-action="delete-customer" data-customer-id="' + customer.id + '">🗑️</button></td>';
       html += '</tr>';
     });
 
@@ -1182,7 +1223,7 @@
   }
 
   function startEditCustomer(id, field, currentVal, cellEl) {
-    cellEl.innerHTML = '<input type="text" id="input-' + id + '" value="' + escapeHtml(currentVal) + '" style="padding:6px; border:1px solid #DAA520; border-radius:4px;"> <button class="btn-confirm" style="padding:4px 8px; font-size:11px;" onclick="confirmEditCustomer(\'' + id + '\', \'' + field + '\')">✓</button> <button class="btn-cancel" style="padding:4px 8px; font-size:11px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="cancelEditCustomer(\'' + id + '\', \'' + field + '\', \'' + escapeHtml(currentVal) + '\')">✗</button>';
+    cellEl.innerHTML = '<input type="text" id="input-' + id + '" value="' + escapeHtml(currentVal) + '" style="padding:6px; border:1px solid #DAA520; border-radius:4px;"> <button type="button" class="btn-confirm" data-action="confirm-edit-customer" data-customer-id="' + id + '" data-field="' + field + '">✓</button> <button type="button" class="btn-cancel" style="padding:4px 8px; font-size:11px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" data-action="cancel-edit-customer" data-customer-id="' + id + '" data-field="' + field + '" data-original-value="' + escapeHtml(currentVal) + '">✗</button>';
     document.getElementById('input-' + id).focus();
   }
 
@@ -1289,6 +1330,186 @@
     }
   }
 
+  function setupAdminInteractions() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', handleLogin);
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyOrderFilters);
+    }
+
+    ['sectionFilter', 'statusFilter', 'showDeletedFilter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', applyOrderFilters);
+      }
+    });
+
+    document.addEventListener('click', event => {
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+
+      const { action } = actionEl.dataset;
+      switch (action) {
+        case 'logout':
+          handleLogout();
+          break;
+        case 'switch-tab':
+          switchTabTo(actionEl.dataset.tab, actionEl);
+          break;
+        case 'export-orders':
+          exportOrdersCSV();
+          break;
+        case 'previous-page':
+          previousPage();
+          break;
+        case 'next-page':
+          nextPage();
+          break;
+        case 'show-add-customer':
+          showAddCustomerForm();
+          break;
+        case 'save-new-customer':
+          saveNewCustomer();
+          break;
+        case 'hide-add-customer':
+          hideAddCustomerForm();
+          break;
+        case 'save-whatsapp':
+          saveWhatsapp();
+          break;
+        case 'save-shipping':
+          saveShipping();
+          break;
+        case 'save-extras':
+          saveExtras();
+          break;
+        case 'save-tier-discounts':
+          saveTierDiscounts();
+          break;
+        case 'save-gallery':
+          saveGallery();
+          break;
+        case 'stats-quick-range':
+          setQuickDateRange(actionEl.dataset.range);
+          break;
+        case 'load-stats':
+          loadStats();
+          break;
+        case 'reset-stats':
+          resetStatsDate();
+          break;
+        case 'export-stats':
+          exportStatsCSV();
+          break;
+        case 'add-cart-row':
+          addCartRow();
+          break;
+        case 'close-edit-order':
+          closeEditOrder();
+          break;
+        case 'save-edit-order':
+          saveEditOrder();
+          break;
+        case 'close-product-selector':
+          closeProductSelector();
+          break;
+        case 'cancel-delete-confirm':
+          cancelDeleteConfirm();
+          break;
+        case 'confirm-delete-final':
+          confirmDeleteFinal();
+          break;
+        case 'toggle-order-detail':
+          toggleOrderDetail(actionEl.dataset.orderId);
+          break;
+        case 'change-order-status':
+          changeOrderStatus(actionEl.dataset.orderId, actionEl.value);
+          break;
+        case 'recover-deleted-order':
+          recoverDeletedOrder(actionEl.dataset.orderId);
+          break;
+        case 'open-edit-order':
+          openEditOrder(actionEl.dataset.orderId);
+          break;
+        case 'confirm-delete-order':
+          confirmDeleteOrder(actionEl.dataset.orderId);
+          break;
+        case 'start-edit-product-price':
+          startEditProductPrice(actionEl.dataset.productId, parseFloat(actionEl.dataset.currentPrice) || 0);
+          break;
+        case 'confirm-edit-product-price':
+          confirmEditProductPrice(actionEl.dataset.productId);
+          break;
+        case 'cancel-edit-product-price':
+          cancelEditProductPrice(actionEl.dataset.productId, parseFloat(actionEl.dataset.currentPrice) || 0);
+          break;
+        case 'start-edit-customer': {
+          const cellEl = document.getElementById('name-' + actionEl.dataset.customerId);
+          startEditCustomer(
+            actionEl.dataset.customerId,
+            actionEl.dataset.field || 'name',
+            cellEl ? cellEl.textContent : '',
+            cellEl
+          );
+          break;
+        }
+        case 'confirm-edit-customer':
+          confirmEditCustomer(actionEl.dataset.customerId, actionEl.dataset.field || 'name');
+          break;
+        case 'cancel-edit-customer':
+          cancelEditCustomer(actionEl.dataset.customerId, actionEl.dataset.field || 'name', actionEl.dataset.originalValue || '');
+          break;
+        case 'delete-customer':
+          deleteCustomerRow(actionEl.dataset.customerId);
+          break;
+        case 'select-edit-product': {
+          const product = editingOrderProducts.find(item => String(item.id) === String(actionEl.dataset.productId));
+          if (product) {
+            addProductToCart(product);
+          }
+          break;
+        }
+        case 'remove-cart-row':
+          removeCartRow(actionEl);
+          break;
+        default:
+          break;
+      }
+    });
+
+    document.addEventListener('input', event => {
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+
+      if (actionEl.dataset.action === 'cart-item-qty' || actionEl.dataset.action === 'cart-item-price') {
+        updateEditTotal();
+      }
+    });
+
+    document.addEventListener('change', event => {
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+
+      if (actionEl.dataset.action === 'change-order-status') {
+        changeOrderStatus(actionEl.dataset.orderId, actionEl.value);
+        return;
+      }
+
+      if (actionEl.dataset.action === 'change-customer-tier') {
+        changeCustomerTier(actionEl.dataset.customerId, actionEl.value);
+        return;
+      }
+
+      if (actionEl.dataset.action === 'cart-item-qty' || actionEl.dataset.action === 'cart-item-price') {
+        updateEditTotal();
+      }
+    });
+  }
+
   async function checkAuth() {
     if (!window.NappanDB) {
       showToast('Supabase client no disponible', 'error');
@@ -1317,6 +1538,7 @@
     }
   }
 
+  setupAdminInteractions();
   checkAuth();
 
   // ---- PHASE 6: ESTADÍSTICAS (mejorado) ----
@@ -1598,18 +1820,21 @@
       return;
     }
 
-    const headers = ['Pedido', 'Cliente', 'Teléfono', 'Sección', 'Total', 'Estado', 'Fecha'];
+    const headers = ['Pedido', 'Cliente', 'Teléfono', 'Sección', 'Hora de Entrega', 'Total', 'Estado', 'Fecha'];
     const rows = [headers];
 
     statsCache.orders.forEach(order => {
       const date = new Date(order.created_at).toLocaleDateString('es-MX');
       const statusLabel = getStatusLabel(order.status);
+      const deliveryTime = order.delivery_time || order.deliveryTime || '';
+      const totalNumber = Number.parseFloat(order.total) || 0;
       rows.push([
         order.order_number || '',
         order.customer_name || '',
         order.customer_phone || '',
         order.section || '',
-        '$' + (order.total || 0),
+        deliveryTime,
+        totalNumber.toFixed(2),
         statusLabel,
         date
       ]);
@@ -1681,4 +1906,3 @@
     setQuickDateRange,
     exportStatsCSV,
   });
-

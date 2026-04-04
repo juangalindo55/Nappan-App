@@ -418,19 +418,11 @@ async function updateConfigValue(key, value) {
   if (!supabaseClient) return { error: 'Supabase not initialized' };
 
   try {
-    const { error: updateError } = await supabaseClient
+    const { error } = await supabaseClient
       .from('app_config')
-      .update({ value, updated_at: new Date().toISOString() })
-      .eq('key', key);
+      .upsert([{ key, value, updated_at: new Date().toISOString() }], { onConflict: 'key' });
 
-    if (updateError) {
-      const { error: insertError } = await supabaseClient
-        .from('app_config')
-        .insert([{ key, value }]);
-      return { error: insertError };
-    }
-
-    return { error: null };
+    return { error };
   } catch (error) {
     console.error('updateConfigValue error:', error);
     return { error };
@@ -683,4 +675,3 @@ window.NappanDB = {
 };
 
 console.log('✓ NappanDB API ready');
-

@@ -10,9 +10,9 @@
 
 ### Phase 2: Admin Dashboard (Complete)
 - Authentication (email/password)
-- Tab: Pedidos - filters, search, inline status edit, expandable details, pagination, CSV export
+- Tab: Pedidos - filters, search, inline status edit, expandable details, delivery time display, pagination, CSV export
 - Tab: Productos - inline price editing
-- Tab: Configuración - WhatsApp, shipping rates, extras, gallery, tier discounts
+- Tab: Configuración - WhatsApp, shipping rates, extras, gallery, tier discounts, Lunch Box extra labels
 - Tab: Clientes - CRUD (view, edit, add, delete customers)
 
 ### Phase 3: Dynamic Config (Complete)
@@ -20,6 +20,7 @@
 - Dynamic WhatsApp number loading
 - Shipping rates configurable (5 tiers)
 - Event gallery dynamic loading
+- Lunch Box extra label overrides editable from Admin > Configuración
 - All editable from Admin > Configuración
 
 ### Phase 4: Dynamic Pricing (Complete)
@@ -51,6 +52,8 @@
 - Implemented cache invalidation for all mutation actions (status changes, product edits, config writes).
 - Auth flow hardened from polling to session bootstrap + auth state listener.
 - Visible admin copy normalized to Spanish labels (`Estado`, `Configuración`, `Estadísticas`, `Teléfono`).
+- Order detail view now shows `Hora Aproximada` for delivery-based sections.
+- `Editar Pedido` now persists `delivery_time` for manual overrides.
 
 #### Phase 6.3: Admin Dashboard Modularization (Completed)
 
@@ -108,6 +111,7 @@
 - **Analytics backend** - Move KPI computation to Supabase RPC functions
 - **CSS modularization** - Extract module-specific styles from global `styles.css`
 - **Data layer optimization** - Parallelize remaining sequential loads
+- **Config polish** - Expand editable `app_config`-driven labels and copy where needed
 
 ---
 

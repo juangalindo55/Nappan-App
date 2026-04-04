@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-7 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization, analytics backend migration to RPC functions.** Next: Phase 7.2+ - event handler refactoring, CSS extraction, rendering phase.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-7 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization, analytics backend migration to RPC functions.** Current admin polish includes `Hora Aproximada` in order details, editable `Hora de Entrega` in `Editar Pedido`, and Lunch Box extra label overrides from `Configuración`.
 
 ## Running Locally
 
@@ -136,10 +136,10 @@ All pages should reference this constant for orders.
 ## Admin Dashboard (`nappan-admin-v2.html`)
 
 Current admin includes:
-- Pedidos - filters, status updates, expandable details, pagination, CSV export
+- Pedidos - filters, status updates, expandable details, delivery time display, pagination, CSV export
 - Productos - inline price editing
 - Clientes - CRUD operations
-- Configuración - WhatsApp, shipping, extras, gallery, tier discounts
+- Configuración - WhatsApp, shipping, extras, gallery, tier discounts, Lunch Box extra labels
 - Estadísticas - client-rendered KPIs and charts (to be optimized)
 
 **Access:** Discrete admin link in `index.html` footer (not visible on section pages).
@@ -164,6 +164,12 @@ Current baseline after Phase 6.1:
 - ✅ **Directory Cleanup**: Audited and removed 17 obsolete files (~2.7 MB) to maintain repository hygiene.
   - Deleted: `nappan-admin.html` (V1), obsolete images, redundant docs, and old SQL migration scripts.
   - Updated `.gitignore` to prevent tracking of Windows system files like `desktop.ini`.
+- ✅ **Admin order editing polish**
+  - `Editar Pedido` now edits and persists `delivery_time` for manual delivery-time overrides.
+  - Expanded order details now show `Hora Aproximada` for Lunch Box, Fit Bar, and Eventos en Vivo.
+- ✅ **Lunch Box extra label overrides**
+  - Admin `Configuración` now allows editing the visible text for Lunch Box 1 and Lunch Box 2 extras.
+  - Labels are stored in `app_config` and read at runtime by `nappan-lunchbox.html`.
 
 ### Admin Modules (Phase 6.3 - Completed)
 

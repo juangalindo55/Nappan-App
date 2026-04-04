@@ -106,7 +106,7 @@
     </div>
     <div class="card-body">
       <ul class="items-list">
-        <li>🥞 PancakeART + miel / Upgrade a <a href="https://www.instagram.com/nucolato/" target="_blank" style="color:#DAA520;text-decoration:none;font-weight:bold;">Nucolato</a></li>
+        <li>🥞 PancakeART + miel</li>
         <li style="display:flex;flex-direction:column;gap:8px;">
           <span>🍓 Elige tu Fruta o Gelatina:</span>
           <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
@@ -191,7 +191,7 @@
     <div class="card-body">
       <ul class="items-list">
         <li>🥐 ½ Croissant (jamón, queso)</li>
-        <li>🥞 PancakeART + miel / Upgrade a <a href="https://www.instagram.com/nucolato/" target="_blank" style="color:#DAA520;text-decoration:none;font-weight:bold;">Nucolato</a></li>
+        <li>🥞 PancakeART + miel</li>
         <li style="display:flex;flex-direction:column;gap:8px;">
           <span>🍓 Elige tu Fruta o Gelatina:</span>
           <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
@@ -330,6 +330,7 @@
     try {
       if (window.NappanDB) {
         console.log('Cargando precios dinámicos...');
+        const appConfig = await window.NappanDB.loadAppConfig();
         const productsFromDB = await window.NappanDB.loadProducts('lunchbox');
         console.log('Productos desde DB:', productsFromDB);
 
@@ -352,13 +353,17 @@
               if (extrasArray && extrasArray.length > 0) {
                 const extrasContainer = document.getElementById(`extras-list-${boxId}`);
                 if (extrasContainer) {
-                  extrasContainer.innerHTML = extrasArray.map(ex => `
+                  extrasContainer.innerHTML = extrasArray.map((ex, idx) => {
+                    const labelKey = `extra_label_${dbProduct.sku}_${idx + 1}`;
+                    const label = appConfig[labelKey] || ex.label;
+                    return `
                     <div class="extra-option" onclick="toggleExtra(this)" data-price="${ex.price}">
                       <div class="check-box">✓</div>
-                      <span class="extra-label">${ex.label}</span>
+                      <span class="extra-label">${label}</span>
                       <span class="extra-price">+$${ex.price}</span>
                     </div>
-                  `).join('');
+                  `;
+                  }).join('');
                   console.log(`✓ Extras LUNCHBOX-${boxId} actualizados`);
                 }
               }

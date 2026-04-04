@@ -5,7 +5,7 @@ This file provides guidance to Codex when working with the **Nappan** repository
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box & Protein Fit Bar) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page architecture. 3 sections fully functional, 1 planned (Eventos en Vivo).
+**Status:** Modular multi-page architecture. 4 sections functional, including Eventos en Vivo.
 
 ## Running Locally
 
@@ -51,6 +51,13 @@ Each section page is self-contained:
 3. Contains section-specific CSS in `<style>` and JS in `<script>` inline
 4. Has its own back-navigation to `index.html`
 5. Loads Google Fonts (Inter + Montserrat) independently
+
+### Current Admin Notes
+
+- `nappan-admin-v2.html` is the admin shell/layout.
+- `nappan-admin-v2.js` contains the dashboard logic, including order details, editable delivery time, CSV export, and configuration forms.
+- `supabase-client.js` exposes `updateConfigValue()` as an idempotent `upsert` over `app_config`.
+- Lunch Box extra labels can now be overridden from Admin > Configuración.
 
 ## Design System (NAPPAN Brand)
 

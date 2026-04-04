@@ -106,6 +106,7 @@ Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark co
 ### 📦 Lunch Box (`nappan-lunchbox.html`)
 - **2 opciones** de Lunch Box ($125 y $130)
 - Selector de PancakeART (Osito, Capibara, Pollito)
+- `Hora Aproximada` se muestra en el desglose de pedidos y puede editarse desde Admin > Pedidos
 - **Selector de Fruta o Gelatina** con custom checkboxes marrón (#8B5E3C)
   - Validación obligatoria (toast si no se selecciona)
   - Palomilla blanca visible solo cuando está seleccionado
@@ -237,6 +238,11 @@ Luego abre: **http://localhost:8080**
   - Centralized state + cache with dependency tracking
   - Foundation ready for Phase 7 (analytics backend, event handler refactoring)
 
+### Admin polish additions
+- [x] Pedido detail view now shows `Hora Aproximada` for Lunch Box, Fit Bar, and Eventos en Vivo.
+- [x] `Editar Pedido` now allows manual editing of `Hora de Entrega` and persists it to `delivery_time`.
+- [x] Admin `Configuración` can override the visible text of Lunch Box 1 and Lunch Box 2 extras through `app_config`.
+
 ### Fase 7 — Analytics Backend Migration ✅
 - [x] **8 RPC Functions** created in PostgreSQL for KPI computation
   - `get_stats_kpis()` — totalOrders, totalRevenue, averageOrder
@@ -259,6 +265,10 @@ Luego abre: **http://localhost:8080**
   - RPC functions run on PostgreSQL (optimized aggregation)
   - Network payload reduced (only aggregated results sent)
   - Scales to thousands of orders without slowdown
+
+### Configuración dinámica
+- `app_config` now stores not only WhatsApp, shipping, and discounts, but also Lunch Box extra label overrides.
+- `updateConfigValue()` persists config keys with an idempotent `upsert`, so label changes do not revert after save.
 
 ---
 
