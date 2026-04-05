@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with the **Nappan** repo
 ## Project Overview
 
 **Nappan** is a lifestyle brand app (Lunch Box, Nappan Box, Protein Fit Bar & Eventos en Vivo) built with pure HTML5, CSS3, and Vanilla JavaScript.
-**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-7 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization, analytics backend migration to RPC functions.** Current admin polish includes `Hora Aproximada` in order details, editable `Hora de Entrega` in `Editar Pedido`, and Lunch Box extra label overrides from `Configuración`.
+**Status:** Modular multi-page public site. 4 sections fully functional. **Phases 1-7 complete: Supabase integration, order capture, dynamic pricing, admin dashboard, recurring tier discounts, admin security & performance optimization, admin dashboard modularization, analytics backend migration to RPC functions.** Current UI polish includes the home hero logo using `images/Logo Dorado Nappan V2.svg`, `Hora Aproximada` in order details, editable `Hora de Entrega` in `Editar Pedido`, and Lunch Box extra label overrides from `Configuración`.
 
 ## Running Locally
 
@@ -25,6 +25,7 @@ The project uses a **modular multi-page** structure. Each business line is a sta
 ### Entry Point
 
 - `index.html` - Main landing page. Navigation hub to all sections via card grid.
+- `nappan-index.html` - Landing redirect alias used by the admin logo.
 
 ### Shared Resources
 
@@ -257,3 +258,4 @@ When modifying the admin:
 5. **Images:** Prefer WebP assets for new product imagery.
 6. **WhatsApp number:** Always reference `WA_NUMBER` from shared config/constants. Never hardcode the number in page scripts.
 7. **Header:** All section pages should preserve the unified header pattern.
+

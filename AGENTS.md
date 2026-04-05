@@ -57,7 +57,8 @@ Each section page is self-contained:
 - `nappan-admin-v2.html` is the admin shell/layout.
 - `nappan-admin-v2.js` contains the dashboard logic, including order details, editable delivery time, CSV export, and configuration forms.
 - `supabase-client.js` exposes `updateConfigValue()` as an idempotent `upsert` over `app_config`.
-- Lunch Box extra labels can now be overridden from Admin > Configuración.
+- Lunch Box extra labels can now be overridden from Admin > Configuracin.
+- The admin logo links to `nappan-index.html`, which redirects to the public landing page.
 
 ## Design System (NAPPAN Brand)
 
@@ -100,3 +101,4 @@ All pages import `utils.js` and reference this constant.
 4. **Typography:** Follow the Inter + Montserrat system. Never use Montserrat for anything below H1. See `TYPOGRAPHY_SYSTEM.md`.
 5. **Images:** Use WebP format with PNG fallback via `<picture>` element for new product images.
 6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.
+

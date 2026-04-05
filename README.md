@@ -40,6 +40,7 @@ Arquitectura **multi-página modular** — cada línea de negocio es una página
 ├── nappan-fitbar.html      ← Protein Fit Bar (coffee, shots, pancakes, combos) — precios dinámicos
 ├── nappan-eventos.html     ← Eventos en Vivo (pancake art en tu evento) — galería dinámica
 ├── nappan-admin-v2.html    ← Dashboard Admin privado (auth-gated)
+├── nappan-index.html       ← Alias de redirección al landing para el logo del admin
 │
 ├── styles.css              ← Design system global (~2,680 líneas)
 ├── script.js               ← Router de navegación goTo() + toast notifications
@@ -101,7 +102,7 @@ Cada sección es un archivo HTML autónomo que:
 ## 📋 Secciones del sitio
 
 ### 🏠 Landing (`index.html`)
-Hub central con cards de navegación a las 4 líneas de negocio. Diseño dark con gradientes radiales y animaciones CSS.
+Hub central con cards de navegación a las 4 líneas de negocio. El hero ahora muestra `images/Logo Dorado Nappan V2.svg` encima del `hero-tag`, manteniendo el diseño dark con gradientes radiales y animaciones CSS.
 
 ### 📦 Lunch Box (`nappan-lunchbox.html`)
 - **2 opciones** de Lunch Box ($125 y $130)
@@ -287,3 +288,4 @@ Todos los pedidos se gestionan vía WhatsApp Business. La configuración se actu
 ---
 
 *Este proyecto es propiedad de [@juangalindo55](https://github.com/juangalindo55). Desarrollado con 🥞 y Vibe Coding en Monterrey.*
+
