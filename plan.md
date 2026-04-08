@@ -120,17 +120,33 @@
 
 ### Core
 - `index.html` - Landing page with admin link in footer
-- `supabase-client.js` - Supabase client API (`window.NappanDB`)
-- `nappan-admin-v2.html` - Admin shell (auth-gated)
-- `nappan-admin-v2.js` - Admin dashboard logic and state handling
-- `admin-v2.css` - Admin-specific extracted styles
-- `supabase-schema.sql` - DDL for all tables + RLS + triggers
+- `js/supabase-client.js` - Supabase client API (`window.NappanDB`)
+- `pages/nappan-admin-v2.html` - Admin shell (auth-gated)
+- `js/admin-modules/nappan-admin-v2.js` - Admin dashboard logic and state handling
+- `css/admin-v2.css` - Admin-specific extracted styles
+- `js/script.js` - Navigation router and shared utilities
+- `js/utils.js` - Shared constants (WA_NUMBER)
 
-### Section Pages
-- `nappan-lunchbox.html` - Complete (phone field + lookup + tier pricing)
-- `nappan-fitbar.html` - Complete (phone field + lookup + tier pricing)
-- `nappan-box.html` - Complete (lookup + tier pricing)
-- `nappan-eventos.html` - Live quotation flow
+### Section Pages (in `pages/` folder)
+- `pages/nappan-lunchbox.html` - Complete (phone field + lookup + tier pricing)
+- `pages/nappan-fitbar.html` - Complete (phone field + lookup + tier pricing)
+- `pages/nappan-box.html` - Complete (lookup + tier pricing)
+- `pages/nappan-eventos.html` - Live quotation flow
+- `pages/nappan-index.html` - Alias redirect for admin logo
+
+### Stylesheets (in `css/` folder)
+- `css/styles.css` - Global design system (~2,680 lines)
+- `css/admin-v2.css` - Admin-specific styles
+
+### Admin Modules (in `js/admin-modules/` folder)
+- `js/admin-modules/state.js` - Centralized state store
+- `js/admin-modules/ui.js` - Toast, HTML escape, state indicators
+- `js/admin-modules/auth.js` - Login, logout, session management
+- `js/admin-modules/orders.js` - Order CRUD, filtering, pagination, CSV export
+- `js/admin-modules/products.js` - Product loading and price editing
+- `js/admin-modules/customers.js` - Customer CRUD operations
+- `js/admin-modules/config.js` - Configuration management
+- `js/admin-modules/stats.js` - Analytics via RPC functions
 
 ---
 

@@ -28,20 +28,20 @@ The project uses a **modular multi-page** structure. Each business line is a sta
 
 ### Shared Resources
 
-- `styles.css` — Global design system. CSS variables (colors, fonts), shared layout rules, and page-specific styles scoped via `body.page-*` classes. (~2,100 lines, optimized).
-- `script.js` — Navigation router (`goTo(page)`) and "coming soon" toast.
-- `utils.js` — Shared constants. Currently exports `WA_NUMBER` for WhatsApp integration.
+- `css/styles.css` — Global design system. CSS variables (colors, fonts), shared layout rules, and page-specific styles scoped via `body.page-*` classes. (~2,680 lines, optimized).
+- `js/script.js` — Navigation router (`goTo(page)`) and "coming soon" toast.
+- `js/utils.js` — Shared constants. Currently exports `WA_NUMBER` for WhatsApp integration.
 
-### Section Pages (Independent Modules)
+### Section Pages (Independent Modules in `pages/` folder)
 
 Each section is a standalone file for isolated maintenance:
 
 | File | Section | Status |
 |---|---|---|
-| `nappan-lunchbox.html` | Lunch Box — events & birthdays | ✅ Live |
-| `nappan-box.html` | Nappan Box + Premium Box — custom pancake art | ✅ Live |
-| `nappan-fitbar.html` | Protein Fit Bar — coffee, shots, pancakes, combos | ✅ Live |
-| `nappan-eventos.html` | Eventos en Vivo — live pancake art at events | 🔜 Planned |
+| `pages/nappan-lunchbox.html` | Lunch Box — events & birthdays | ✅ Live |
+| `pages/nappan-box.html` | Nappan Box + Premium Box — custom pancake art | ✅ Live |
+| `pages/nappan-fitbar.html` | Protein Fit Bar — coffee, shots, pancakes, combos | ✅ Live |
+| `pages/nappan-eventos.html` | Eventos en Vivo — live pancake art at events | ✅ Live |
 
 ### Page Pattern
 
@@ -54,11 +54,13 @@ Each section page is self-contained:
 
 ### Current Admin Notes
 
-- `nappan-admin-v2.html` is the admin shell/layout.
-- `nappan-admin-v2.js` contains the dashboard logic, including order details, editable delivery time, CSV export, and configuration forms.
-- `supabase-client.js` exposes `updateConfigValue()` as an idempotent `upsert` over `app_config`.
-- Lunch Box extra labels can now be overridden from Admin > Configuracin.
-- The admin logo links to `nappan-index.html`, which redirects to the public landing page.
+- `pages/nappan-admin-v2.html` is the admin shell/layout.
+- `js/admin-modules/nappan-admin-v2.js` contains the dashboard logic, including order details, editable delivery time, CSV export, and configuration forms.
+- `js/supabase-client.js` exposes `updateConfigValue()` as an idempotent `upsert` over `app_config`.
+- Analytics are now powered by Supabase RPC functions (`getStatsKpis()`, `getOrdersBySection()`, etc.) for performance optimization.
+- Lunch Box extra labels can now be overridden from Admin > Configuración.
+- The admin logo links to `pages/nappan-index.html`, which redirects to the public landing page.
+- Admin modules (state.js, auth.js, orders.js, products.js, customers.js, config.js, stats.js, ui.js) are located in `js/admin-modules/` and handle all domain-specific logic.
 
 ## Design System (NAPPAN Brand)
 

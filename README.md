@@ -35,30 +35,51 @@ Arquitectura **multi-página modular** — cada línea de negocio es una página
 ```
 📁 Nappan App/
 ├── index.html              ← Landing page / Hub de navegación
-├── nappan-lunchbox.html    ← Lunch Box (eventos y cumpleaños) — precios dinámicos
-├── nappan-box.html         ← Nappan Box + Premium Box (arte personalizado) — precios y extras dinámicos
-├── nappan-fitbar.html      ← Protein Fit Bar (coffee, shots, pancakes, combos) — precios dinámicos
-├── nappan-eventos.html     ← Eventos en Vivo (pancake art en tu evento) — galería dinámica
-├── nappan-admin-v2.html    ← Dashboard Admin privado (auth-gated)
-├── nappan-index.html       ← Alias de redirección al landing para el logo del admin
 │
-├── styles.css              ← Design system global (~2,680 líneas)
-├── script.js               ← Router de navegación goTo() + toast notifications
-├── utils.js                ← Constantes compartidas (WA_NUMBER)
-├── chatbot.js              ← Chatbot embebido con calculadora de envío (Google Maps API)
-├── supabase-client.js      ← Cliente de datos y API window.NappanDB
+├── pages/                  ← Todas las secciones y admin
+│   ├── nappan-lunchbox.html     ← Lunch Box (eventos y cumpleaños)
+│   ├── nappan-box.html          ← Nappan Box + Premium Box (arte personalizado)
+│   ├── nappan-fitbar.html       ← Protein Fit Bar (coffee, shots, pancakes, combos)
+│   ├── nappan-eventos.html      ← Eventos en Vivo (pancake art en tu evento)
+│   ├── nappan-admin-v2.html     ← Dashboard Admin privado (auth-gated)
+│   └── nappan-index.html        ← Alias de redirección al landing
 │
-├── images/
+├── css/                    ← Estilos
+│   ├── styles.css          ← Design system global (~2,680 líneas)
+│   └── admin-v2.css        ← Admin-specific styles
+│
+├── js/                     ← Scripts
+│   ├── script.js           ← Router de navegación goTo() + toast notifications
+│   ├── utils.js            ← Constantes compartidas (WA_NUMBER)
+│   ├── chatbot.js          ← Chatbot embebido con calculadora de envío (Google Maps API)
+│   ├── supabase-client.js  ← Cliente de datos y API window.NappanDB
+│   └── admin-modules/      ← Módulos del admin
+│       ├── state.js        ← Estado centralizado
+│       ├── ui.js           ← Toast, escape HTML, indicadores
+│       ├── auth.js         ← Login/logout/sesiones
+│       ├── orders.js       ← CRUD de pedidos, filtros, paginación, CSV
+│       ├── products.js     ← Carga de productos y edición de precios
+│       ├── customers.js    ← CRUD de clientes
+│       ├── config.js       ← Gestión de configuración
+│       ├── stats.js        ← Analíticas via RPC
+│       └── nappan-admin-v2.js ← Lógica del dashboard y renderizado
+│
+├── images/                 ← Assets
 │   ├── logo-dorado.webp        ← Logo principal (usado en headers dark)
+│   ├── Logo Dorado Nappan V2.svg ← Logo SVG hero
 │   ├── logo-white-solo.webp    ← Logo blanco (hero Fit Bar)
 │   ├── logo.png                ← Logo negro (referencia)
 │   ├── bg-*.jpg                ← Backgrounds de secciones
 │   ├── nappanbox-gallery-*.jpg
 │   ├── cold-protein-latte.webp
 │   ├── cold-brew.webp
-│   └── black-coffee.webp
+│   ├── black-coffee.webp
+│   ├── Brunchtime.jpeg         ← Nueva imagen para galería
+│   └── Nappan banner.webp      ← Banner promocional
 │
 ├── CLAUDE.md               ← Guía arquitectónica para Claude Code
+├── GEMINI.md               ← Guía para Gemini CLI
+├── AGENTS.md               ← Guía para Codex
 ├── TYPOGRAPHY_SYSTEM.md    ← Documentación del sistema tipográfico
 ├── plan.md                 ← Roadmap y backlog de funcionalidades
 ├── README.md               ← Este archivo
@@ -179,10 +200,10 @@ Luego abre: **http://localhost:8080**
 
 ### Agregar una nueva sección
 
-1. Crear un nuevo archivo `nappan-[seccion].html` en la raíz
-2. Importar `styles.css` y `utils.js`
-3. Agregar la ruta en `script.js` dentro de `goTo()`
-4. Crear una card de navegación en `index.html`
+1. Crear un nuevo archivo `nappan-[seccion].html` en la carpeta `pages/`
+2. Importar `../css/styles.css` y `../js/utils.js`
+3. Agregar la ruta en `js/script.js` dentro de `goTo()` (usar ruta `pages/nappan-[seccion].html`)
+4. Crear una card de navegación en `index.html` (usar ruta `goTo('pages/nappan-[seccion].html')`)
 5. Seguir el sistema tipográfico documentado en `TYPOGRAPHY_SYSTEM.md`
 
 ---

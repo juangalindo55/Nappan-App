@@ -23,21 +23,21 @@ El proyecto utiliza una estructura **modular multi-página**. Cada línea de neg
 
 ### Puntos de Entrada
 - `index.html`: Landing page principal y hub de navegación.
-- `nappan-index.html`: Alias de redirección utilizado por el logo de administración.
+- `pages/nappan-index.html`: Alias de redirección utilizado por el logo de administración.
 
 ### Recursos Compartidos
-- `styles.css`: Sistema de diseño global, variables CSS y reglas compartidas.
-- `script.js`: Router de navegación (`goTo(page)`) y notificaciones.
-- `utils.js`: Constantes compartidas (ej. `WA_NUMBER`).
-- `supabase-client.js`: Cliente de Supabase y API `window.NappanDB`.
+- `css/styles.css`: Sistema de diseño global, variables CSS y reglas compartidas.
+- `js/script.js`: Router de navegación (`goTo(page)`) y notificaciones.
+- `js/utils.js`: Constantes compartidas (ej. `WA_NUMBER`).
+- `js/supabase-client.js`: Cliente de Supabase y API `window.NappanDB`.
 
-### Páginas de Sección
+### Páginas de Sección (en carpeta `pages/`)
 | Archivo | Sección |
 |---|---|
-| `nappan-lunchbox.html` | Lunch Box - eventos y cumpleaños |
-| `nappan-box.html` | Nappan Box + Premium Box - pancake art personalizado |
-| `nappan-fitbar.html` | Protein Fit Bar - café, shots, pancakes, combos |
-| `nappan-eventos.html` | Eventos en Vivo - pancake art en vivo |
+| `pages/nappan-lunchbox.html` | Lunch Box - eventos y cumpleaños |
+| `pages/nappan-box.html` | Nappan Box + Premium Box - pancake art personalizado |
+| `pages/nappan-fitbar.html` | Protein Fit Bar - café, shots, pancakes, combos |
+| `pages/nappan-eventos.html` | Eventos en Vivo - pancake art en vivo |
 
 ## Sistema de Diseño (Marca NAPPAN)
 

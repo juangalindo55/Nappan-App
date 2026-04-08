@@ -25,31 +25,31 @@ The project uses a **modular multi-page** structure. Each business line is a sta
 ### Entry Point
 
 - `index.html` - Main landing page. Navigation hub to all sections via card grid.
-- `nappan-index.html` - Landing redirect alias used by the admin logo.
+- `pages/nappan-index.html` - Landing redirect alias used by the admin logo.
 
 ### Shared Resources
 
-- `styles.css` - Global design system. CSS variables (colors, fonts), shared layout rules, and page-specific styles scoped via `body.page-*` classes.
-- `script.js` - Navigation router (`goTo(page)`) and "coming soon" toast.
-- `utils.js` - Shared constants. Currently exports `WA_NUMBER` for WhatsApp integration.
-- `supabase-client.js` - Shared Supabase client and `window.NappanDB` API.
+- `css/styles.css` - Global design system. CSS variables (colors, fonts), shared layout rules, and page-specific styles scoped via `body.page-*` classes.
+- `js/script.js` - Navigation router (`goTo(page)`) and "coming soon" toast.
+- `js/utils.js` - Shared constants. Currently exports `WA_NUMBER` for WhatsApp integration.
+- `js/supabase-client.js` - Shared Supabase client and `window.NappanDB` API.
 
-### Section Pages (Independent Modules)
+### Section Pages (Independent Modules in `pages/` folder)
 
 | File | Section | Status |
 |---|---|---|
-| `nappan-lunchbox.html` | Lunch Box - events & birthdays | Live |
-| `nappan-box.html` | Nappan Box + Premium Box - custom pancake art | Live |
-| `nappan-fitbar.html` | Protein Fit Bar - coffee, shots, pancakes, combos | Live |
-| `nappan-eventos.html` | Eventos en Vivo - live pancake art at events | Live |
+| `pages/nappan-lunchbox.html` | Lunch Box - events & birthdays | Live |
+| `pages/nappan-box.html` | Nappan Box + Premium Box - custom pancake art | Live |
+| `pages/nappan-fitbar.html` | Protein Fit Bar - coffee, shots, pancakes, combos | Live |
+| `pages/nappan-eventos.html` | Eventos en Vivo - live pancake art at events | Live |
 
 ### Page Pattern
 
-Each section page is self-contained:
-1. Imports `styles.css` for global design system
-2. Imports `utils.js` for shared constants (`WA_NUMBER`)
+Each section page is self-contained (located in `pages/` folder):
+1. Imports `../css/styles.css` for global design system
+2. Imports `../js/utils.js` for shared constants (`WA_NUMBER`)
 3. Contains section-specific CSS in `<style>` and JS in `<script>` inline
-4. Has its own back-navigation to `index.html` (button inside the unified header)
+4. Has its own back-navigation to `../index.html` (button inside the unified header)
 5. Loads Google Fonts (Inter + Montserrat) independently
 
 ### Header Pattern (Unified Across All Pages)
@@ -134,29 +134,30 @@ const WA_NUMBER = '528123509768';
 
 All pages should reference this constant for orders.
 
-## Admin Dashboard (`nappan-admin-v2.html`)
+## Admin Dashboard (`pages/nappan-admin-v2.html`)
 
 Current admin includes:
 - Pedidos - filters, status updates, expandable details, delivery time display, pagination, CSV export
 - Productos - inline price editing
 - Clientes - CRUD operations
 - Configuración - WhatsApp, shipping, extras, gallery, tier discounts, Lunch Box extra labels
-- Estadísticas - client-rendered KPIs and charts (to be optimized)
+- Estadísticas - RPC-backed KPIs and analytics
 
 **Access:** Discrete admin link in `index.html` footer (not visible on section pages).
 
 ### Admin Architecture Priority
 
-Current baseline after Phase 6.1:
+Current baseline after Phase 7 (Analytics Backend Migration):
 
-- `nappan-admin-v2.html` is the admin shell/layout
-- `nappan-admin-v2.js` contains admin logic, state handling, rendering, CRUD flows, and client-side analytics
-- `admin-v2.css` contains extracted admin-specific styles
+- `pages/nappan-admin-v2.html` is the admin shell/layout
+- `js/admin-modules/nappan-admin-v2.js` contains admin logic, state handling, rendering, CRUD flows
+- `css/admin-v2.css` contains extracted admin-specific styles
 - `window.NappanAdminState` is the shared dashboard state surface
-- `supabase-client.js` already exposes:
+- `js/supabase-client.js` already exposes:
   - `loadProductsForSections()`
   - `loadProductsWithExtras()`
   - `onAuthStateChange()`
+  - RPC methods for analytics: `getStatsKpis()`, `getOrdersBySection()`, `getRevenueBySection()`, etc.
 
 - ✅ **Security & RLS Fix**: Resolved "new row violates row-level security policy" error (42501) occurring with new Supabase `sb_publishable_` keys.
   - Replaced direct `INSERT...RETURNING` (which required public SELECT access) with a `SECURITY DEFINER` RPC function `public_save_order`.
@@ -172,57 +173,62 @@ Current baseline after Phase 6.1:
   - Admin `Configuración` now allows editing the visible text for Lunch Box 1 and Lunch Box 2 extras.
   - Labels are stored in `app_config` and read at runtime by `nappan-lunchbox.html`.
 
-### Admin Modules (Phase 6.3 - Completed)
+### Admin Modules (Phase 6.3 - Completed, Phase 7 - RPC Optimization)
 
-8 domain-specific modules now handle all admin logic:
+8 domain-specific modules now handle all admin logic (located in `js/admin-modules/`):
 
-**`admin-modules/state.js`** (244 lines)
+**`js/admin-modules/state.js`** (244 lines)
 - Centralized state store with all admin data (orders, products, customers, config, stats, auth)
 - Cache invalidation rules with dependency tracking (products/orders → stats)
 - Safe getters that return deep copies to prevent mutations
 - Exported as both named (`AdminState`) and default export
 
-**`admin-modules/ui.js`** (150 lines)
+**`js/admin-modules/ui.js`** (150 lines)
 - `showToast(message, type)` - Toast notifications (info/success/error)
 - `escapeHtml(text)` - XSS prevention for user data
 - `clearElement()`, `setLoading()`, `setEmpty()`, `setError()` - State indicators
 
-**`admin-modules/auth.js`** (98 lines)
+**`js/admin-modules/auth.js`** (98 lines)
 - `init()` - Auth state listener setup
 - `login(email, password)` - Sign-in with AdminState tracking
 - `logout()` - Sign-out + full state invalidation
 - `showDashboard()` / `showLogin()` - UI visibility toggle
 
-**`admin-modules/orders.js`** (176 lines)
+**`js/admin-modules/orders.js`** (176 lines)
 - `load()` - Fetch + cache orders
 - `applyFilters()` / `setFilter()` - Search, section, status, deleted flag
 - `getCurrentPageOrders()` / `nextPage()` / `previousPage()` - Pagination (20 per page)
 - `updateStatus()` / `saveEdit()` / `delete()` / `recover()` - CRUD operations
 - `exportCSV()` - Download filtered orders as CSV
 
-**`admin-modules/products.js`** (147 lines)
+**`js/admin-modules/products.js`** (147 lines)
 - `load()` - Fetch all products + extras in parallel
 - `updatePrice(productId, newPrice)` - Inline price editing
 - Exports all to `window.Products`
 
-**`admin-modules/customers.js`** (72 lines)
+**`js/admin-modules/customers.js`** (72 lines)
 - `load()` / `insert()` / `update()` / `delete()` - Full CRUD
 - Cache + state management via AdminState
 - Exports to `window.Customers`
 
-**`admin-modules/config.js`** (99 lines)
+**`js/admin-modules/config.js`** (99 lines)
 - `load()` - Fetch all 5 config sections in parallel (WhatsApp, shipping, extras, gallery, tier discounts)
 - `saveWhatsapp()` / `saveShipping()` / `saveTierDiscounts()` - Save mutations
 - Safe JSON parsing with fallbacks
 
-**`admin-modules/stats.js`** (147 lines — Phase 7 optimized)
+**`js/admin-modules/stats.js`** (147 lines — Phase 7 optimized with RPC)
 - `load()` - Ensure dependencies, fetch KPIs from RPC functions
 - `computeStats()` - Calls 7 RPC functions in parallel (async), returns: totalOrders, totalRevenue, averageOrder, ordersBySection, revenueBySection, ordersByStatus, ordersByHour, topProducts (top 10), topCustomers (top 10)
 - All client-side helper methods removed (computation now in PostgreSQL via RPC)
 
+**`js/admin-modules/nappan-admin-v2.js`** (Main admin logic)
+- Admin logic, state handling, rendering, CRUD flows
+- All UI rendering and interactions
+- Exposes functions to `window` for backward compatibility with inline onclick handlers
+
 **Integration:**
 - All modules expose to `window` for backward compatibility
-- Imported via `<script type="module">` in HTML
+- Imported via `<script type="module">` in HTML (`pages/nappan-admin-v2.html`)
 - Existing `nappan-admin-v2.js` functions still used for all UI rendering/interactions
 - No breaking changes to dashboard functionality
 
