@@ -244,7 +244,6 @@
       script.dataset.mapsLoading = 'true';
       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
-      script.defer = true;
       document.head.appendChild(script);
     }
 
@@ -398,45 +397,55 @@
 
     async fetchDistance(destinationCP) {
       return new Promise((resolve) => {
-        // Fallback de 5 segundos para evitar que el chat se quede colgado
+        // Fallback de 10 segundos para evitar que el chat se quede colgado
         const timeout = setTimeout(() => {
           console.error('Distance Matrix timeout');
           resolve(null);
-        }, 5000);
+        }, 10000);
 
-        if (!window.google || !window.google.maps) {
-          clearTimeout(timeout);
-          console.error('Google Maps SDK no cargado');
-          return resolve(null);
-        }
-
-        try {
-          const service = new google.maps.DistanceMatrixService();
-          service.getDistanceMatrix({
-            origins: [ORIGIN_ADDRESS],
-            destinations: [`${destinationCP}, Monterrey, NL, Mexico`],
-            travelMode: google.maps.TravelMode.DRIVING,
-            unitSystem: google.maps.UnitSystem.METRIC,
-          }, (response, status) => {
+        // Esperar a que Google Maps cargue (máximo 8 segundos)
+        let waitAttempts = 0;
+        const waitForMaps = setInterval(() => {
+          if (window.google && window.google.maps) {
+            clearInterval(waitForMaps);
+            performDistanceMatrix();
+          } else if (waitAttempts++ > 80) {
+            clearInterval(waitForMaps);
             clearTimeout(timeout);
-            try {
-              if (status === 'OK' && response && response.rows && response.rows[0] && response.rows[0].elements && response.rows[0].elements[0].status === 'OK') {
-                const distanceMeters = response.rows[0].elements[0].distance.value;
-                resolve(distanceMeters / 1000);
-              } else {
-                console.error('Error de Distance Matrix:', status, response);
+            console.error('Google Maps SDK no cargó después de 8 segundos');
+            return resolve(null);
+          }
+        }, 100);
+
+        const performDistanceMatrix = () => {
+          try {
+            const service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix({
+              origins: [ORIGIN_ADDRESS],
+              destinations: [`${destinationCP}, Monterrey, NL, Mexico`],
+              travelMode: google.maps.TravelMode.DRIVING,
+              unitSystem: google.maps.UnitSystem.METRIC,
+            }, (response, status) => {
+              clearTimeout(timeout);
+              try {
+                if (status === 'OK' && response && response.rows && response.rows[0] && response.rows[0].elements && response.rows[0].elements[0].status === 'OK') {
+                  const distanceMeters = response.rows[0].elements[0].distance.value;
+                  resolve(distanceMeters / 1000);
+                } else {
+                  console.error('Error de Distance Matrix:', status, response);
+                  resolve(null);
+                }
+              } catch (err) {
+                console.error('Error procesando Matrix:', err);
                 resolve(null);
               }
-            } catch (err) {
-              console.error('Error procesando Matrix:', err);
-              resolve(null);
-            }
-          });
-        } catch (err) {
-          clearTimeout(timeout);
-          console.error('Excepción al instanciar DistanceMatrix:', err);
-          resolve(null);
-        }
+            });
+          } catch (err) {
+            clearTimeout(timeout);
+            console.error('Excepción al instanciar DistanceMatrix:', err);
+            resolve(null);
+          }
+        };
       });
     }
 

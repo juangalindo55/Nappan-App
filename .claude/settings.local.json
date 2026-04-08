@@ -51,7 +51,10 @@
       "mcp__claude_ai_Supabase__execute_sql",
       "mcp__claude_ai_Supabase__list_extensions",
       "Bash(.\\\\.claude\\\\serve.bat)",
-      "Bash(curl -s http://localhost:8080/nappan-admin-v2.html)"
+      "Bash(curl -s http://localhost:8080/nappan-admin-v2.html)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__emulate"
     ]
   }
 }

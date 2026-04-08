@@ -131,7 +131,11 @@ body.page-home {
 
 body.page-home {
     font-family: var(--font-sans);
-    background: var(--dark);
+    background: linear-gradient(to bottom,
+      #3D2817 0%,
+      #5C3D28 40%,
+      #9B6B3F 52%,
+      #F0E8D8 90%);
     color: var(--cream);
     min-height: 100vh;
     overflow-x: hidden;
@@ -139,17 +143,54 @@ body.page-home {
 
   /* HERO */
 body.page-home #page-home .hero {
-    min-height: 58vh;
+    min-height: 85vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
     padding: 88px 24px 60px;
     position: relative;
-    background: radial-gradient(ellipse at 50% 30%, rgba(255,217,61,0.12) 0%, transparent 70%),
-                radial-gradient(ellipse at 80% 80%, rgba(255,140,66,0.08) 0%, transparent 50%),
-                var(--dark);
+    background: url('../images/Brunchtime.jpeg') center / cover no-repeat;
+  }
+
+  /* Mobile Portrait — full width, image at top */
+  @media (max-width: 768px) and (orientation: portrait) {
+    body.page-home #page-home .hero {
+      min-height: 40vh !important;
+      padding: 0 !important;
+      background-image: url('../images/Brunchtime.jpeg');
+      background-size: 100% auto !important;
+      background-position: top;
+      background-repeat: no-repeat;
+    }
+  }
+
+  /* Mobile Landscape — compact, cover */
+  @media (max-width: 768px) and (orientation: landscape) {
+    body.page-home #page-home .hero {
+      min-height: 100vh !important;
+      padding: 0 !important;
+      background-image: url('../images/Brunchtime.jpeg');
+      background-size: cover !important;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  }
+
+  /* Mobile Portrait — sections-title minimal, centered vertically */
+  @media (max-width: 768px) and (orientation: portrait) {
+    body.page-home .sections-title {
+      padding: 12px 12px 8px !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px;
+    }
+    body.page-home .sections-title h2 {
+      margin-top: -15px;
+    }
   }
 
 body.page-home .hero-logo {
@@ -244,23 +285,23 @@ body.page-home .scroll-hint::after {
   /* SECTIONS */
 body.page-home .sections-title {
     text-align: center;
-    padding: 80px 24px 48px;
+    padding: 100px 24px 70px;
     position: relative;
-    background: #F5F0E8;
+    background: transparent;
   }
 
 body.page-home .sections-title h2 {
     font-family: var(--font-sans);
     font-size: clamp(24px, 6vw, 40px);
-    font-weight: var(--font-bold);
+    font-weight: var(--font-semibold);
     line-height: 1.3;
     letter-spacing: -0.5px;
-    color: var(--brown);
+    color: var(--cream);
     margin-bottom: 12px;
   }
 
 body.page-home .sections-title p {
-    color: rgba(45,27,14,0.55);
+    color: rgba(255,248,237,0.75);
     font-size: 14px;
     font-style: italic;
   }
@@ -275,11 +316,12 @@ body.page-home .divider {
   /* CARDS GRID */
 body.page-home .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 2px;
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 20px 80px;
+    background: transparent;
   }
 
 body.page-home .section-card {
@@ -310,22 +352,22 @@ body.page-home .card-bg {
 
   /* Individual card backgrounds */
 body.page-home .card-lunchbox .card-bg {
-    background-image: url('images/bg-card-lunchbox.jpg');
+    background-image: url('../images/bg-card-lunchbox.jpg');
     background-size: cover;
     background-position: center;
   }
 body.page-home .card-eventos .card-bg {
-    background-image: url('images/nappan-stand.webp');
+    background-image: url('../images/nappan-stand.webp');
     background-size: cover;
     background-position: center;
   }
 body.page-home .card-fitbar .card-bg {
-    background-image: url('images/bg-card-fitbar.jpg');
+    background-image: url('../images/bg-card-fitbar.jpg');
     background-size: cover;
     background-position: center;
   }
 body.page-home .card-nappanbox .card-bg {
-    background-image: url('images/bg-card-nappanbox.jpg');
+    background-image: url('../images/bg-card-nappanbox.jpg');
     background-size: cover;
     background-position: center top;
   }
@@ -414,6 +456,10 @@ body.page-home .card-fitbar .card-cta:hover { background: #7DD4B0; }
 body.page-home .card-nappanbox .card-cta { background: #FFB3C6; }
 body.page-home .card-nappanbox .card-cta:hover { background: #FF8FAE; }
 
+/* Eventos en Vivo card gets gold CTA */
+body.page-home .card-eventos .card-cta { background: var(--gold); color: var(--brown); }
+body.page-home .card-eventos .card-cta:hover { background: #C4941A; }
+
   /* COMING SOON BADGE */
 body.page-home .coming-soon {
     position: absolute;
@@ -441,6 +487,7 @@ body.page-home footer {
     font-size: 12px;
     font-style: italic;
     letter-spacing: 1px;
+    background: #1A1008;
   }
 
   footer span { color: var(--yellow); }
@@ -1660,11 +1707,11 @@ body.page-fitbar .product-image {
       background: white;
     }
 
-body.page-fitbar .product-image.img-cold-protein-latte { background-image: url('images/cold-protein-latte.webp'); background-size: cover; background-position: center; }
-body.page-fitbar .product-image.img-cold-brew          { background-image: url('images/cold-brew.webp'); background-size: cover; background-position: center; }
-body.page-fitbar .product-image.img-black-coffee       { background-image: url('images/black-coffee.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-cold-protein-latte { background-image: url('../images/cold-protein-latte.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-cold-brew          { background-image: url('../images/cold-brew.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-black-coffee       { background-image: url('../images/black-coffee.webp'); background-size: cover; background-position: center; }
 body.page-fitbar .product-image.img-power-pancakes     { background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%); }
-body.page-fitbar .product-image.img-protein-minis      { background-image: url('images/Protein Minipancakes.webp'); background-size: cover; background-position: center; }
+body.page-fitbar .product-image.img-protein-minis      { background-image: url('../images/Protein Minipancakes.webp'); background-size: cover; background-position: center; }
 
 body.page-fitbar .field-full { grid-column: 1 / -1; }
 
@@ -2833,4 +2880,26 @@ body.page-eventos   .nav-item.nav-eventos {
 }
 .nav-float-btn.open:hover {
   transform: rotate(90deg) scale(1.08);
+}
+
+/* Mobile logo optimization for lunchbox and eventos pages */
+@media (max-width: 768px) {
+  body.page-lunchbox header,
+  body.page-eventos header {
+    height: 70px;
+    padding: 0 12px;
+  }
+
+  body.page-lunchbox .logo-img,
+  body.page-eventos .logo-img {
+    height: 50px;
+  }
+
+  body.page-lunchbox {
+    padding-top: 70px;
+  }
+
+  body.page-eventos {
+    padding-top: 70px;
+  }
 }

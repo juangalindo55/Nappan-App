@@ -7,16 +7,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="../css/styles.css?v=4">
 <!-- Supabase Integration (Phase 1) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js"></script>
+<script src="../js/supabase-client.js"></script>
 </head>
 <body class="page-eventos">
 <!-- HEADER -->
 <header>
-  <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
-<img src="images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" style="width: 90px; height: auto;"/>
+  <button class="back-btn" onclick="window.location.href='../index.html'">← Inicio</button>
+<img src="../images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" />
   <div></div>
 </header>
 
@@ -184,7 +184,7 @@
       // Defaults si Supabase falla
       GALLERY_PHOTOS = {
         cumpleanos:   { label: '🎂 Cumpleaños · Así lo hacemos',  img1: null, img2: null },
-        wellness:     { label: '💪 Wellness · Energía en vivo',   img1: 'images/wellness-event.webp', img2: null },
+        wellness:     { label: '💪 Wellness · Energía en vivo',   img1: '../images/wellness-event.webp', img2: null },
         corporativos: { label: '🏢 Corporativos · Marca en vivo', img1: null, img2: null },
       };
     }
@@ -245,7 +245,7 @@
   }
 </script>
 
-<script src="utils.js"></script>
+<script src="../js/utils.js"></script>
 <script>
   function showToast(msg) {
     const t = document.getElementById('ev-toast');
@@ -355,7 +355,7 @@
   document.getElementById('ev-date').min = minDate.toISOString().split('T')[0];
 </script>
 
-<script src="chatbot.js"></script>
+<script src="../js/chatbot.js"></script>
 
 <!-- FLOATING NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>

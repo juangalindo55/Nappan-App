@@ -42,6 +42,7 @@
 - Fit Bar: phone field + lookup + welcome badge + tier pricing applied to cart
 - Nappan Box: phone lookup + welcome badge + tier pricing applied to both Normal/Premium boxes
 - Eventos en Vivo remains excluded from Phase 5 because it is an open quotation flow
+- Admin policies for `customers` now include the required `SELECT`, `INSERT`, `UPDATE`, and `DELETE` permissions for authenticated admin usage
 
 #### Phase 6.2: Query Optimization, Security & Directory Cleanup (Completed)
 - ✅ **Security & RLS Fix**: Switched public `saveOrder()` path from direct PostgreSQL `INSERT` to a `SECURITY DEFINER` RPC function `public_save_order()`.
@@ -139,20 +140,6 @@
 2. **Phase 7.3** - CSS Extraction (separate admin-specific styles from global styles.css)
 3. **Phase 7.4** - Rendering Phase (add render() methods to modules, safe DOM builders)
 4. Optional polish - PWA, service worker, enhanced mobile UX
-
----
-
-## SQL Still to Run (Phase 5)
-
-Execute in Supabase SQL Editor to enable admin `INSERT` / `DELETE` on customers:
-
-```sql
-CREATE POLICY "customers_insert_admin" ON customers
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
-CREATE POLICY "customers_delete_admin" ON customers
-  FOR DELETE USING (auth.role() = 'authenticated');
-```
 
 ---
 

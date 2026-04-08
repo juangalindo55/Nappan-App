@@ -7,13 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="../css/styles.css?v=4">
 <!-- Supabase Integration (Phase 1) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA&libraries=places"></script>
 </head>
 <body class="page-nappanbox">
-  <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
+  <button class="back-btn" onclick="window.location.href='../index.html'">← Inicio</button>
   
 
 <!-- HERO -->
@@ -34,9 +35,9 @@
 
   <!-- GALLERY -->
   <div class="gallery">
-    <div class="gallery-img"><img src="images/nappanbox-gallery-1.jpg" alt="Nappan Box"/></div>
-    <div class="gallery-img"><img src="images/nappanbox-gallery-2.jpg" alt="Nappan Box"/></div>
-    <div class="gallery-img"><img src="images/nappanbox-gallery-3.jpg" alt="Nappan Box"/></div>
+    <div class="gallery-img"><img src="../images/nappanbox-gallery-1.jpg" alt="Nappan Box"/></div>
+    <div class="gallery-img"><img src="../images/nappanbox-gallery-2.jpg" alt="Nappan Box"/></div>
+    <div class="gallery-img"><img src="../images/nappanbox-gallery-3.jpg" alt="Nappan Box"/></div>
   </div>
 
   <!-- PRICE CARD -->
@@ -130,8 +131,8 @@
 
   <!-- GALLERY -->
   <div class="gallery">
-    <div class="gallery-img"><img src="images/bg-card-nappanbox.jpg" alt="Premium Box"/></div>
-    <div class="gallery-img"><img src="images/nappanbox-gallery-4.jpg" alt="Premium Box"/></div>
+    <div class="gallery-img"><img src="../images/bg-card-nappanbox.jpg" alt="Premium Box"/></div>
+    <div class="gallery-img"><img src="../images/nappanbox-gallery-4.jpg" alt="Premium Box"/></div>
   </div>
 
   <!-- PRICE CARD -->
@@ -231,7 +232,7 @@
 
 
 
-<script src="utils.js"></script>
+<script src="../js/utils.js"></script>
 <script>
   // Precios dinámicos
   let nappaBoxPrice = 450;
@@ -796,7 +797,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
 
 </script>
 
-<script src="chatbot.js"></script>
+<script src="../js/chatbot.js"></script>
 
 <!-- FLOATING NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>

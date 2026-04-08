@@ -1,9 +1,9 @@
 function goTo(page) {
   if (
-    page === 'nappan-lunchbox.html' ||
-    page === 'nappan-box.html' ||
-    page === 'nappan-fitbar.html' ||
-    page === 'nappan-eventos.html'
+    page === 'pages/nappan-lunchbox.html' ||
+    page === 'pages/nappan-box.html' ||
+    page === 'pages/nappan-fitbar.html' ||
+    page === 'pages/nappan-eventos.html'
   ) {
     window.location.href = page;
   } else {

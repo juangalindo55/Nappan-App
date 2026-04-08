@@ -7,16 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="../css/styles.css?v=3">
 <!-- Supabase Integration (Phase 1) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA&libraries=places"></script>
 </head>
 <body class="page-lunchbox">
 <!-- HEADER -->
 <header>
-  <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
-<img src="images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" style="width: 90px; height: auto;"/>
+  <button class="back-btn" onclick="window.location.href='../index.html'">← Inicio</button>
+<img src="../images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" />
   <button class="cart-btn" onclick="toggleCart()">
     🛒 Mi pedido
     <span class="cart-badge" id="cartBadge">0</span>
@@ -27,7 +28,7 @@
 <div class="hero" style="position:relative;overflow:hidden;padding:0;">
   <div class="hero-bg" style="
     position:absolute;inset:0;
-    background-image:url('images/bg-card-lunchbox.jpg');
+    background-image:url('../images/bg-card-lunchbox.jpg');
     background-size:cover;
     background-position:center;
     filter:brightness(0.45) saturate(1.2);
@@ -91,7 +92,7 @@
   <!-- BOX 1 -->
   <div class="product-card" id="card1">
     <div class="card-header" style="
-      background-image: url('images/bg-box1-header.jpg');
+      background-image: url('../images/bg-box1-header.jpg');
       background-size: cover;
       background-position: center center;
       position: relative;
@@ -133,7 +134,7 @@
             <div class="art-name">Osito</div>
           </div>
           <div class="art-opt" data-art="Capibara" onclick="selectArt(1, this)">
-            <img src="images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
+            <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
             <div class="art-name">Capibara</div>
           </div>
           <div class="art-opt" data-art="Pollito" onclick="selectArt(1, this)">
@@ -175,7 +176,7 @@
   <!-- BOX 2 -->
   <div class="product-card" id="card2">
     <div class="card-header box2" style="
-      background-image: url('images/bg-box2-header.jpg');
+      background-image: url('../images/bg-box2-header.jpg');
       background-size: 60%;
       background-position: center center;
       position: relative;
@@ -219,7 +220,7 @@
             <div class="art-name">Osito</div>
           </div>
           <div class="art-opt" data-art="Capibara" onclick="selectArt(2, this)">
-            <img src="images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
+            <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
             <div class="art-name">Capibara</div>
           </div>
           <div class="art-opt" data-art="Pollito" onclick="selectArt(2, this)">
@@ -298,11 +299,11 @@
 
 
 
-<script src="utils.js"></script>
+<script src="../js/utils.js"></script>
 <script>
   let cart = [];
   let cartOpen = false;
-  const capybaraImg = 'images/pancakeart-capibara.png';
+  const capybaraImg = '../images/pancakeart-capibara.png';
 
   // ── Estado de envío ────────────────────────────────────────
   let shippingCost  = 0;    // 0 = no calculado / fuera de zona
@@ -903,7 +904,7 @@
   renderCart();
 </script>
 
-<script src="chatbot.js"></script>
+<script src="../js/chatbot.js"></script>
 
 <!-- FLOATING NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>
