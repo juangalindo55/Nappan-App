@@ -13,6 +13,11 @@ module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Content-Type', 'application/json');
 
+  // Disable caching - environment variables change and we need fresh values
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   // Return environment variables as JSON
   // On Vercel: values come from dashboard env vars
   // Locally: values come from .env file
