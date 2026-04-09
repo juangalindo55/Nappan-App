@@ -52,15 +52,21 @@
     }
   }
 
-  function getDb() {
+  async function getDb() {
+    // Wait for NappanDB to be exposed (happens after /api/config loads)
+    let maxAttempts = 100;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
     if (!window.NappanDB) {
-      throw new Error('Supabase client no disponible');
+      throw new Error('Supabase client no disponible después de 10 segundos');
     }
     return window.NappanDB;
   }
 
   async function loadSectionProducts() {
-    const db = getDb();
+    const db = await getDb();
     if (typeof db.loadProductsForSections === 'function') {
       return db.loadProductsForSections(ADMIN_SECTIONS);
     }
@@ -70,7 +76,7 @@
   }
 
   async function loadProductsWithExtras() {
-    const db = getDb();
+    const db = await getDb();
     if (typeof db.loadProductsWithExtras === 'function') {
       return db.loadProductsWithExtras(ADMIN_SECTIONS);
     }
@@ -109,13 +115,17 @@
     document.getElementById('submitBtn').textContent = 'Entrando...';
 
     try {
-      const result = await getDb().signIn(email, password);
+      if (!window.Auth || typeof window.Auth.login !== 'function') {
+        throw new Error('Auth module no disponible');
+      }
 
-      if (result.error) {
+      const result = await window.Auth.login(email, password);
+
+      if (!result) {
         showToast('Email o contraseña incorrectos', 'error');
-        document.getElementById('loginError').textContent = result.error.message;
+        document.getElementById('loginError').textContent = 'Credenciales inválidas';
         document.getElementById('loginError').style.display = 'block';
-      } else if (result.session) {
+      } else {
         showDashboardShell();
         await loadOrders();
       }
@@ -129,7 +139,11 @@
   }
 
   async function handleLogout() {
-    await getDb().signOut();
+    if (!window.Auth || typeof window.Auth.logout !== 'function') {
+      throw new Error('Auth module no disponible');
+    }
+
+    await window.Auth.logout();
     showLoginShell();
     document.getElementById('loginForm').reset();
   }
@@ -1516,7 +1530,7 @@
       return;
     }
 
-    const db = getDb();
+    const db = await getDb();
     const result = await db.getSession();
     if (result && result.session) {
       showDashboardShell();

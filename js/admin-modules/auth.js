@@ -8,9 +8,15 @@ import { AdminState } from './state.js';
 import { UI } from './ui.js';
 
 export const Auth = {
-  getDb() {
+  async getDb() {
+    // Wait for NappanDB to be exposed (happens after /api/config loads)
+    let maxAttempts = 100;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
     if (!window.NappanDB) {
-      throw new Error('Supabase client no disponible');
+      throw new Error('Supabase client no disponible después de 10 segundos');
     }
     return window.NappanDB;
   },
@@ -18,7 +24,7 @@ export const Auth = {
   async init() {
     AdminState.auth.loading = true;
     try {
-      const db = this.getDb();
+      const db = await this.getDb();
       if (typeof db.onAuthStateChange === 'function') {
         db.onAuthStateChange((user) => {
           AdminState.auth.user = user;
@@ -43,7 +49,7 @@ export const Auth = {
     AdminState.auth.error = null;
 
     try {
-      const db = this.getDb();
+      const db = await this.getDb();
       const { data, error } = await db.supabase.auth.signInWithPassword({
         email,
         password
@@ -69,7 +75,7 @@ export const Auth = {
 
   async logout() {
     try {
-      const db = this.getDb();
+      const db = await this.getDb();
       await db.supabase.auth.signOut();
       AdminState.auth.user = null;
       AdminState.invalidate('all');
