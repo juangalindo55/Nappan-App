@@ -1,10 +1,9 @@
 {
-  "buildCommand": "echo 'Static site - no build needed'",
+  "buildCommand": "echo 'Static site with API routes - no build needed'",
   "outputDirectory": ".",
-  "env": {
-    "SUPABASE_URL": "@supabase_url",
-    "SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "GOOGLE_MAPS_API_KEY": "@google_maps_api_key",
-    "WHATSAPP_NUMBER": "@whatsapp_number"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
   }
 }

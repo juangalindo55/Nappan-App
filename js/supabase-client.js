@@ -1,12 +1,16 @@
 /**
  * Nappan App — Supabase Client Initialization
  * This file initializes the Supabase client and exports the NappanDB API
+ *
+ * Credentials are injected via window.NappanConfig (from js/config.js)
+ * which loads environment variables from Vercel at runtime
  */
 
-const supabaseUrl = 'https://rbhjacmuelcjgxdyxmuh.supabase.co';
-const supabaseAnonKey = 'sb_publishable_d958WcFSLNa6yVan61MiWQ_e7FS8NL1';
-
 let supabaseClient = null;
+
+// Get credentials from config
+const supabaseUrl = window.NappanConfig?.SUPABASE_URL;
+const supabaseAnonKey = window.NappanConfig?.SUPABASE_ANON_KEY;
 
 async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
   if (!supabaseClient) return { customer_id: null, error: 'Supabase not initialized' };
