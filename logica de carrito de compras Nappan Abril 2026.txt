@@ -1,0 +1,23 @@
+Lógica del Carrito de Compras - Nappan App (Abril 2026)
+
+1. Estado en Memoria (Local por Página)
+Cada línea de negocio (Fitbar, Box, Lunchbox) maneja su propio estado del carrito en memoria del cliente usando un arreglo global (ej. let cartPFB = [];).
+- Adición de productos: Se agregan objetos individuales al arreglo con name, price, category, image y un id único (Date.now()).
+- Precios dinámicos: Se utilizan tarifas dinámicas configuradas en el admin si están disponibles.
+
+2. Actualización de la Interfaz (updateCart())
+- Agrupación: Los ítems se agrupan por nombre para mostrar cantidades acumuladas en la UI.
+- Renderizado: Se reconstruye el HTML del contenedor de ítems cada vez que cambia el estado.
+- Cálculos: Se suma el subtotal base de todos los elementos del arreglo.
+
+3. Descuentos por Niveles (Tiers) y Envíos
+- Fidelización: Detección automática de clientes recurrentes por teléfono para aplicar descuentos de Tier (Premium/Business).
+- Logística: Cálculo de envío dinámico basado en la distancia (Google Maps API) y tablas de costos por zona (CP).
+
+4. Flujo de Checkout y Persistencia
+- Validación: Verificación de campos obligatorios y montos mínimos de pedido.
+- Persistencia: Los pedidos se guardan en Supabase mediante la función NappanDB.saveOrder(), almacenando el carrito completo en formato JSON (raw_cart).
+- Handoff: Redirección final a WhatsApp con un mensaje estructurado y amigable que incluye todos los detalles del ticket.
+
+5. Administración
+- El panel administrativo permite visualizar y editar el contenido del "raw_cart" para ajustes manuales posteriores al pedido.
