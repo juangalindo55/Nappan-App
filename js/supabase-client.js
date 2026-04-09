@@ -7,10 +7,7 @@
  */
 
 let supabaseClient = null;
-
-// Get credentials from config
-const supabaseUrl = window.NappanConfig?.SUPABASE_URL;
-const supabaseAnonKey = window.NappanConfig?.SUPABASE_ANON_KEY;
+let nappanDBReady = false;
 
 async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
   if (!supabaseClient) return { customer_id: null, error: 'Supabase not initialized' };
@@ -53,9 +50,23 @@ function initializeSupabaseClient() {
     return false;
   }
 
+  // Guard: don't initialize with localhost fallback unless config is actually READY
+  // (prevents exposing a broken client while /api/config is still loading)
+  if (url === 'http://localhost:54321' && window.NappanConfig?.READY !== true) {
+    console.log('⏳ Skipping Supabase init with localhost fallback; waiting for /api/config');
+    return false;
+  }
+
   try {
     supabaseClient = window.supabase.createClient(url, key);
     console.log('✓ Supabase client initialized with credentials from window.NappanConfig');
+
+    // Only expose NappanDB once we have a real client
+    if (!nappanDBReady) {
+      window.NappanDB = NappanDBAPI;
+      nappanDBReady = true;
+      console.log('✓ NappanDB API exposed on window');
+    }
     return true;
   } catch (error) {
     console.error('❌ Failed to initialize Supabase:', error);
@@ -68,9 +79,6 @@ function initializeSupabaseClient() {
  * This allows creating the Supabase client after credentials are asynchronously loaded
  */
 window.reinitializeSupabase = initializeSupabaseClient;
-
-// Attempt initialization immediately (fallback for edge cases)
-initializeSupabaseClient();
 
 // Save order to database
 async function saveOrder(orderPayload) {
@@ -667,9 +675,9 @@ async function getTopCustomers(limit = 10) {
   }
 }
 
-// Export API
-window.NappanDB = {
-  client: supabaseClient,
+// Export API (exposed on window only after initializeSupabaseClient succeeds)
+const NappanDBAPI = {
+  get client() { return supabaseClient; },
   saveOrder,
   loadAppConfig,
   getConfigValue,
@@ -707,4 +715,7 @@ window.NappanDB = {
   getTopCustomers
 };
 
-console.log('✓ NappanDB API ready');
+console.log('✓ NappanDB API defined (pending initialization)');
+
+// Attempt immediate init — will no-op if config not READY and URL is localhost fallback
+initializeSupabaseClient();
