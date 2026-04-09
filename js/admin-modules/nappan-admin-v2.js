@@ -115,8 +115,15 @@
     document.getElementById('submitBtn').textContent = 'Entrando...';
 
     try {
+      // Wait for Auth module to be exposed (happens after <script type="module"> runs)
+      let maxAttempts = 50;
+      while ((!window.Auth || typeof window.Auth.login !== 'function') && maxAttempts > 0) {
+        await new Promise(r => setTimeout(r, 100));
+        maxAttempts--;
+      }
+
       if (!window.Auth || typeof window.Auth.login !== 'function') {
-        throw new Error('Auth module no disponible');
+        throw new Error('Auth module no disponible después de 5 segundos');
       }
 
       const result = await window.Auth.login(email, password);
@@ -139,6 +146,13 @@
   }
 
   async function handleLogout() {
+    // Wait for Auth module if not ready
+    let maxAttempts = 50;
+    while ((!window.Auth || typeof window.Auth.logout !== 'function') && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
     if (!window.Auth || typeof window.Auth.logout !== 'function') {
       throw new Error('Auth module no disponible');
     }
