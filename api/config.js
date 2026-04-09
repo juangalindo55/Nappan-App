@@ -1,5 +1,5 @@
 /**
- * Vercel Edge Function - Config API
+ * Vercel Serverless Function - Config API
  *
  * This function injects environment variables from Vercel into the client
  * It's called by js/config.js at runtime to load credentials
@@ -7,7 +7,7 @@
  * URL: /api/config
  */
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   // CORS headers for client-side fetch
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -24,4 +24,4 @@ export default function handler(req, res) {
   };
 
   res.status(200).json(config);
-}
+};
