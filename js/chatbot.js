@@ -184,7 +184,7 @@
   document.head.appendChild(styleEl);
 
   // ── CONFIGURACIÓN ──────────────────────────────────────────
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA';
+  const GOOGLE_MAPS_API_KEY = window.NappanConfig?.GOOGLE_MAPS_API_KEY || 'AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA';
   const ORIGIN_ADDRESS = 'Cumbres, Monterrey, 64349, Mexico';
 
   // ── CLASE CHATBOT ──────────────────────────────────────────
@@ -482,7 +482,7 @@
     }
 
     async openWhatsApp() {
-      let number = '528123509768'; // Default
+      let number = window.NappanConfig?.WHATSAPP_NUMBER || '528123509768'; // From environment
 
       try {
         if (window.NappanDB) {
