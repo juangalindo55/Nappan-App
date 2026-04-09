@@ -31,17 +31,46 @@ async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
   return { customer_id: data || null, error };
 }
 
-// Initialize Supabase
-if (typeof window.supabase === 'undefined') {
-  console.error('❌ Supabase CDN not loaded!');
-} else {
+/**
+ * Initialize Supabase Client with credentials from window.NappanConfig
+ *
+ * This function is called by js/config.js after credentials are loaded from /api/config
+ * Separated from immediate execution to avoid race conditions with async config loading
+ */
+function initializeSupabaseClient() {
+  // Validate prerequisites
+  if (typeof window.supabase === 'undefined') {
+    console.error('❌ Supabase CDN not loaded!');
+    return false;
+  }
+
+  // Get fresh credentials from config
+  const url = window.NappanConfig?.SUPABASE_URL;
+  const key = window.NappanConfig?.SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    console.warn('⚠️ Supabase config not ready yet. Initialization deferred.');
+    return false;
+  }
+
   try {
-    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    console.log('✓ Supabase client initialized');
+    supabaseClient = window.supabase.createClient(url, key);
+    console.log('✓ Supabase client initialized with credentials from window.NappanConfig');
+    return true;
   } catch (error) {
-    console.error('❌ Failed to init Supabase:', error);
+    console.error('❌ Failed to initialize Supabase:', error);
+    return false;
   }
 }
+
+/**
+ * Expose reinitialization function for config.js to call
+ * This allows creating the Supabase client after credentials are asynchronously loaded
+ */
+window.reinitializeSupabase = initializeSupabaseClient;
+
+// Attempt initialization immediately (fallback for edge cases)
+initializeSupabaseClient();
 
 // Save order to database
 async function saveOrder(orderPayload) {
