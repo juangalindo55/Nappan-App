@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="../css/admin-v2.css">
@@ -339,14 +340,14 @@
 
 <script type="module">
 // Import new modules and expose them globally for use by nappan-admin-v2.js
-import { AdminState } from './admin-modules/state.js';
-import { UI } from './admin-modules/ui.js';
-import { Auth } from './admin-modules/auth.js';
-import { Orders } from './admin-modules/orders.js';
-import { Products } from './admin-modules/products.js';
-import { Customers } from './admin-modules/customers.js';
-import { Config } from './admin-modules/config.js';
-import { Stats } from './admin-modules/stats.js';
+import { AdminState } from '../js/admin-modules/state.js';
+import { UI } from '../js/admin-modules/ui.js';
+import { Auth } from '../js/admin-modules/auth.js';
+import { Orders } from '../js/admin-modules/orders.js';
+import { Products } from '../js/admin-modules/products.js';
+import { Customers } from '../js/admin-modules/customers.js';
+import { Config } from '../js/admin-modules/config.js';
+import { Stats } from '../js/admin-modules/stats.js';
 
 window.AdminState = AdminState;
 window.Auth = Auth;
