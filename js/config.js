@@ -72,7 +72,6 @@ async function loadConfig() {
             // Still initialize Google Maps with whatever we have
             initGoogleMapsAPI();
         }
-    }
     })();
 
     return configLoadingPromise;
