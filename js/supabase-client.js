@@ -678,6 +678,7 @@ async function getTopCustomers(limit = 10) {
 // Export API (exposed on window only after initializeSupabaseClient succeeds)
 const NappanDBAPI = {
   get client() { return supabaseClient; },
+  get supabase() { return supabaseClient; },
   saveOrder,
   loadAppConfig,
   getConfigValue,
