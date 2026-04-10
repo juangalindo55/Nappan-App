@@ -68,16 +68,20 @@ async function loadConfig() {
  * Initialize Google Maps API dynamically from environment variables
  * This replaces hardcoded API keys in HTML <script> tags
  */
+let googleMapsInitialized = false;
+
 function initGoogleMapsAPI() {
     if (!window.NappanConfig?.GOOGLE_MAPS_API_KEY) {
         console.warn('⚠️ Google Maps API key not configured. Map features will be disabled.');
         return;
     }
 
-    // Check if already loaded
-    if (window.google?.maps) {
+    // Check if already loaded or initialization already in progress
+    if (window.google?.maps || googleMapsInitialized) {
         return;
     }
+
+    googleMapsInitialized = true;
 
     // Dynamically inject Google Maps script
     const script = document.createElement('script');
