@@ -21,47 +21,61 @@ window.NappanConfig = {
 /**
  * Load configuration from API
  * This function fetches the actual credentials from /api/config
+ * Only executes once globally to prevent duplicate Google Maps script injection
  */
+let configLoadingPromise = null;
+
 async function loadConfig() {
-    try {
-        const response = await fetch('/api/config');
-        if (!response.ok) {
-            throw new Error(`Config API returned status ${response.status}`);
-        }
-
-        const config = await response.json();
-
-        // Merge with window.NappanConfig
-        Object.assign(window.NappanConfig, config);
-        window.NappanConfig.READY = true;
-
-        console.log('✓ Configuration loaded from API');
-
-        // Re-initialize Supabase client with real credentials
-        // This must happen AFTER config is loaded, not before
-        if (window.reinitializeSupabase) {
-          const success = window.reinitializeSupabase();
-          if (success) {
-            console.log('✓ Supabase client re-initialized with API credentials');
-          }
-        }
-
-        // Initialize Google Maps after config is ready
-        initGoogleMapsAPI();
-    } catch (error) {
-        console.warn('⚠️ Failed to load config from API:', error);
-        console.log('Using fallback configuration');
-        window.NappanConfig.READY = true;
-
-        // Try to initialize Supabase with fallback config
-        // (only works if hardcoded defaults are present)
-        if (window.reinitializeSupabase) {
-          window.reinitializeSupabase();
-        }
-
-        // Still initialize Google Maps with whatever we have
-        initGoogleMapsAPI();
+    // If already loading or loaded, return early
+    if (window.NappanConfig.READY || configLoadingPromise) {
+        return configLoadingPromise || Promise.resolve();
     }
+
+    // Track that we're loading to prevent multiple concurrent executions
+    configLoadingPromise = (async () => {
+        try {
+            const response = await fetch('/api/config');
+            if (!response.ok) {
+                throw new Error(`Config API returned status ${response.status}`);
+            }
+
+            const config = await response.json();
+
+            // Merge with window.NappanConfig
+            Object.assign(window.NappanConfig, config);
+            window.NappanConfig.READY = true;
+
+            console.log('✓ Configuration loaded from API');
+
+            // Re-initialize Supabase client with real credentials
+            // This must happen AFTER config is loaded, not before
+            if (window.reinitializeSupabase) {
+              const success = window.reinitializeSupabase();
+              if (success) {
+                console.log('✓ Supabase client re-initialized with API credentials');
+              }
+            }
+
+            // Initialize Google Maps after config is ready
+            initGoogleMapsAPI();
+        } catch (error) {
+            console.warn('⚠️ Failed to load config from API:', error);
+            console.log('Using fallback configuration');
+            window.NappanConfig.READY = true;
+
+            // Try to initialize Supabase with fallback config
+            // (only works if hardcoded defaults are present)
+            if (window.reinitializeSupabase) {
+              window.reinitializeSupabase();
+            }
+
+            // Still initialize Google Maps with whatever we have
+            initGoogleMapsAPI();
+        }
+    }
+    })();
+
+    return configLoadingPromise;
 }
 
 /**
