@@ -167,7 +167,7 @@
     container.innerHTML = '<div class="loading">Cargando pedidos...</div>';
 
     try {
-      allOrders = (await getDb()).loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
 
       if (!allOrders || allOrders.length === 0) {
         container.innerHTML = '<div class="loading">No hay pedidos</div>';
@@ -797,7 +797,7 @@
     if (cacheState.ordersLoaded && !force) return;
     document.getElementById('tableContainer').innerHTML = '<div class="loading">Cargando pedidos...</div>';
     try {
-      allOrders = (await getDb()).loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
       cacheState.ordersLoaded = true;
       renderOrdersTable();
     } catch (error) {
@@ -1151,7 +1151,7 @@
     container.innerHTML = '<div class="loading">Cargando clientes...</div>';
 
     try {
-      allCustomers = (await getDb()).loadCustomers({});
+      allCustomers = await (await getDb()).loadCustomers({});
 
       if (!allCustomers || allCustomers.length === 0) {
         container.innerHTML = '<div class="loading">No hay clientes</div>';
@@ -1159,7 +1159,7 @@
       }
 
       // Recargar órdenes desde Supabase para obtener cambios recientes (e.g., eliminaciones)
-      allOrders = (await getDb()).loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
 
       // Enriquecer datos de clientes con información de órdenes
       await enrichCustomersWithOrderData();
@@ -1175,7 +1175,7 @@
     try {
       // Cargar todas las órdenes
       if (allOrders.length === 0) {
-        allOrders = (await getDb()).loadAllOrders({});
+        allOrders = await (await getDb()).loadAllOrders({});
       }
 
       // Filtrar órdenes válidas (excluir cancelled y deleted)
@@ -1649,7 +1649,7 @@
 
       // Cargar todas las órdenes (usar caché si existen)
       if (allOrders.length === 0) {
-        allOrders = (await getDb()).loadAllOrders({});
+        allOrders = await (await getDb()).loadAllOrders({});
       }
 
       // Filtrar en cliente (excluir pedidos eliminados y cancelados por defecto)
