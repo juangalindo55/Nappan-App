@@ -61,6 +61,50 @@ Backend basado en **PostgreSQL + Auth + RLS**.
 - **Admin:** Gestión de clientes, actualización de pedidos y métodos del dashboard.
 - **Analíticas (Fase 7):** Orquestación de funciones RPC (`getStatsKpis`, `getTopProducts`, etc.).
 
+## Configuración de Entorno & Orden de Carga de Scripts (Despliegue en Vercel)
+
+**Crítico:** El despliegue en Vercel utiliza funciones serverless para inyectar variables de entorno de forma segura. El orden de carga de scripts es esencial y no debe modificarse.
+
+### Arquitectura
+
+1. **`/api/config.js`** (Función serverless de Vercel)
+   - Retorna JSON con 4 variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_MAPS_API_KEY`, `WHATSAPP_NUMBER`
+   - Lee desde Environment Variables de Vercel (no desde archivos .env)
+   - Desactiva caching para garantizar valores frescos en cada despliegue
+
+2. **`js/config.js`** (Bootstrap del lado del cliente)
+   - Inicializa `window.NappanConfig` con valores por defecto (localhost)
+   - Llama a `loadConfig()` que hace fetch a `/api/config` de forma asíncrona
+   - Establece `window.NappanConfig.READY = true` al completar (éxito o fallback)
+   - Llama a `window.reinitializeSupabase()` para inicializar el cliente de Supabase con credenciales reales
+   - Llama a `initGoogleMapsAPI()` para cargar Google Maps (solo una vez globalmente)
+   - **Guard:** Si ya está READY o cargando, retorna early para evitar ejecuciones duplicadas
+
+3. **`js/supabase-client.js`** (Inicialización del cliente de Supabase)
+   - Exporta `window.reinitializeSupabase()` que `config.js` llama
+   - **Guard:** Salta init si la URL es localhost Y config.READY !== true
+   - Solo expone `window.NappanDB` después de crear el cliente exitosamente con credenciales reales
+
+4. **Scripts de página** (Todas las secciones + admin)
+   - Incluir `js/config.js` primero (carga y hace fetch de configuración)
+   - Incluir `js/supabase-client.js` segundo
+   - Hacer polling de `window.NappanDB` (máx 10 segundos) antes de usarlo
+
+5. **Módulos de admin** (`js/admin-modules/`)
+   - Módulo de auth (`auth.js`) tiene `getDb()` asíncrono que espera a `window.NappanDB`
+   - Módulo principal (`nappan-admin-v2.js`) también tiene `getDb()` asíncrono
+
+6. **Google Maps** (`js/config.js` + `js/chatbot.js`)
+   - `config.js` carga Google Maps (guard previene duplicados)
+   - `chatbot.js` espera a `window.google.maps` en lugar de cargar su propio script
+
+### Por Qué Es Importante
+
+- Las variables de entorno de Vercel solo están disponibles en tiempo de request
+- Las condiciones de carrera ocurren cuando la carga de config compite con la inicialización síncrona
+- El timing de module scripts causa que `window.Auth` se exponga de forma asíncrona
+- La navegación entre páginas recarga config.js múltiples veces; los guards previenen inyecciones duplicadas
+
 ## Panel de Administración (`nappan-admin-v2.html`)
 
 El panel está modularizado en `admin-modules/`:
