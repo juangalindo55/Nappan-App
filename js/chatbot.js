@@ -234,17 +234,21 @@
       document.getElementById('chat-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') this.sendMessage();
       });
-      this.loadGoogleMapsSDK();
+      // Load Google Maps asynchronously in the background
+      this.loadGoogleMapsSDK().catch(err => console.error('Failed to load Google Maps:', err));
     }
 
-    loadGoogleMapsSDK() {
-      if (window.google && window.google.maps) return;
-      if (document.querySelector('script[data-maps-loading]')) return;
-      const script = document.createElement('script');
-      script.dataset.mapsLoading = 'true';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      document.head.appendChild(script);
+    async loadGoogleMapsSDK() {
+      // Wait for Google Maps to be loaded by config.js
+      // (config.js loads it dynamically when the page loads)
+      let maxAttempts = 100;
+      while (!window.google?.maps && maxAttempts > 0) {
+        await new Promise(r => setTimeout(r, 100));
+        maxAttempts--;
+      }
+      if (!window.google?.maps) {
+        console.warn('⚠️ Google Maps not available after waiting');
+      }
     }
 
     toggleChat() {

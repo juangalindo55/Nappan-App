@@ -118,6 +118,69 @@ All functions are exported from `supabase-client.js`.
 - Membership tiers: `individual`, `premium`, `business`
 - Discounts are configurable from Admin > Configuración > Descuentos por Membresía
 
+## Environment Configuration & Script Loading Order (Phase 8 - Vercel Deployment)
+
+**Critical:** Deployment uses Vercel serverless functions to inject environment variables securely. The following loading order is essential and must not be changed.
+
+### Architecture
+
+1. **`/api/config`** (Vercel serverless function)
+   - Returns JSON with 4 env vars: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_MAPS_API_KEY`, `WHATSAPP_NUMBER`
+   - Reads from Vercel Environment Variables (not .env files)
+   - Disables caching to ensure fresh values on deploys
+
+2. **`js/config.js`** (Client-side bootstrap)
+   - Initializes `window.NappanConfig` with hardcoded fallback defaults (localhost)
+   - Calls `loadConfig()` which fetches `/api/config` asynchronously
+   - Sets `window.NappanConfig.READY = true` when done (success or fallback)
+   - Calls `window.reinitializeSupabase()` to init Supabase client with real credentials
+   - Calls `initGoogleMapsAPI()` to load Google Maps script (only once globally)
+   - **Guard:** If already READY or currently loading, returns early to prevent duplicate executions across page navigations
+
+3. **`js/supabase-client.js`** (Supabase client init)
+   - Exports `window.reinitializeSupabase()` function that `config.js` calls
+   - **Guard:** Skips init if URL is localhost AND config.READY !== true (prevents exposing broken client with fallback values)
+   - Only exposes `window.NappanDB` after successful client creation with real credentials
+   - Getter-based property `.supabase` for auth methods (compatibility with modules)
+
+4. **Page scripts** (All section pages + admin)
+   - Include `js/config.js` first (loads and fetches config)
+   - Include `js/supabase-client.js` second
+   - Poll for `window.NappanDB` (max 10 seconds) before using it:
+     ```javascript
+     let maxAttempts = 100;
+     while (!window.NappanDB && maxAttempts > 0) {
+       await new Promise(r => setTimeout(r, 100));
+       maxAttempts--;
+     }
+     ```
+   - This prevents race conditions where pages try to use NappanDB before config finishes loading
+
+5. **Admin modules** (`js/admin-modules/`)
+   - Auth module (`auth.js`) has async `getDb()` that waits for `window.NappanDB`
+   - Main module (`nappan-admin-v2.js`) also has async `getDb()` with polling
+   - Both modules wait up to 5 seconds for `window.Auth` to be exposed by module script
+
+6. **Google Maps** (`js/config.js` + `js/chatbot.js`)
+   - `config.js` loads Google Maps via `initGoogleMapsSDK()` (guard prevents duplicates)
+   - `chatbot.js` waits for `window.google.maps` instead of loading its own script
+   - Prevents "Multiple Google Maps API" warnings and internal errors
+
+### Why This Matters
+
+- **Vercel env vars** are only available at request time; they cannot be bundled with static assets
+- **Race conditions** occur when async config loading competes with sync supabase-client initialization
+- **Module script timing** causes `window.Auth` to be exposed asynchronously after nappan-admin-v2.js runs
+- **Page navigation** reloads config.js multiple times; guards prevent duplicate script injections
+
+### When Making Changes
+
+1. Never hardcode credentials in JavaScript or HTML
+2. Never remove the guards in `loadConfig()`, `initializeSupabaseClient()`, or `initGoogleMapsAPI()`
+3. Always ensure polling loops wait for both `window.NappanDB` and `window.Auth` before using them
+4. Test page navigation between sections to verify no duplicate script loads
+5. Verify `/api/config` returns correct Vercel env vars before debugging client-side issues
+
 ## WhatsApp Integration
 
 The business phone number is dynamic and should be loaded from `app_config` at runtime:

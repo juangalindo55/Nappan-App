@@ -1,12 +1,13 @@
 /**
  * Nappan App — Supabase Client Initialization
  * This file initializes the Supabase client and exports the NappanDB API
+ *
+ * Credentials are injected via window.NappanConfig (from js/config.js)
+ * which loads environment variables from Vercel at runtime
  */
 
-const supabaseUrl = 'https://rbhjacmuelcjgxdyxmuh.supabase.co';
-const supabaseAnonKey = 'sb_publishable_d958WcFSLNa6yVan61MiWQ_e7FS8NL1';
-
 let supabaseClient = null;
+let nappanDBReady = false;
 
 async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
   if (!supabaseClient) return { customer_id: null, error: 'Supabase not initialized' };
@@ -27,17 +28,57 @@ async function syncCustomerFromOrder(orderId, orderPayload, orderCreatedAt) {
   return { customer_id: data || null, error };
 }
 
-// Initialize Supabase
-if (typeof window.supabase === 'undefined') {
-  console.error('❌ Supabase CDN not loaded!');
-} else {
+/**
+ * Initialize Supabase Client with credentials from window.NappanConfig
+ *
+ * This function is called by js/config.js after credentials are loaded from /api/config
+ * Separated from immediate execution to avoid race conditions with async config loading
+ */
+function initializeSupabaseClient() {
+  // Validate prerequisites
+  if (typeof window.supabase === 'undefined') {
+    console.error('❌ Supabase CDN not loaded!');
+    return false;
+  }
+
+  // Get fresh credentials from config
+  const url = window.NappanConfig?.SUPABASE_URL;
+  const key = window.NappanConfig?.SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    console.warn('⚠️ Supabase config not ready yet. Initialization deferred.');
+    return false;
+  }
+
+  // Guard: don't initialize with localhost fallback unless config is actually READY
+  // (prevents exposing a broken client while /api/config is still loading)
+  if (url === 'http://localhost:54321' && window.NappanConfig?.READY !== true) {
+    console.log('⏳ Skipping Supabase init with localhost fallback; waiting for /api/config');
+    return false;
+  }
+
   try {
-    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    console.log('✓ Supabase client initialized');
+    supabaseClient = window.supabase.createClient(url, key);
+    console.log('✓ Supabase client initialized with credentials from window.NappanConfig');
+
+    // Only expose NappanDB once we have a real client
+    if (!nappanDBReady) {
+      window.NappanDB = NappanDBAPI;
+      nappanDBReady = true;
+      console.log('✓ NappanDB API exposed on window');
+    }
+    return true;
   } catch (error) {
-    console.error('❌ Failed to init Supabase:', error);
+    console.error('❌ Failed to initialize Supabase:', error);
+    return false;
   }
 }
+
+/**
+ * Expose reinitialization function for config.js to call
+ * This allows creating the Supabase client after credentials are asynchronously loaded
+ */
+window.reinitializeSupabase = initializeSupabaseClient;
 
 // Save order to database
 async function saveOrder(orderPayload) {
@@ -634,9 +675,10 @@ async function getTopCustomers(limit = 10) {
   }
 }
 
-// Export API
-window.NappanDB = {
-  client: supabaseClient,
+// Export API (exposed on window only after initializeSupabaseClient succeeds)
+const NappanDBAPI = {
+  get client() { return supabaseClient; },
+  get supabase() { return supabaseClient; },
   saveOrder,
   loadAppConfig,
   getConfigValue,
@@ -674,4 +716,7 @@ window.NappanDB = {
   getTopCustomers
 };
 
-console.log('✓ NappanDB API ready');
+console.log('✓ NappanDB API defined (pending initialization)');
+
+// Attempt immediate init — will no-op if config not READY and URL is localhost fallback
+initializeSupabaseClient();

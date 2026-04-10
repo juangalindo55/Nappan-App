@@ -85,6 +85,39 @@ Full spec in `TYPOGRAPHY_SYSTEM.md`.
 ### Principle
 Minimalist, high-end "boutique" feel. Mobile-first responsive design.
 
+## Environment Configuration & Script Loading Order (Vercel Deployment)
+
+**Critical:** This app uses Vercel serverless functions to inject environment variables securely. Script loading order is essential.
+
+### Key Files
+
+- **`/api/config.js`** — Vercel function that returns JSON with 4 env vars (SUPABASE_URL, SUPABASE_ANON_KEY, GOOGLE_MAPS_API_KEY, WHATSAPP_NUMBER)
+- **`js/config.js`** — Fetches from `/api/config`, initializes `window.NappanConfig`, reinitializes Supabase, loads Google Maps (once)
+- **`js/supabase-client.js`** — Exports `window.NappanDB` only after real credentials are loaded (not localhost fallback)
+
+### Loading Sequence
+
+1. Browser loads HTML page
+2. `js/config.js` runs (async fetch to `/api/config`)
+3. `js/supabase-client.js` runs (waits for real config before exposing NappanDB)
+4. Page scripts poll for `window.NappanDB` (max 10 sec timeout)
+5. Admin modules use async `getDb()` to wait for client availability
+6. Google Maps loads once globally via `config.js` (not duplicated by chatbot.js)
+
+### Guards to Never Remove
+
+- `loadConfig()` in config.js has early return if already READY or loading
+- `initializeSupabaseClient()` skips if URL is localhost and config not READY
+- `initGoogleMapsAPI()` skips if already loaded or loading in progress
+- All page scripts and modules poll for `window.NappanDB` before using it
+
+### Debugging Environment Issues
+
+- Check `/api/config` endpoint directly (browser DevTools Network tab)
+- Verify Vercel Environment Variables are set with "All Environments" scope
+- Verify console messages: "✓ Configuration loaded from API" and "✓ Supabase client re-initialized"
+- If localhost in console, check Vercel deployment URL (may differ from preview link)
+
 ## WhatsApp Integration
 
 The business phone number for orders is centralized in `utils.js`:

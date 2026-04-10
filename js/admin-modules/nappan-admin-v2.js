@@ -52,15 +52,21 @@
     }
   }
 
-  function getDb() {
+  async function getDb() {
+    // Wait for NappanDB to be exposed (happens after /api/config loads)
+    let maxAttempts = 100;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
     if (!window.NappanDB) {
-      throw new Error('Supabase client no disponible');
+      throw new Error('Supabase client no disponible después de 10 segundos');
     }
     return window.NappanDB;
   }
 
   async function loadSectionProducts() {
-    const db = getDb();
+    const db = await getDb();
     if (typeof db.loadProductsForSections === 'function') {
       return db.loadProductsForSections(ADMIN_SECTIONS);
     }
@@ -70,7 +76,7 @@
   }
 
   async function loadProductsWithExtras() {
-    const db = getDb();
+    const db = await getDb();
     if (typeof db.loadProductsWithExtras === 'function') {
       return db.loadProductsWithExtras(ADMIN_SECTIONS);
     }
@@ -109,13 +115,24 @@
     document.getElementById('submitBtn').textContent = 'Entrando...';
 
     try {
-      const result = await getDb().signIn(email, password);
+      // Wait for Auth module to be exposed (happens after <script type="module"> runs)
+      let maxAttempts = 50;
+      while ((!window.Auth || typeof window.Auth.login !== 'function') && maxAttempts > 0) {
+        await new Promise(r => setTimeout(r, 100));
+        maxAttempts--;
+      }
 
-      if (result.error) {
+      if (!window.Auth || typeof window.Auth.login !== 'function') {
+        throw new Error('Auth module no disponible después de 5 segundos');
+      }
+
+      const result = await window.Auth.login(email, password);
+
+      if (!result) {
         showToast('Email o contraseña incorrectos', 'error');
-        document.getElementById('loginError').textContent = result.error.message;
+        document.getElementById('loginError').textContent = 'Credenciales inválidas';
         document.getElementById('loginError').style.display = 'block';
-      } else if (result.session) {
+      } else {
         showDashboardShell();
         await loadOrders();
       }
@@ -129,7 +146,18 @@
   }
 
   async function handleLogout() {
-    await getDb().signOut();
+    // Wait for Auth module if not ready
+    let maxAttempts = 50;
+    while ((!window.Auth || typeof window.Auth.logout !== 'function') && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.Auth || typeof window.Auth.logout !== 'function') {
+      throw new Error('Auth module no disponible');
+    }
+
+    await window.Auth.logout();
     showLoginShell();
     document.getElementById('loginForm').reset();
   }
@@ -139,7 +167,7 @@
     container.innerHTML = '<div class="loading">Cargando pedidos...</div>';
 
     try {
-      allOrders = await getDb().loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
 
       if (!allOrders || allOrders.length === 0) {
         container.innerHTML = '<div class="loading">No hay pedidos</div>';
@@ -769,7 +797,7 @@
     if (cacheState.ordersLoaded && !force) return;
     document.getElementById('tableContainer').innerHTML = '<div class="loading">Cargando pedidos...</div>';
     try {
-      allOrders = await getDb().loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
       cacheState.ordersLoaded = true;
       renderOrdersTable();
     } catch (error) {
@@ -1123,7 +1151,7 @@
     container.innerHTML = '<div class="loading">Cargando clientes...</div>';
 
     try {
-      allCustomers = await getDb().loadCustomers({});
+      allCustomers = await (await getDb()).loadCustomers({});
 
       if (!allCustomers || allCustomers.length === 0) {
         container.innerHTML = '<div class="loading">No hay clientes</div>';
@@ -1131,7 +1159,7 @@
       }
 
       // Recargar órdenes desde Supabase para obtener cambios recientes (e.g., eliminaciones)
-      allOrders = await getDb().loadAllOrders({});
+      allOrders = await (await getDb()).loadAllOrders({});
 
       // Enriquecer datos de clientes con información de órdenes
       await enrichCustomersWithOrderData();
@@ -1147,7 +1175,7 @@
     try {
       // Cargar todas las órdenes
       if (allOrders.length === 0) {
-        allOrders = await getDb().loadAllOrders({});
+        allOrders = await (await getDb()).loadAllOrders({});
       }
 
       // Filtrar órdenes válidas (excluir cancelled y deleted)
@@ -1516,7 +1544,7 @@
       return;
     }
 
-    const db = getDb();
+    const db = await getDb();
     const result = await db.getSession();
     if (result && result.session) {
       showDashboardShell();
@@ -1621,7 +1649,7 @@
 
       // Cargar todas las órdenes (usar caché si existen)
       if (allOrders.length === 0) {
-        allOrders = await getDb().loadAllOrders({});
+        allOrders = await (await getDb()).loadAllOrders({});
       }
 
       // Filtrar en cliente (excluir pedidos eliminados y cancelados por defecto)
