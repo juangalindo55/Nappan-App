@@ -24,5 +24,9 @@ Este archivo contiene el contexto del proyecto, directrices y convenciones espec
 *   Las actualizaciones de la interfaz gráfica dependen de `UI.showToast`, `UI.setLoading`, etc.
 *   Al realizar integraciones con la base de datos, siempre asegurar de verificar si `supabaseClient` (o `window.NappanDB`) está inicializado y disponible.
 
+## Capacidades y Limitaciones (Tokens/Costos)
+*   Como modelo de lenguaje, **no tengo una calculadora interna** para rastrear el consumo acumulado de tokens o el dinero gastado durante la sesión.
+*   El cálculo de costos y tokens lo maneja exclusivamente el cliente local (Aider) y se reporta en la terminal del usuario.
+
 ## Tareas Pendientes / Bitácora
 *   *(Espacio reservado para futuras instrucciones o tareas a corto plazo que el usuario asigne)*
