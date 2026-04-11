@@ -15,5 +15,9 @@ desktop.ini
 
 .claude/
 
+# Logs and temporary files
+.logs/
+server.log
+
 # Git worktrees
 .worktrees/
