@@ -113,4 +113,4 @@ function initGoogleMapsAPI() {
 }
 
 // Load config immediately when script loads
-loadConfig();
+window.NappanConfig.readyPromise = loadConfig();

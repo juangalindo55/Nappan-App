@@ -53,14 +53,11 @@
   }
 
   async function getDb() {
-    // Wait for NappanDB to be exposed (happens after /api/config loads)
-    let maxAttempts = 100;
-    while (!window.NappanDB && maxAttempts > 0) {
-      await new Promise(r => setTimeout(r, 100));
-      maxAttempts--;
+    if (!window.NappanDB && window.NappanConfig?.readyPromise) {
+      await window.NappanConfig.readyPromise;
     }
     if (!window.NappanDB) {
-      throw new Error('Supabase client no disponible después de 10 segundos');
+      throw new Error('Supabase client no disponible');
     }
     return window.NappanDB;
   }
