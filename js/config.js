@@ -72,4 +72,5 @@ async function loadConfig() {
 }
 
 // Load config immediately when script loads
+// Using OSRM for all distance calculations - no Google Maps needed
 window.NappanConfig.readyPromise = loadConfig();
