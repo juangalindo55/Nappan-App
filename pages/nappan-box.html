@@ -371,11 +371,7 @@
       if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
     }, 8000);
 
-    const tryCalc = () => {
-      if (!window.google || !window.google.maps) {
-        setTimeout(tryCalc, 500);
-        return;
-      }
+    const tryCalc = async () => {
       clearTimeout(window._shippingTimeout);
 
       const apiTimeout = setTimeout(() => {
@@ -384,34 +380,50 @@
         if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
       }, 6000);
 
-      const service = new window.google.maps.DistanceMatrixService();
-      service.getDistanceMatrix({
-        origins: [SHIPPING_ORIGIN],
-        destinations: [cp + ', Mexico'],
-        travelMode: 'DRIVING',
-        unitSystem: window.google.maps.UnitSystem.METRIC
-      }, (response, status) => {
+      try {
+        const geoResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${cp}+Monterrey+Mexico&format=json&limit=1`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+
+        if (!geoResponse.ok) throw new Error('Geocoding failed');
+        const geoData = await geoResponse.json();
+        if (!geoData || geoData.length === 0) throw new Error('No location found');
+
+        const destLat = parseFloat(geoData[0].lat);
+        const destLon = parseFloat(geoData[0].lon);
+
+        const originLat = 25.6866;
+        const originLon = -100.3161;
+
+        const routeResponse = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+
+        if (!routeResponse.ok) throw new Error('Route calculation failed');
+        const routeData = await routeResponse.json();
+        if (!routeData.routes || routeData.routes.length === 0) throw new Error('No route found');
+
         clearTimeout(apiTimeout);
+        const distanceKm = routeData.routes[0].distance / 1000;
+        const cost = getShippingCost(distanceKm);
 
-        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-          const distanceKm = response.rows[0].elements[0].distance.value / 1000;
-          const cost = getShippingCost(distanceKm);
-
-          if (cost !== null) {
-            shippingCost = cost;
-            shippingLabel = 'calculated';
-            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
-          } else {
-            shippingCost = 0;
-            shippingLabel = 'out_of_range';
-            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
-          }
+        if (cost !== null) {
+          shippingCost = cost;
+          shippingLabel = 'calculated';
+          if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
         } else {
           shippingCost = 0;
-          shippingLabel = 'error';
-          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+          shippingLabel = 'out_of_range';
+          if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
         }
-      });
+      } catch(e) {
+        clearTimeout(apiTimeout);
+        shippingCost = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+      }
     };
     tryCalc();
   }
@@ -434,7 +446,6 @@
     shippingCP = cp;
     if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
 
-    // Timeout global si el SDK nunca carga
     clearTimeout(window._shippingTimeout);
     window._shippingTimeout = setTimeout(() => {
       shippingCost  = 0;
@@ -442,11 +453,7 @@
       if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
     }, 8000);
 
-    const tryCalc = () => {
-      if (!window.google || !window.google.maps) {
-        setTimeout(tryCalc, 500);
-        return;
-      }
+    const tryCalc = async () => {
       clearTimeout(window._shippingTimeout);
 
       const apiTimeout = setTimeout(() => {
@@ -455,34 +462,50 @@
         if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
       }, 6000);
 
-      const service = new window.google.maps.DistanceMatrixService();
-      service.getDistanceMatrix({
-        origins: [SHIPPING_ORIGIN],
-        destinations: [cp + ', Mexico'],
-        travelMode: 'DRIVING',
-        unitSystem: window.google.maps.UnitSystem.METRIC
-      }, (response, status) => {
+      try {
+        const geoResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${cp}+Monterrey+Mexico&format=json&limit=1`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+
+        if (!geoResponse.ok) throw new Error('Geocoding failed');
+        const geoData = await geoResponse.json();
+        if (!geoData || geoData.length === 0) throw new Error('No location found');
+
+        const destLat = parseFloat(geoData[0].lat);
+        const destLon = parseFloat(geoData[0].lon);
+
+        const originLat = 25.6866;
+        const originLon = -100.3161;
+
+        const routeResponse = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+
+        if (!routeResponse.ok) throw new Error('Route calculation failed');
+        const routeData = await routeResponse.json();
+        if (!routeData.routes || routeData.routes.length === 0) throw new Error('No route found');
+
         clearTimeout(apiTimeout);
+        const distanceKm = routeData.routes[0].distance / 1000;
+        const cost = getShippingCost(distanceKm);
 
-        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-          const distanceKm = response.rows[0].elements[0].distance.value / 1000;
-          const cost = getShippingCost(distanceKm);
-
-          if (cost !== null) {
-            shippingCost = cost;
-            shippingLabel = 'calculated';
-            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
-          } else {
-            shippingCost = 0;
-            shippingLabel = 'out_of_range';
-            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
-          }
+        if (cost !== null) {
+          shippingCost = cost;
+          shippingLabel = 'calculated';
+          if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
         } else {
           shippingCost = 0;
-          shippingLabel = 'error';
-          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+          shippingLabel = 'out_of_range';
+          if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
         }
-      });
+      } catch(e) {
+        clearTimeout(apiTimeout);
+        shippingCost = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
+      }
     };
     tryCalc();
   }
