@@ -18,38 +18,14 @@ window.NappanConfig = {
 };
 
 /**
- * Geocode origin address for shipping calculations
- * Uses Nominatim (free, OpenStreetMap) to convert address to coordinates
- * Results stored in window.NappanConfig for use by shipping calculators
+ * Hardcoded origin coordinates for CP 64349 (Cumbres, Monterrey)
+ * Avoids rate-limiting issues and guarantees consistency.
  */
-async function geocodeOriginAddress() {
-  try {
-    const originAddress = '64349, Monterrey, Mexico';
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(originAddress)}&format=json&limit=1`,
-      { signal: AbortSignal.timeout(5000) }
-    );
+window.NappanConfig.ORIGIN_LAT = 25.750779;
+window.NappanConfig.ORIGIN_LON = -100.421119;
 
-    if (!response.ok) {
-      throw new Error(`Nominatim returned status ${response.status}`);
-    }
+// Function removed to prevent unnecessary API calls and rate limits
 
-    const data = await response.json();
-    if (data && data.length > 0) {
-      window.NappanConfig.ORIGIN_LAT = parseFloat(data[0].lat);
-      window.NappanConfig.ORIGIN_LON = parseFloat(data[0].lon);
-      console.log(`✓ Origin geocoded: (${window.NappanConfig.ORIGIN_LAT}, ${window.NappanConfig.ORIGIN_LON})`);
-    } else {
-      throw new Error('Nominatim returned no results for origin address');
-    }
-  } catch (error) {
-    console.warn('⚠️ Failed to geocode origin address:', error);
-    // Fallback to default coordinates if geocoding fails
-    window.NappanConfig.ORIGIN_LAT = 25.6866;
-    window.NappanConfig.ORIGIN_LON = -100.3161;
-    console.log('Using fallback origin coordinates');
-  }
-}
 
 /**
  * Load configuration from API
@@ -80,8 +56,7 @@ async function loadConfig() {
 
             console.log('✓ Configuration loaded from API');
 
-            // Geocode origin address for accurate shipping calculations
-            await geocodeOriginAddress();
+            // Origin is now hardcoded above, no need to geocode from API
 
             // Re-initialize Supabase client with real credentials
             // This must happen AFTER config is loaded, not before

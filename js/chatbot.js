@@ -406,8 +406,8 @@
         const destLon = parseFloat(geoData[0].lon);
 
         // OSRM routing: calculate distance between origin and destination
-        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.6866;
-        const originLon = window.NappanConfig?.ORIGIN_LON || -100.3161;
+        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.750779;
+        const originLon = window.NappanConfig?.ORIGIN_LON || -100.421119;
 
         const routeResponse = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
