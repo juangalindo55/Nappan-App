@@ -96,6 +96,12 @@
 
 <!-- MENU -->
 <div class="section-title">📦 Elige tu Lunch Box</div>
+<div style="text-align: center; margin-bottom: 25px;">
+  <button id="openGalleryBtn" class="pill-btn" onclick="openLunchboxGallery()">
+    🖼️ Ver Galeria de ejemplos
+  </button>
+</div>
+
 <div class="menu-grid">
 
   <!-- BOX 1 -->
@@ -949,6 +955,82 @@
   </a>
 </div>
 <button class="nav-float-btn" id="navFloatBtn" onclick="toggleNavModal()" aria-label="Navegación">☰</button>
+
+<!-- LUNCHBOX GALLERY MODAL -->
+<div id="lbGalleryModal" class="gallery-modal">
+  <span class="gallery-close" onclick="closeLunchboxGallery()">&times;</span>
+  <div class="gallery-content-wrapper">
+    <button class="gallery-arrow left" onclick="moveLbGallery(-1)">&#10094;</button>
+    <div class="gallery-slider-container">
+      <div class="gallery-slider" id="lbGallerySlider">
+        <!-- Imágenes inyectadas vía JS al abrir -->
+      </div>
+    </div>
+    <button class="gallery-arrow right" onclick="moveLbGallery(1)">&#10095;</button>
+  </div>
+</div>
+
+<script>
+  // --- Lógica de Galería On-Demand ---
+  let lbGalleryCurrentIdx = 0;
+  let lbGalleryLoaded = false;
+  // Reemplaza estas URLs con tus fotos reales luego
+  const lbGalleryImages = [
+    'https://placehold.co/800x1000/2D1B0E/FFF8ED?text=Foto+1',
+    'https://placehold.co/800x1000/DAA520/FFF8ED?text=Foto+2',
+    'https://placehold.co/800x1000/FF8C42/FFF8ED?text=Foto+3',
+    'https://placehold.co/800x1000/FFB3C6/1A1008?text=Foto+4',
+    'https://placehold.co/800x1000/A8E6CF/1A1008?text=Foto+5',
+    'https://placehold.co/800x1000/FF6B6B/FFF8ED?text=Foto+6',
+    'https://placehold.co/800x1000/FFD93D/2D1B0E?text=Foto+7'
+  ];
+
+  function openLunchboxGallery() {
+    const modal = document.getElementById('lbGalleryModal');
+    const slider = document.getElementById('lbGallerySlider');
+    
+    if (!lbGalleryLoaded) {
+      // Carga perezosa (Lazy Load) solo al abrir
+      lbGalleryImages.forEach(src => {
+        const slide = document.createElement('div');
+        slide.className = 'gallery-slide';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Ejemplo Lunchbox';
+        slide.appendChild(img);
+        slider.appendChild(slide);
+      });
+      lbGalleryLoaded = true;
+    }
+    
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+    updateLbGalleryPosition();
+  }
+
+  function closeLunchboxGallery() {
+    document.getElementById('lbGalleryModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function moveLbGallery(dir) {
+    lbGalleryCurrentIdx += dir;
+    if (lbGalleryCurrentIdx < 0) lbGalleryCurrentIdx = lbGalleryImages.length - 1;
+    if (lbGalleryCurrentIdx >= lbGalleryImages.length) lbGalleryCurrentIdx = 0;
+    updateLbGalleryPosition();
+  }
+
+  function updateLbGalleryPosition() {
+    const slider = document.getElementById('lbGallerySlider');
+    slider.style.transform = `translateX(-${lbGalleryCurrentIdx * 100}%)`;
+  }
+  
+  // Cerrar con tecla ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLunchboxGallery();
+  });
+</script>
+
 <script>
   function toggleNavModal() {
     document.getElementById('navModal').classList.toggle('open');
