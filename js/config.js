@@ -24,7 +24,7 @@ window.NappanConfig = {
  */
 async function geocodeOriginAddress() {
   try {
-    const originAddress = 'Cumbres, Monterrey, 64349, Mexico';
+    const originAddress = '64349, Monterrey, Mexico';
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(originAddress)}&format=json&limit=1`,
       { signal: AbortSignal.timeout(5000) }
