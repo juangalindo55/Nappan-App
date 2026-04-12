@@ -234,21 +234,6 @@
       document.getElementById('chat-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') this.sendMessage();
       });
-      // Load Google Maps asynchronously in the background
-      this.loadGoogleMapsSDK().catch(err => console.error('Failed to load Google Maps:', err));
-    }
-
-    async loadGoogleMapsSDK() {
-      // Wait for Google Maps to be loaded by config.js
-      // (config.js loads it dynamically when the page loads)
-      let maxAttempts = 100;
-      while (!window.google?.maps && maxAttempts > 0) {
-        await new Promise(r => setTimeout(r, 100));
-        maxAttempts--;
-      }
-      if (!window.google?.maps) {
-        console.warn('⚠️ Google Maps not available after waiting');
-      }
     }
 
     toggleChat() {
@@ -400,57 +385,55 @@
     }
 
     async fetchDistance(destinationCP) {
-      return new Promise((resolve) => {
-        // Fallback de 10 segundos para evitar que el chat se quede colgado
-        const timeout = setTimeout(() => {
-          console.error('Distance Matrix timeout');
-          resolve(null);
-        }, 10000);
+      try {
+        // OSRM geocoding: convert postal code to coordinates
+        const geoResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${destinationCP}+Monterrey+Mexico&format=json&limit=1`,
+          { signal: AbortSignal.timeout(5000) }
+        );
 
-        // Esperar a que Google Maps cargue (máximo 8 segundos)
-        let waitAttempts = 0;
-        const waitForMaps = setInterval(() => {
-          if (window.google && window.google.maps) {
-            clearInterval(waitForMaps);
-            performDistanceMatrix();
-          } else if (waitAttempts++ > 80) {
-            clearInterval(waitForMaps);
-            clearTimeout(timeout);
-            console.error('Google Maps SDK no cargó después de 8 segundos');
-            return resolve(null);
-          }
-        }, 100);
+        if (!geoResponse.ok) {
+          console.error('Geocoding failed:', geoResponse.status);
+          return null;
+        }
 
-        const performDistanceMatrix = () => {
-          try {
-            const service = new google.maps.DistanceMatrixService();
-            service.getDistanceMatrix({
-              origins: [ORIGIN_ADDRESS],
-              destinations: [`${destinationCP}, Monterrey, NL, Mexico`],
-              travelMode: google.maps.TravelMode.DRIVING,
-              unitSystem: google.maps.UnitSystem.METRIC,
-            }, (response, status) => {
-              clearTimeout(timeout);
-              try {
-                if (status === 'OK' && response && response.rows && response.rows[0] && response.rows[0].elements && response.rows[0].elements[0].status === 'OK') {
-                  const distanceMeters = response.rows[0].elements[0].distance.value;
-                  resolve(distanceMeters / 1000);
-                } else {
-                  console.error('Error de Distance Matrix:', status, response);
-                  resolve(null);
-                }
-              } catch (err) {
-                console.error('Error procesando Matrix:', err);
-                resolve(null);
-              }
-            });
-          } catch (err) {
-            clearTimeout(timeout);
-            console.error('Excepción al instanciar DistanceMatrix:', err);
-            resolve(null);
-          }
-        };
-      });
+        const geoData = await geoResponse.json();
+        if (!geoData || geoData.length === 0) {
+          console.warn('No results found for postal code:', destinationCP);
+          return null;
+        }
+
+        const destLat = parseFloat(geoData[0].lat);
+        const destLon = parseFloat(geoData[0].lon);
+
+        // OSRM routing: calculate distance between origin and destination
+        // Monterrey center coordinates (ORIGIN_ADDRESS = "Monterrey, NL, Mexico")
+        const originLat = 25.6866;
+        const originLon = -100.3161;
+
+        const routeResponse = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+
+        if (!routeResponse.ok) {
+          console.error('OSRM routing failed:', routeResponse.status);
+          return null;
+        }
+
+        const routeData = await routeResponse.json();
+        if (!routeData.routes || routeData.routes.length === 0) {
+          console.error('No route found');
+          return null;
+        }
+
+        // Distance is in meters, convert to kilometers
+        const distanceKm = routeData.routes[0].distance / 1000;
+        return distanceKm;
+      } catch (error) {
+        console.error('Distance calculation error:', error);
+        return null;
+      }
     }
 
     async calculateShippingCost(km) {
