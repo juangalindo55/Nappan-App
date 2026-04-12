@@ -18,14 +18,11 @@ module.exports = function handler(req, res) {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
-  // Return environment variables as JSON
-  // On Vercel: values come from dashboard env vars
-  // Locally: values come from .env file
+  // Return public environment variables only (NEXT_PUBLIC_* prefix)
+  // Private variables (GOOGLE_MAPS_API_KEY, WHATSAPP_NUMBER) should NOT be exposed to client
   const config = {
-    SUPABASE_URL: process.env.SUPABASE_URL || 'http://localhost:54321',
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY || '',
-    WHATSAPP_NUMBER: process.env.WHATSAPP_NUMBER || '528123509768'
+    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321',
+    SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
   };
 
   res.status(200).json(config);
