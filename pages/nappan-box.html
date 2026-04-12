@@ -393,8 +393,8 @@
         const destLat = parseFloat(geoData[0].lat);
         const destLon = parseFloat(geoData[0].lon);
 
-        const originLat = 25.6866;
-        const originLon = -100.3161;
+        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.6866;
+        const originLon = window.NappanConfig?.ORIGIN_LON || -100.3161;
 
         const routeResponse = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
@@ -475,8 +475,8 @@
         const destLat = parseFloat(geoData[0].lat);
         const destLon = parseFloat(geoData[0].lon);
 
-        const originLat = 25.6866;
-        const originLon = -100.3161;
+        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.6866;
+        const originLon = window.NappanConfig?.ORIGIN_LON || -100.3161;
 
         const routeResponse = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,

@@ -691,9 +691,9 @@
         const destLat = parseFloat(geoData[0].lat);
         const destLon = parseFloat(geoData[0].lon);
 
-        // Monterrey center coordinates
-        const originLat = 25.6866;
-        const originLon = -100.3161;
+        // Use geocoded origin coordinates from config (Nominatim)
+        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.6866;
+        const originLon = window.NappanConfig?.ORIGIN_LON || -100.3161;
 
         // Calculate distance using OSRM
         const routeResponse = await fetch(
