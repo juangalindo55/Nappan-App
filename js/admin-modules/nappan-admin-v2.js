@@ -52,6 +52,18 @@
     }
   }
 
+  async function refreshStatsIfVisible() {
+    const statsTab = document.getElementById('estadisticas-tab');
+    if (!statsTab) return false;
+
+    if (getComputedStyle(statsTab).display === 'none') {
+      return false;
+    }
+
+    await loadStats();
+    return true;
+  }
+
   async function getDb() {
     if (!window.NappanDB && window.NappanConfig?.readyPromise) {
       await window.NappanConfig.readyPromise;
@@ -321,6 +333,7 @@
         showToast('✓ Estado actualizado', 'success');
         renderOrdersTable();
         invalidateCache('stats');
+        await refreshStatsIfVisible();
       }
     } catch (error) {
       console.error('Error:', error);
@@ -657,6 +670,7 @@
         closeEditOrder();
         renderOrdersTable();
         invalidateCache('stats');
+        await refreshStatsIfVisible();
       }
     } catch (error) {
       console.error('Error saving order:', error);
