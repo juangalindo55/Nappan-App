@@ -385,49 +385,39 @@
 
     async fetchDistance(destinationCP) {
       try {
-        // OSRM geocoding: convert postal code to coordinates
-        const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${destinationCP}+Monterrey+Mexico&format=json&limit=1`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+        // Ensure Google Maps SDK is loaded
+        await window.initGoogleMapsAPI();
 
-        if (!geoResponse.ok) {
-          console.error('Geocoding failed:', geoResponse.status);
-          return null;
-        }
+        const service = new google.maps.DistanceMatrixService();
+        const origin = ORIGIN_ADDRESS;
+        const destination = `${destinationCP}, Monterrey, Mexico`;
 
-        const geoData = await geoResponse.json();
-        if (!geoData || geoData.length === 0) {
-          console.warn('No results found for postal code:', destinationCP);
-          return null;
-        }
+        return new Promise((resolve, reject) => {
+          service.getDistanceMatrix({
+            origins: [origin],
+            destinations: [destination],
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+          }, (response, status) => {
+            if (status !== 'OK') {
+              console.error('Distance Matrix failed:', status);
+              reject(new Error('Distance Matrix failed'));
+              return;
+            }
 
-        const destLat = parseFloat(geoData[0].lat);
-        const destLon = parseFloat(geoData[0].lon);
+            const element = response.rows[0].elements[0];
+            if (element.status !== 'OK') {
+              console.warn('No route found for:', destination);
+              reject(new Error('No route found'));
+              return;
+            }
 
-        // OSRM routing: calculate distance between origin and destination
-        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.750779;
-        const originLon = window.NappanConfig?.ORIGIN_LON || -100.421119;
-
-        const routeResponse = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
-          { signal: AbortSignal.timeout(5000) }
-        );
-
-        if (!routeResponse.ok) {
-          console.error('OSRM routing failed:', routeResponse.status);
-          return null;
-        }
-
-        const routeData = await routeResponse.json();
-        if (!routeData.routes || routeData.routes.length === 0) {
-          console.error('No route found');
-          return null;
-        }
-
-        // Distance is in meters, convert to kilometers
-        const distanceKm = routeData.routes[0].distance / 1000;
-        return distanceKm;
+            // Distance is in meters, convert to kilometers
+            const distanceKm = element.distance.value / 1000;
+            console.log(`✓ Distance calculated (Google): ${distanceKm.toFixed(1)} km`);
+            resolve(distanceKm);
+          });
+        });
       } catch (error) {
         console.error('Distance calculation error:', error);
         return null;

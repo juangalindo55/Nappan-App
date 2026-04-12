@@ -24,7 +24,40 @@ window.NappanConfig = {
 window.NappanConfig.ORIGIN_LAT = 25.750779;
 window.NappanConfig.ORIGIN_LON = -100.421119;
 
-// Function removed to prevent unnecessary API calls and rate limits
+
+/**
+ * Loads the Google Maps SDK script once globally.
+ * Returns a promise that resolves when the SDK is ready.
+ */
+let googleMapsLoadingPromise = null;
+window.initGoogleMapsAPI = function() {
+  if (window.google?.maps) return Promise.resolve();
+  if (googleMapsLoadingPromise) return googleMapsLoadingPromise;
+
+  googleMapsLoadingPromise = new Promise((resolve, reject) => {
+    if (!window.NappanConfig.GOOGLE_MAPS_API_KEY) {
+      console.warn('⚠️ No Google Maps API Key found in config');
+      reject(new Error('Missing API Key'));
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${window.NappanConfig.GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      console.log('✓ Google Maps SDK Loaded');
+      resolve();
+    };
+    script.onerror = () => {
+      console.error('⚠️ Failed to load Google Maps SDK');
+      reject(new Error('SDK load error'));
+    };
+    document.head.appendChild(script);
+  });
+
+  return googleMapsLoadingPromise;
+};
 
 
 /**
@@ -84,5 +117,4 @@ async function loadConfig() {
 }
 
 // Load config immediately when script loads
-// Using OSRM for all distance calculations - no Google Maps needed
 window.NappanConfig.readyPromise = loadConfig();

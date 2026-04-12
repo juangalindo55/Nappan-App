@@ -381,42 +381,50 @@
       }, 6000);
 
       try {
-        const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${cp}+Monterrey+Mexico&format=json&limit=1`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+        await window.initGoogleMapsAPI();
+        const service = new google.maps.DistanceMatrixService();
+        const origin = SHIPPING_ORIGIN;
+        const destination = cp + ', Monterrey, Mexico';
 
-        if (!geoResponse.ok) throw new Error('Geocoding failed');
-        const geoData = await geoResponse.json();
-        if (!geoData || geoData.length === 0) throw new Error('No location found');
+        service.getDistanceMatrix({
+          origins: [origin],
+          destinations: [destination],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+        }, (response, status) => {
+          clearTimeout(apiTimeout);
 
-        const destLat = parseFloat(geoData[0].lat);
-        const destLon = parseFloat(geoData[0].lon);
+          if (status !== 'OK') {
+            handleError();
+            return;
+          }
 
-        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.750779;
-        const originLon = window.NappanConfig?.ORIGIN_LON || -100.421119;
+          const element = response.rows[0].elements[0];
+          if (element.status !== 'OK') {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura. Nos pondremos en contacto para cotizar.</span>`;
+            return;
+          }
 
-        const routeResponse = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+          const distanceKm = element.distance.value / 1000;
+          const cost = getShippingCost(distanceKm);
 
-        if (!routeResponse.ok) throw new Error('Route calculation failed');
-        const routeData = await routeResponse.json();
-        if (!routeData.routes || routeData.routes.length === 0) throw new Error('No route found');
+          if (cost !== null) {
+            shippingCost = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
+          } else {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          }
+        });
 
-        clearTimeout(apiTimeout);
-        const distanceKm = routeData.routes[0].distance / 1000;
-        const cost = getShippingCost(distanceKm);
-
-        if (cost !== null) {
-          shippingCost = cost;
-          shippingLabel = 'calculated';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
-        } else {
+        function handleError() {
           shippingCost = 0;
-          shippingLabel = 'out_of_range';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
         }
       } catch(e) {
         clearTimeout(apiTimeout);
@@ -463,42 +471,50 @@
       }, 6000);
 
       try {
-        const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${cp}+Monterrey+Mexico&format=json&limit=1`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+        await window.initGoogleMapsAPI();
+        const service = new google.maps.DistanceMatrixService();
+        const origin = SHIPPING_ORIGIN;
+        const destination = cp + ', Monterrey, Mexico';
 
-        if (!geoResponse.ok) throw new Error('Geocoding failed');
-        const geoData = await geoResponse.json();
-        if (!geoData || geoData.length === 0) throw new Error('No location found');
+        service.getDistanceMatrix({
+          origins: [origin],
+          destinations: [destination],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+        }, (response, status) => {
+          clearTimeout(apiTimeout);
 
-        const destLat = parseFloat(geoData[0].lat);
-        const destLon = parseFloat(geoData[0].lon);
+          if (status !== 'OK') {
+            handleError();
+            return;
+          }
 
-        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.750779;
-        const originLon = window.NappanConfig?.ORIGIN_LON || -100.421119;
+          const element = response.rows[0].elements[0];
+          if (element.status !== 'OK') {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura. Nos pondremos en contacto para cotizar.</span>`;
+            return;
+          }
 
-        const routeResponse = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+          const distanceKm = element.distance.value / 1000;
+          const cost = getShippingCost(distanceKm);
 
-        if (!routeResponse.ok) throw new Error('Route calculation failed');
-        const routeData = await routeResponse.json();
-        if (!routeData.routes || routeData.routes.length === 0) throw new Error('No route found');
+          if (cost !== null) {
+            shippingCost = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
+          } else {
+            shippingCost = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          }
+        });
 
-        clearTimeout(apiTimeout);
-        const distanceKm = routeData.routes[0].distance / 1000;
-        const cost = getShippingCost(distanceKm);
-
-        if (cost !== null) {
-          shippingCost = cost;
-          shippingLabel = 'calculated';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;font-weight:600;">✅ Envío: $${cost} MXN (${Math.round(distanceKm)} km)</span>`;
-        } else {
+        function handleError() {
           shippingCost = 0;
-          shippingLabel = 'out_of_range';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ CP fuera de zona de cobertura (${Math.round(distanceKm)} km). Nos pondremos en contacto para cotizar.</span>`;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos validar el CP. Se cotizará al confirmar.</span>';
         }
       } catch(e) {
         clearTimeout(apiTimeout);

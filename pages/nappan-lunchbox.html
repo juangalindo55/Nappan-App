@@ -678,54 +678,66 @@
       }, 6000);
 
       try {
-        // Use OSRM for distance calculation (free, no API key needed)
-        // Geocode postal code to coordinates using Nominatim
-        const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${cp}+Monterrey+Mexico&format=json&limit=1`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+        // Use Google Maps for distance calculation
+        await window.initGoogleMapsAPI();
 
-        if (!geoResponse.ok) throw new Error('Geocoding failed');
-        const geoData = await geoResponse.json();
-        if (!geoData || geoData.length === 0) throw new Error('No location found');
+        const service = new google.maps.DistanceMatrixService();
+        const origin = SHIPPING_ORIGIN;
+        const destination = cp + ', Monterrey, Mexico';
 
-        const destLat = parseFloat(geoData[0].lat);
-        const destLon = parseFloat(geoData[0].lon);
+        service.getDistanceMatrix({
+          origins: [origin],
+          destinations: [destination],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+        }, (response, status) => {
+          clearTimeout(apiTimeout);
 
-        // Use geocoded origin coordinates from config (Nominatim)
-        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.750779;
-        const originLon = window.NappanConfig?.ORIGIN_LON || -100.421119;
+          if (status !== 'OK') {
+            console.error('Distance Matrix failed:', status);
+            handleError();
+            return;
+          }
 
-        // Calculate distance using OSRM
-        const routeResponse = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,
-          { signal: AbortSignal.timeout(5000) }
-        );
+          const element = response.rows[0].elements[0];
+          if (element.status !== 'OK') {
+            console.warn('No route found for:', destination);
+            shippingCost  = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura. Cotizamos por WhatsApp.</span>`;
+            renderCart();
+            return;
+          }
 
-        if (!routeResponse.ok) throw new Error('Route calculation failed');
-        const routeData = await routeResponse.json();
-        if (!routeData.routes || routeData.routes.length === 0) throw new Error('No route found');
+          const km = element.distance.value / 1000;
+          const cost = getShippingCost(km);
 
-        clearTimeout(apiTimeout);
-        const km = routeData.routes[0].distance / 1000;
-        const cost = getShippingCost(km);
+          if (cost === null) {
+            shippingCost  = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura (${km.toFixed(1)} km). Cotizamos por WhatsApp.</span>`;
+          } else {
+            shippingCost  = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;">✅ Envío estimado: <strong>$${cost} MXN</strong> (${km.toFixed(1)} km)</span>`;
+          }
+          renderCart();
+        });
 
-        if (cost === null) {
+        function handleError() {
           shippingCost  = 0;
-          shippingLabel = 'out_of_range';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura (${km.toFixed(1)} km). Cotizamos por WhatsApp.</span>`;
-        } else {
-          shippingCost  = cost;
-          shippingLabel = 'calculated';
-          if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;">✅ Envío estimado: <strong>$${cost} MXN</strong> (${km.toFixed(1)} km)</span>`;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+          renderCart();
         }
+
       } catch(e) {
         clearTimeout(apiTimeout);
         shippingCost  = 0;
         shippingLabel = 'error';
         if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        renderCart();
       }
-      renderCart();
     };
 
     tryCalc();
