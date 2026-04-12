@@ -124,3 +124,64 @@ El panel está modularizado en `admin-modules/`:
 6. **Encabezado Unificado:** Mantener el patrón de header (Grid 1fr auto 1fr) en todas las secciones.
 7. **Seguridad Admin:** Las mutaciones de base de datos sensibles deben usar funciones RPC con `SECURITY DEFINER` para evitar violaciones de RLS por parte de usuarios anónimos.
 8. **Rendimiento Admin:** Evitar bucles de carga secuenciales; preferir cargas en paralelo o batches.
+
+## Despliegue en Vercel & Dominios Personalizados (Fase 9)
+
+**Configuración Crítica:** Los despliegues en producción a www.nappan.net requieren una configuración adecuada en Vercel para asegurar el despliegue automático desde la rama master.
+
+### Configuración de Producción
+
+1. **Vercel Project Settings → Deployments**
+   - **Production Branch:** Debe ser `master` (no `main`)
+   - **Auto-assign Custom Domains:** Habilitar para asignar automáticamente www.nappan.net a cada nuevo despliegue desde master
+   - **Production Deployment:** NO debe estar fijado a un despliegue específico. En su lugar, usar "Latest from master"
+
+2. **Qué Logra Esto**
+   - Cada `git push origin master` crea automáticamente un nuevo despliegue en producción
+   - www.nappan.net apunta automáticamente al último despliegue en producción
+   - Sin necesidad de cambios de despliegue manuales
+   - Los cambios se publican inmediatamente después del push
+
+3. **Configuración de Dominios Personalizados**
+   - `www.nappan.net` - Dominio de producción (principal)
+   - `nappan.net` - Redirección 308 a www.nappan.net
+   - Ambos dominios configurados en la configuración del proyecto en Vercel
+
+### Calculadora de Envío & Geocodificación de Origen (Característica Fase 9)
+
+La calculadora de envío utiliza geocodificación de origen dinámica para asegurar cálculos de distancia precisos:
+
+**Archivo:** `js/config.js`
+
+```javascript
+async function geocodeOriginAddress() {
+  const originAddress = '64349, Monterrey, Mexico';
+  // Nominatim geocodifica el código postal a su centroide
+  // Esto asegura que el origen coincida con donde los usuarios ingresan el mismo código postal
+}
+```
+
+**Por Qué:** Los códigos postales son zonas, no puntos. Usar el código postal como origen asegura:
+- Cuando un cliente del código postal 64349 pide (envío = 0 km)
+- Ve el precio de tier correcto para 0-3 km ($50)
+- No una distancia inflada por desajuste de dirección específica
+
+**Tiers (Configurables en Admin):**
+- 0-3 km: $50
+- 3-8 km: $85
+- 8-15 km: $130
+- 15-20 km: $150
+- 20-45 km: $200
+- >45 km: Fuera de rango (requiere cotización)
+
+### Resolución de Problemas de Despliegue
+
+**Problema:** Los cambios empujados a master no aparecen en www.nappan.net
+- **Verificación 1:** Confirmar que Vercel Production Branch está configurado a `master` (no `main`)
+- **Verificación 2:** Confirmar que Production Deployment no está fijado a un despliegue antiguo específico
+- **Verificación 3:** Limpiar caché de CDN al activar un nuevo despliegue (hacer un pequeño commit)
+
+**Problema:** La calculadora de envío muestra distancia incorrecta
+- **Verificación 1:** Verificar que `originAddress` en `js/config.js` usa formato de código postal (no dirección específica)
+- **Verificación 2:** La consola debería mostrar: `✓ Origin geocoded: (lat, lon)` al cargar la página
+- **Verificación 3:** Probar con código postal 64349 (origen) - debería mostrar precio de tier 0-3 km

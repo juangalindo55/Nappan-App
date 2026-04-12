@@ -184,8 +184,7 @@
   document.head.appendChild(styleEl);
 
   // ── CONFIGURACIÓN ──────────────────────────────────────────
-  const GOOGLE_MAPS_API_KEY = window.NappanConfig?.GOOGLE_MAPS_API_KEY || 'AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA';
-  const ORIGIN_ADDRESS = 'Cumbres, Monterrey, 64349, Mexico';
+  const ORIGIN_ADDRESS = '64349, Monterrey, Mexico';
 
   // ── CLASE CHATBOT ──────────────────────────────────────────
   class NappanChatbot {
@@ -407,9 +406,8 @@
         const destLon = parseFloat(geoData[0].lon);
 
         // OSRM routing: calculate distance between origin and destination
-        // Monterrey center coordinates (ORIGIN_ADDRESS = "Monterrey, NL, Mexico")
-        const originLat = 25.6866;
-        const originLon = -100.3161;
+        const originLat = window.NappanConfig?.ORIGIN_LAT || 25.6866;
+        const originLon = window.NappanConfig?.ORIGIN_LON || -100.3161;
 
         const routeResponse = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}`,

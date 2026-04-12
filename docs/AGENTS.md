@@ -137,3 +137,64 @@ All pages import `utils.js` and reference this constant.
 5. **Images:** Use WebP format with PNG fallback via `<picture>` element for new product images.
 6. **WhatsApp number:** Always reference `WA_NUMBER` from `utils.js`. Never hardcode the number in page scripts.
 
+## Vercel Production Deployment & Custom Domains (Phase 9)
+
+**Critical Configuration:** Production deployments to www.nappan.net require proper Vercel setup to ensure automatic deployment from master branch.
+
+### Production Setup
+
+1. **Vercel Project Settings → Deployments**
+   - **Production Branch:** Must be set to `master` (not `main`)
+   - **Auto-assign Custom Domains:** Enable this to automatically assign www.nappan.net to each new master deployment
+   - **Production Deployment:** Should NOT be pinned to a specific deployment. Instead, set to use "Latest from master"
+
+2. **What This Achieves**
+   - Every `git push origin master` automatically creates a new production deployment
+   - www.nappan.net automatically points to the latest production deployment
+   - No manual deployment switching needed
+   - Changes go live immediately after push
+
+3. **Custom Domain Configuration**
+   - `www.nappan.net` - Production domain (primary)
+   - `nappan.net` - 308 redirect to www.nappan.net
+   - Both domains configured in Vercel project settings
+
+### Shipping Calculator & Origin Geocoding (Phase 9 Feature)
+
+The shipping calculator uses dynamic origin geocoding to ensure accurate distance calculations:
+
+**File:** `js/config.js`
+
+```javascript
+async function geocodeOriginAddress() {
+  const originAddress = '64349, Monterrey, Mexico';
+  // Nominatim geocodes the postal code to its centroid
+  // This ensures origin matches where users enter the same postal code
+}
+```
+
+**Why:** Postal codes are zones, not points. Using the postal code as the origin ensures:
+- When a customer from postal code 64349 orders (shipping = 0 km)
+- They see the correct tier price for 0-3 km ($50)
+- Not an inflated distance because of specific address mismatch
+
+**Tiers (Configurable in Admin):**
+- 0-3 km: $50
+- 3-8 km: $85
+- 8-15 km: $130
+- 15-20 km: $150
+- 20-45 km: $200
+- >45 km: Out of range (requires quote)
+
+### Troubleshooting Deployment Issues
+
+**Problem:** Changes pushed to master don't appear on www.nappan.net
+- **Check 1:** Verify Vercel Production Branch is set to `master` (not `main`)
+- **Check 2:** Verify Production Deployment is not pinned to a specific old deployment
+- **Check 3:** Clear CDN cache by triggering a new deployment (make a small commit)
+
+**Problem:** Shipping calculator shows wrong distance
+- **Check 1:** Verify `originAddress` in `js/config.js` uses postal code format (not specific address)
+- **Check 2:** Console should show: `✓ Origin geocoded: (lat, lon)` on page load
+- **Check 3:** Test with postal code 64349 (origin) - should show 0-3 km tier price
+
