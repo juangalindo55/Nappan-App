@@ -115,20 +115,10 @@
     document.getElementById('submitBtn').textContent = 'Entrando...';
 
     try {
-      // Wait for Auth module to be exposed (happens after <script type="module"> runs)
-      let maxAttempts = 50;
-      while ((!window.Auth || typeof window.Auth.login !== 'function') && maxAttempts > 0) {
-        await new Promise(r => setTimeout(r, 100));
-        maxAttempts--;
-      }
+      const db = await getDb();
+      const { session, error } = await db.signIn(email, password);
 
-      if (!window.Auth || typeof window.Auth.login !== 'function') {
-        throw new Error('Auth module no disponible después de 5 segundos');
-      }
-
-      const result = await window.Auth.login(email, password);
-
-      if (!result) {
+      if (error || !session) {
         showToast('Email o contraseña incorrectos', 'error');
         document.getElementById('loginError').textContent = 'Credenciales inválidas';
         document.getElementById('loginError').style.display = 'block';
@@ -146,18 +136,8 @@
   }
 
   async function handleLogout() {
-    // Wait for Auth module if not ready
-    let maxAttempts = 50;
-    while ((!window.Auth || typeof window.Auth.logout !== 'function') && maxAttempts > 0) {
-      await new Promise(r => setTimeout(r, 100));
-      maxAttempts--;
-    }
-
-    if (!window.Auth || typeof window.Auth.logout !== 'function') {
-      throw new Error('Auth module no disponible');
-    }
-
-    await window.Auth.logout();
+    const db = await getDb();
+    await db.signOut();
     showLoginShell();
     document.getElementById('loginForm').reset();
   }
@@ -1883,8 +1863,7 @@
   }
   // ---- END PHASE 6 ----
 
-  // Expose all functions to window for inline onclick handlers
-  // Required because <script type="module"> scopes functions locally
+  // Expose the handlers for any legacy consumers outside this script.
   Object.assign(window, {
     handleLogin,
     handleLogout,
