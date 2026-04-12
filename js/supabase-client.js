@@ -415,20 +415,24 @@ async function loadCustomers(filters = {}) {
 // Admin: Update customer
 async function updateCustomer(customerId, updates) {
   if (!supabaseClient) return { error: 'Supabase not initialized' };
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('customers')
     .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', customerId);
-  return { error };
+    .eq('id', customerId)
+    .select('*')
+    .single();
+  return { data, error };
 }
 
 // Admin: Insert new customer
 async function insertCustomer(phone, name, tier) {
   if (!supabaseClient) return { error: 'Supabase not initialized' };
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('customers')
-    .insert([{ phone, name, membership_tier: tier || 'individual' }]);
-  return { error };
+    .insert([{ phone, name, membership_tier: tier || 'individual' }])
+    .select('*')
+    .single();
+  return { data, error };
 }
 
 // Admin: Delete customer

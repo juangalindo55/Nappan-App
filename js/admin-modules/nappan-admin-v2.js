@@ -36,6 +36,52 @@
     return div.innerHTML;
   }
 
+  function normalizePhone(phone) {
+    return (phone || '').replace(/\D/g, '');
+  }
+
+  async function resolveCustomerByPhone(phone) {
+    const normalized = normalizePhone(phone);
+    if (!normalized) return null;
+
+    const localCustomer = allCustomers.find(customer => normalizePhone(customer.phone) === normalized);
+    if (localCustomer) return localCustomer;
+
+    try {
+      return await window.NappanDB.findCustomerByPhone(phone);
+    } catch (error) {
+      console.warn('resolveCustomerByPhone failed:', error);
+      return null;
+    }
+  }
+
+  async function syncOrdersWithCustomerIdByPhone(customerId, phone) {
+    const normalized = normalizePhone(phone);
+    if (!customerId || !normalized) return 0;
+
+    if (allOrders.length === 0) {
+      allOrders = await (await getDb()).loadAllOrders({});
+    }
+
+    const targetOrders = allOrders.filter(order => normalizePhone(order.customer_phone) === normalized);
+    if (targetOrders.length === 0) return 0;
+
+    const results = await Promise.all(
+      targetOrders.map(order => window.NappanDB.updateOrder(order.id, { customer_id: customerId }))
+    );
+
+    const failed = results.filter(result => result && result.error);
+    if (failed.length > 0) {
+      console.warn('syncOrdersWithCustomerIdByPhone partial failures:', failed);
+    }
+
+    targetOrders.forEach(order => {
+      order.customer_id = customerId;
+    });
+
+    return targetOrders.length;
+  }
+
   // Cache state and invalidation (only for Orders tab which has real cache logic)
   let cacheState = {
     ordersLoaded: false
@@ -649,6 +695,9 @@
         raw_cart: JSON.stringify(cart)
       };
 
+      const matchedCustomer = phone ? await resolveCustomerByPhone(phone) : null;
+      updates.customer_id = matchedCustomer ? matchedCustomer.id : null;
+
       const { error } = await window.NappanDB.updateOrder(editingOrderId, updates);
 
       if (error) {
@@ -664,6 +713,7 @@
           order.notes = notes;
           order.total = total;
           order.raw_cart = cart;
+          order.customer_id = updates.customer_id;
         }
 
         showToast('✓ Pedido actualizado', 'success');
@@ -1164,29 +1214,37 @@
 
   async function enrichCustomersWithOrderData() {
     try {
-      // Cargar todas las órdenes
-      if (allOrders.length === 0) {
-        allOrders = await (await getDb()).loadAllOrders({});
-      }
-
-      // Filtrar órdenes válidas (excluir cancelled y deleted)
       const validOrders = allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted');
-
-      // Agrupar órdenes válidas por teléfono del cliente (normalizado)
+      const ordersByCustomerId = {};
       const ordersByPhone = {};
+
       validOrders.forEach(order => {
-        const phone = (order.customer_phone || '').replace(/\D/g, '');
-        if (!phone) return;
-        if (!ordersByPhone[phone]) {
-          ordersByPhone[phone] = [];
+        const customerId = order.customer_id || '';
+        if (customerId) {
+          if (!ordersByCustomerId[customerId]) {
+            ordersByCustomerId[customerId] = [];
+          }
+          ordersByCustomerId[customerId].push(order);
         }
-        ordersByPhone[phone].push(order);
+
+        const phone = normalizePhone(order.customer_phone);
+        if (phone) {
+          if (!ordersByPhone[phone]) {
+            ordersByPhone[phone] = [];
+          }
+          ordersByPhone[phone].push(order);
+        }
       });
 
-      // Enriquecer cada cliente
       allCustomers.forEach(customer => {
-        const phone = (customer.phone || '').replace(/\D/g, '');
-        const customerOrders = ordersByPhone[phone] || [];
+        const phone = normalizePhone(customer.phone);
+        const linkedOrders = ordersByCustomerId[customer.id] || [];
+        const fallbackOrders = ordersByPhone[phone] || [];
+        const ordersById = new Map();
+        [...linkedOrders, ...fallbackOrders].forEach(order => {
+          ordersById.set(order.id, order);
+        });
+        const customerOrders = Array.from(ordersById.values());
 
         customer.order_count = customerOrders.length;
         customer.total_spent = customerOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
@@ -1222,8 +1280,8 @@
       const lastOrder = customer.last_order_at ? new Date(customer.last_order_at).toLocaleDateString('es-MX') : '—';
       const totalSpent = parseFloat(customer.total_spent || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       html += '<tr>';
-      html += '<td id="phone-' + customer.id + '">' + escapeHtml(customer.phone || '—') + '</td>';
-      html += '<td id="name-' + customer.id + '">' + escapeHtml(customer.name || '—') + '</td>';
+      html += '<td id="phone-' + customer.id + '">' + escapeHtml(customer.phone || '—') + ' <button type="button" class="btn" style="padding:4px 8px; font-size:11px; width:auto;" data-action="start-edit-customer" data-customer-id="' + customer.id + '" data-field="phone">✏️</button></td>';
+      html += '<td id="name-' + customer.id + '">' + escapeHtml(customer.name || '—') + ' <button type="button" class="btn" style="padding:4px 8px; font-size:11px; width:auto;" data-action="start-edit-customer" data-customer-id="' + customer.id + '" data-field="name">✏️</button></td>';
       html += '<td><select data-action="change-customer-tier" data-customer-id="' + customer.id + '">';
       html += '<option value="individual" ' + (customer.membership_tier === 'individual' ? 'selected' : '') + '>Individual</option>';
       html += '<option value="premium" ' + (customer.membership_tier === 'premium' ? 'selected' : '') + '>Premium</option>';
@@ -1232,8 +1290,7 @@
       html += '<td style="text-align:center;"><strong>' + (customer.order_count || 0) + '</strong></td>';
       html += '<td style="text-align:right;">$' + totalSpent + '</td>';
       html += '<td style="font-size:13px;color:#666;">' + lastOrder + '</td>';
-      html += '<td><button type="button" class="btn" style="padding:6px 10px; font-size:12px;" data-action="start-edit-customer" data-customer-id="' + customer.id + '" data-field="name">✏️</button> ';
-      html += '<button type="button" class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" data-action="delete-customer" data-customer-id="' + customer.id + '">🗑️</button></td>';
+      html += '<td><button type="button" class="btn-cancel" style="padding:6px 10px; font-size:12px; background:#FF6B6B; color:white; border:none; border-radius:4px; cursor:pointer;" data-action="delete-customer" data-customer-id="' + customer.id + '">🗑️</button></td>';
       html += '</tr>';
     });
 
@@ -1253,6 +1310,8 @@
       return;
     }
 
+    const customer = allCustomers.find(c => c.id === id);
+    const oldVal = customer ? customer[field] : '';
     const updates = {};
     updates[field] = newVal;
 
@@ -1261,11 +1320,19 @@
       if (error) {
         showToast('Error: ' + error.message, 'error');
       } else {
-        const customer = allCustomers.find(c => c.id === id);
         if (customer) customer[field] = newVal;
         showToast('✓ ' + field.charAt(0).toUpperCase() + field.slice(1) + ' actualizado', 'success');
+
+        if (field === 'phone') {
+          const linked = await syncOrdersWithCustomerIdByPhone(id, oldVal);
+          if (linked > 0) {
+            showToast('✓ ' + linked + ' pedidos vinculados al cliente', 'success');
+          }
+        }
+
         renderCustomersTable();
         invalidateCache('stats');
+        await refreshStatsIfVisible();
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1273,8 +1340,7 @@
   }
 
   function cancelEditCustomer(id, field, originalVal) {
-    const cellEl = document.getElementById(field + '-' + id);
-    cellEl.textContent = originalVal;
+    renderCustomersTable();
   }
 
   async function changeCustomerTier(id, newTier) {
@@ -1305,6 +1371,7 @@
         showToast('✓ Cliente eliminado', 'success');
         renderCustomersTable();
         invalidateCache('stats');
+        await refreshStatsIfVisible();
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1334,15 +1401,22 @@
     }
 
     try {
-      const { error } = await window.NappanDB.insertCustomer(phone, name, tier);
+      const { data, error } = await window.NappanDB.insertCustomer(phone, name, tier);
       if (error) {
         showToast('Error: ' + error.message, 'error');
       } else {
         showToast('✓ Cliente agregado', 'success');
+        if (data?.id) {
+          const linked = await syncOrdersWithCustomerIdByPhone(data.id, phone);
+          if (linked > 0) {
+            showToast('✓ ' + linked + ' pedidos vinculados al cliente', 'success');
+          }
+        }
         hideAddCustomerForm();
         invalidateCache('customers');
         invalidateCache('stats');
         await ensureCustomersLoaded({ force: true });
+        await refreshStatsIfVisible();
       }
     } catch (error) {
       showToast('Error: ' + error.message, 'error');
@@ -1467,11 +1541,13 @@
           cancelEditProductPrice(actionEl.dataset.productId, parseFloat(actionEl.dataset.currentPrice) || 0);
           break;
         case 'start-edit-customer': {
-          const cellEl = document.getElementById('name-' + actionEl.dataset.customerId);
+          const field = actionEl.dataset.field || 'name';
+          const cellEl = document.getElementById(field + '-' + actionEl.dataset.customerId);
+          const currentVal = cellEl ? (cellEl.childNodes[0]?.textContent || cellEl.textContent || '').trim() : '';
           startEditCustomer(
             actionEl.dataset.customerId,
-            actionEl.dataset.field || 'name',
-            cellEl ? cellEl.textContent : '',
+            field,
+            currentVal,
             cellEl
           );
           break;
@@ -1643,6 +1719,38 @@
         allOrders = await (await getDb()).loadAllOrders({});
       }
 
+      if (allCustomers.length === 0) {
+        allCustomers = await (await getDb()).loadCustomers({});
+      }
+
+      const customerById = {};
+      const customerIdByPhone = {};
+      allCustomers.forEach(customer => {
+        customerById[customer.id] = customer;
+        const phone = normalizePhone(customer.phone);
+        if (phone && !customerIdByPhone[phone]) {
+          customerIdByPhone[phone] = customer.id;
+        }
+      });
+
+      const getStatsCustomerKey = (order) => {
+        const phone = normalizePhone(order.customer_phone);
+        return order.customer_id || customerIdByPhone[phone] || (phone ? 'phone:' + phone : (order.customer_name ? 'name:' + order.customer_name.trim().toLowerCase() : 'unknown'));
+      };
+
+      const getStatsCustomerLabel = (order) => {
+        if (order.customer_id && customerById[order.customer_id]) {
+          return customerById[order.customer_id].name || order.customer_name || order.customer_phone || 'Desconocido';
+        }
+
+        const phone = normalizePhone(order.customer_phone);
+        if (phone && customerIdByPhone[phone] && customerById[customerIdByPhone[phone]]) {
+          return customerById[customerIdByPhone[phone]].name || order.customer_name || order.customer_phone || 'Desconocido';
+        }
+
+        return order.customer_name || order.customer_phone || 'Desconocido';
+      };
+
       // Filtrar en cliente (excluir pedidos eliminados y cancelados por defecto)
       let orders = allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted');
       if (fromVal) orders = orders.filter(o => o.created_at.slice(0,10) >= fromVal);
@@ -1668,9 +1776,8 @@
       let repeatCustomers = 0;
       const phoneCounts = {};
       allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'deleted').forEach(o => {
-        if (o.customer_phone) {
-          phoneCounts[o.customer_phone] = (phoneCounts[o.customer_phone] || 0) + 1;
-        }
+        const key = getStatsCustomerKey(o);
+        phoneCounts[key] = (phoneCounts[key] || 0) + 1;
       });
       repeatCustomers = Object.values(phoneCounts).filter(c => c > 1).length;
 
@@ -1776,15 +1883,21 @@
       // --- TOP CUSTOMERS ---
       const custMap = {};
       orders.forEach(o => {
-        const key = o.customer_name || o.customer_phone || 'Desconocido';
-        if (!custMap[key]) custMap[key] = { count: 0, total: 0 };
+        const key = getStatsCustomerKey(o);
+        if (!custMap[key]) {
+          custMap[key] = {
+            label: getStatsCustomerLabel(o),
+            count: 0,
+            total: 0
+          };
+        }
         custMap[key].count++;
         custMap[key].total += (parseFloat(o.total) || 0);
       });
       const sortedCusts = Object.entries(custMap).sort((a,b) => b[1].total - a[1].total).slice(0,5);
       const custTbody = document.querySelector('#topCustomersTable tbody');
-      custTbody.innerHTML = sortedCusts.map(([ name, d ], i) =>
-        `<tr><td><span class="rank-badge">${i+1}</span></td><td>${name}</td><td>${d.count}</td><td>$${d.total.toLocaleString('es-MX')}</td></tr>`
+      custTbody.innerHTML = sortedCusts.map(([ key, d ], i) =>
+        `<tr><td><span class="rank-badge">${i+1}</span></td><td>${d.label}</td><td>${d.count}</td><td>$${d.total.toLocaleString('es-MX')}</td></tr>`
       ).join('') || '<tr><td colspan="4" style="color:#999;text-align:center;">Sin datos</td></tr>';
 
       // Ocultar loader y mostrar contenido

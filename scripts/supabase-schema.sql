@@ -87,6 +87,23 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.table_constraints
+    WHERE table_schema = 'public'
+      AND table_name = 'orders'
+      AND constraint_name = 'orders_customer_id_fkey'
+  ) THEN
+    ALTER TABLE orders
+      ADD CONSTRAINT orders_customer_id_fkey
+      FOREIGN KEY (customer_id)
+      REFERENCES customers(id)
+      ON DELETE SET NULL;
+  END IF;
+END $$;
+
 -- RLS: INSERT open to anon, SELECT/UPDATE/DELETE admin only
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
