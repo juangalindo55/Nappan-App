@@ -397,8 +397,33 @@
     }
   }
 
-  // Cargar precios cuando la página esté lista
-  loadDynamicPrices();
+  // 1. Ejecutar inmediatamente para el contenido estático
+  linkifyNucolato();
+
+  // 2. Intentar de nuevo tras la carga dinámica (o fallo de la misma)
+  loadDynamicPrices().finally(() => {
+    linkifyNucolato();
+    // Re-ejecutar un par de veces por si hay retrasos en el renderizado
+    setTimeout(linkifyNucolato, 1000);
+    setTimeout(linkifyNucolato, 3000);
+  });
+
+  function linkifyNucolato() {
+    // Selectores para los elementos que podrían tener la palabra
+    const targets = document.querySelectorAll('.extra-label, .items-list li, span, li');
+    
+    targets.forEach(el => {
+      const regex = /Nucolato/gi; // Definido aquí para resetear el estado en cada elemento
+      
+      // Verificamos si la palabra existe en el texto plano del elemento
+      if (regex.test(el.textContent) && !el.querySelector('.nucolato-link')) {
+        // Reemplazamos en el HTML para no perder emojis u otros estilos
+        el.innerHTML = el.innerHTML.replace(regex, (match) => {
+          return `<a href="https://www.instagram.com/nucolato/" target="_blank" class="nucolato-link" style="color: #DAA520; text-decoration: underline; font-weight: 800;" onclick="event.stopPropagation()">${match}</a>`;
+        });
+      }
+    });
+  }
 
   function changeQty(id, delta) {
     const el = document.getElementById(id);

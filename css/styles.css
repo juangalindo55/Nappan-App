@@ -520,6 +520,16 @@ body.page-lunchbox {
     --shadow: 0 8px 32px rgba(45,27,14,0.12);
   }
 
+  .nucolato-link {
+    color: var(--gold);
+    text-decoration: underline;
+    font-weight: 800;
+    transition: opacity 0.2s;
+  }
+  .nucolato-link:hover {
+    opacity: 0.8;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body.page-lunchbox {
