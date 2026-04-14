@@ -75,6 +75,13 @@
       <label>⏰ Hora aproximada</label>
       <input type="time" id="deliveryTime" />
     </div>
+    <div class="date-field">
+      <label>💳 Método de pago</label>
+      <select id="paymentMethod" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-family:inherit; font-size:14px; background:white;">
+        <option value="EFECTIVO">💵 EFECTIVO</option>
+        <option value="TRANSFERENCIA SPEI">🏦 TRANSFERENCIA SPEI</option>
+      </select>
+    </div>
     <div class="date-field" style="flex:100%">
       <label>📍 Dirección / Notas especiales</label>
       <textarea id="notes" placeholder="Dirección de entrega, temática del evento, nombre del cumpleañero..."></textarea>
@@ -841,6 +848,7 @@
     const phone = document.getElementById('clientPhone').value.trim();
     const date = document.getElementById('deliveryDate').value;
     const time = document.getElementById('deliveryTime').value;
+    const paymentMethod = document.getElementById('paymentMethod').value;
     const notes = document.getElementById('notes').value.trim();
 
     if (cart.length === 0) { showToast('⚠️ Tu carrito está vacío'); return; }
@@ -859,6 +867,7 @@
     if (phone) msg += `📱 *Teléfono:* ${phone}\n`;
     msg += `📅 *Fecha:* ${formatDate(date)}\n`;
     if (time) msg += `⏰ *Hora:* ${time}\n`;
+    msg += `💳 *Pago:* ${paymentMethod}\n`;
     if (notes) msg += `📍 *Dirección:* ${notes}\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `*PRODUCTOS:*\n`;

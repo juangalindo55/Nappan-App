@@ -88,6 +88,13 @@
         <input type="date" id="nb-date"/>
       </div>
       <div class="form-field">
+        <label>💳 Método de pago</label>
+        <select id="nb-payment" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:14px; background:white;">
+          <option value="EFECTIVO">💵 EFECTIVO</option>
+          <option value="TRANSFERENCIA SPEI">🏦 TRANSFERENCIA SPEI</option>
+        </select>
+      </div>
+      <div class="form-field">
         <label>👤 ¿Es para quién?</label>
         <input type="text" id="nb-for" placeholder="Nombre del festejado"/>
       </div>
@@ -185,6 +192,13 @@
       <div class="form-field premium">
         <label>📅 Fecha deseada</label>
         <input type="date" id="pr-date"/>
+      </div>
+      <div class="form-field premium">
+        <label>💳 Método de pago</label>
+        <select id="pr-payment" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:14px; background:white;">
+          <option value="EFECTIVO">💵 EFECTIVO</option>
+          <option value="TRANSFERENCIA SPEI">🏦 TRANSFERENCIA SPEI</option>
+        </select>
       </div>
       <div class="form-field premium">
         <label>👤 ¿Es para quién?</label>
@@ -624,6 +638,7 @@
       const character = document.getElementById('nb-character').value.trim();
       const desc = document.getElementById('nb-desc').value.trim();
       const date = document.getElementById('nb-date').value;
+      const payment = document.getElementById('nb-payment').value;
       const forWho = document.getElementById('nb-for').value.trim();
       const notes = document.getElementById('nb-notes').value.trim();
       const hasExtra = document.querySelector('#panel-normal .extras-row')?.classList.contains('selected');
@@ -648,6 +663,8 @@
       if (phone) msg += `📱 *Teléfono:* ${phone}
 `;
       msg += `📅 *Fecha deseada:* ${formatDate(date)}
+`;
+      msg += `💳 *Pago:* ${payment}
 `;
       if (forWho) msg += `🎁 *Para:* ${forWho}
 `;
@@ -730,6 +747,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       const design = document.getElementById('pr-design').value.trim();
       const ref = document.getElementById('pr-ref').value.trim();
       const date = document.getElementById('pr-date').value;
+      const payment = document.getElementById('pr-payment').value;
       const forWho = document.getElementById('pr-for').value.trim();
       const notes = document.getElementById('pr-notes').value.trim();
       const hasExtra = document.querySelector('#panel-premium .extras-row')?.classList.contains('selected');
@@ -754,6 +772,8 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
       if (phone) msg += `📱 *Teléfono:* ${phone}
 `;
       msg += `📅 *Fecha deseada:* ${formatDate(date)}
+`;
+      msg += `💳 *Pago:* ${payment}
 `;
       if (forWho) msg += `🎁 *Para:* ${forWho}
 `;

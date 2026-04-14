@@ -274,6 +274,13 @@
         <label>⏰ Hora aproximada</label>
         <input type="time" id="deliveryTime" />
       </div>
+      <div class="date-field">
+        <label>💳 Método de pago</label>
+        <select id="paymentMethod" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-family:inherit; font-size:14px; background:white;">
+          <option value="EFECTIVO">💵 EFECTIVO</option>
+          <option value="TRANSFERENCIA SPEI">🏦 TRANSFERENCIA SPEI</option>
+        </select>
+      </div>
       <div class="date-field" style="flex:100%">
         <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
         <div style="display:flex;gap:8px;align-items:center;">
@@ -745,6 +752,7 @@
     const clientPhone = document.getElementById('clientPhone').value.trim();
     const deliveryDate = document.getElementById('deliveryDate').value;
     const deliveryTime = document.getElementById('deliveryTime').value;
+    const paymentMethod = document.getElementById('paymentMethod').value;
     const specialNotes = document.getElementById('specialNotes').value.trim();
 
     if (!clientName) {
@@ -785,6 +793,7 @@
     if (deliveryTime) {
       message += `⏰ *Hora:* ${deliveryTime}\n`;
     }
+    message += `💳 *Pago:* ${paymentMethod}\n`;
 
     message += '━━━━━━━━━━━━━━━━━━━━━━━\n\n';
     message += '📋 *PRODUCTOS:*\n';
