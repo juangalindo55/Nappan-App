@@ -850,6 +850,7 @@
       total: total,
       whatsapp_sent: true,
       notes: specialNotes,
+      membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
       raw_cart: JSON.parse(JSON.stringify(cartPFB))
     });
 

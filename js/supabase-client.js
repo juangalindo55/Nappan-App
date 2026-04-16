@@ -105,7 +105,8 @@ async function saveOrder(orderPayload) {
       p_total: orderPayload.total || 0,
       p_whatsapp_sent: orderPayload.whatsapp_sent || true,
       p_notes: orderPayload.notes || null,
-      p_raw_cart: orderPayload.raw_cart || {}
+      p_raw_cart: orderPayload.raw_cart || {},
+      p_membership_tier: orderPayload.membership_tier || 'individual'
     });
 
     if (orderError) {

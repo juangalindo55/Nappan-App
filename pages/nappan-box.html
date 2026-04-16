@@ -834,6 +834,7 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
         total: total,
         whatsapp_sent: true,
         notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,
+        membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
         raw_cart: JSON.stringify({
           type: 'premium',
           design,
