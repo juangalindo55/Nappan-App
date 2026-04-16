@@ -317,6 +317,11 @@
         const discountAmount = order.discount_amount ? parseFloat(order.discount_amount) : 0;
         const shippingCost = order.shipping_cost ? parseFloat(order.shipping_cost) : 0;
         const tier = order.membership_tier || 'individual';
+        
+        // Buscar el cliente actual para comparar el Tier
+        const currentCustomer = allCustomers.find(c => c.phone === order.customer_phone);
+        const currentTier = currentCustomer ? currentCustomer.membership_tier : null;
+        const showTierAlert = currentTier && currentTier !== tier;
 
         html += '<tr class="detail-row show">';
         html += '<td colspan="8"><div class="detail-content">';
@@ -327,7 +332,11 @@
         
         if (discountAmount > 0) {
           const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
-          html += '<div class="detail-field"><div class="detail-field-label">✨ Descuento (' + escapeHtml(tierLabel) + ')</div><div class="detail-field-value" style="color: #27ae60; font-weight: 600;">-$' + discountAmount.toFixed(2) + '</div></div>';
+          let alertHtml = '';
+          if (showTierAlert) {
+            alertHtml = ' <span style="font-size: 10px; background: #fff3cd; padding: 2px 4px; border-radius: 3px; color: #856404;">Actual: ' + currentTier.charAt(0).toUpperCase() + currentTier.slice(1) + '</span>';
+          }
+          html += '<div class="detail-field"><div class="detail-field-label">✨ Descuento (' + escapeHtml(tierLabel) + ')' + alertHtml + '</div><div class="detail-field-value" style="color: #27ae60; font-weight: 600;">-$' + discountAmount.toFixed(2) + '</div></div>';
         }
         
         html += '<div class="detail-field"><div class="detail-field-label">🚚 Envío</div><div class="detail-field-value">$' + shippingCost.toFixed(2) + '</div></div>';
