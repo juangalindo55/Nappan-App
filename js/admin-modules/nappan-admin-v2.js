@@ -315,6 +315,7 @@
         const createdAt = order.created_at ? new Date(order.created_at).toLocaleString('es-MX') : 'No disponible';
         const updatedAt = order.updated_at ? new Date(order.updated_at).toLocaleString('es-MX') : createdAt;
         const discountAmount = order.discount_amount ? parseFloat(order.discount_amount) : 0;
+        const shippingCost = order.shipping_cost ? parseFloat(order.shipping_cost) : 0;
         const tier = order.membership_tier || 'individual';
 
         html += '<tr class="detail-row show">';
@@ -328,6 +329,8 @@
           const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
           html += '<div class="detail-field"><div class="detail-field-label">✨ Descuento (' + escapeHtml(tierLabel) + ')</div><div class="detail-field-value" style="color: #27ae60; font-weight: 600;">-$' + discountAmount.toFixed(2) + '</div></div>';
         }
+        
+        html += '<div class="detail-field"><div class="detail-field-label">🚚 Envío</div><div class="detail-field-value">$' + shippingCost.toFixed(2) + '</div></div>';
         
         html += '<div class="detail-field"><div class="detail-field-label">📅 Creado</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(createdAt) + '</div></div>';
         html += '<div class="detail-field"><div class="detail-field-label">✏️ Último cambio</div><div class="detail-field-value" style="font-size: 12px; color: #999;">' + escapeHtml(updatedAt) + '</div></div>';
