@@ -1,4 +1,0 @@
-{
-  "buildCommand": "echo 'Static site with API routes - no build needed'",
-  "outputDirectory": "."
-}
