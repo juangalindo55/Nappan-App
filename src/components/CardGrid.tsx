@@ -7,48 +7,66 @@ const cards = [
     id: 'lunchbox',
     tag: 'Eventos · Cumpleaños',
     title: 'Lunch Box',
-    description: 'Cajas con pancakes artísticos para eventos y cumpleaños. Mínimo 20 piezas.',
-    cta: 'Pedir ahora',
+    description: 'Cajas con pancakes artísticos para eventos. Presentación premium.',
+    cta: 'Pedir',
     href: '/products/lunchbox',
-    bgColor: 'from-pink-500 to-pink-600'
-  },
-  {
-    id: 'eventos',
-    tag: 'Experiencia · En vivo',
-    title: 'Eventos en Vivo',
-    description: 'Hacemos pancakes artísticos en tu evento. Cada invitado recibe uno completo, hecho al momento.',
-    cta: 'Cotizar',
-    href: '/products/eventos',
-    bgColor: 'from-purple-500 to-purple-600'
+    bgColor: 'from-rose-400 to-rose-500',
+    size: 'lg'
   },
   {
     id: 'fitbar',
-    tag: 'Fit · Proteína · Café',
+    tag: 'Fit · Proteína',
     title: 'Protein Fit Bar',
-    description: 'Coffee bar proteico, Power Pancakes, Protein Minis y Boost Shots. Eat clean. Feel strong.',
-    cta: 'Ver menú',
+    description: 'Pancakes proteicos premium. Eat clean. Feel strong.',
+    cta: 'Explorar',
     href: '/products/fitbar',
-    bgColor: 'from-yellow-500 to-amber-600',
-    ctaStyle: 'bg-amber-400 text-amber-900'
+    bgColor: 'from-amber-400 to-amber-500',
+    size: 'sm'
+  },
+  {
+    id: 'eventos',
+    tag: 'Experiencia',
+    title: 'Eventos en Vivo',
+    description: 'Hacemos pancakes artísticos en tu evento. Experiencia gastronómica.',
+    cta: 'Cotizar',
+    href: '/products/eventos',
+    bgColor: 'from-purple-400 to-purple-500',
+    size: 'sm'
   },
   {
     id: 'nappanbox',
-    tag: 'Ultra personalizado · Realismo',
+    tag: 'Ultra Realismo',
     title: 'Nappan Box',
-    description: 'Cajas de pancakes con arte de ultra realismo. Completamente personalizadas para ti.',
-    cta: 'Explorar',
+    description: 'Pancakes con arte ultra realista. Completamente personalizado para ti.',
+    cta: 'Descubrir',
     href: '/products/nappanbox',
-    bgColor: 'from-emerald-500 to-emerald-600',
-    ctaStyle: 'bg-amber-400 text-amber-900'
+    bgColor: 'from-emerald-400 to-emerald-500',
+    size: 'lg'
   }
 ]
 
 export default function CardGrid() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-      {cards.map(card => (
-        <Card key={card.id} {...card} />
-      ))}
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-max">
+        {/* Large card - left */}
+        <div className="md:col-span-2 md:row-span-2">
+          <Card {...cards[0]} />
+        </div>
+
+        {/* Small cards - right */}
+        <div>
+          <Card {...cards[1]} />
+        </div>
+        <div>
+          <Card {...cards[2]} />
+        </div>
+
+        {/* Large card - bottom right */}
+        <div className="md:col-span-2">
+          <Card {...cards[3]} />
+        </div>
+      </div>
     </div>
   )
 }

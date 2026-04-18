@@ -8,7 +8,7 @@ interface CardProps {
   cta: string
   href: string
   bgColor: string
-  ctaStyle?: string
+  size?: 'sm' | 'lg'
 }
 
 export default function Card({
@@ -18,34 +18,47 @@ export default function Card({
   cta,
   href,
   bgColor,
-  ctaStyle
+  size = 'sm'
 }: CardProps) {
+  const isLarge = size === 'lg'
+
   return (
     <Link href={href}>
-      <div className="group cursor-pointer h-full rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105">
-        <div className={`bg-gradient-to-br ${bgColor} h-32 relative overflow-hidden`}></div>
+      <div className={`group cursor-pointer h-full rounded-2xl overflow-hidden shadow-2xl transition-all hover:shadow-3xl hover:-translate-y-1 duration-300 ${
+        isLarge ? 'min-h-96' : 'min-h-80'
+      }`}>
+        {/* Image/Color section */}
+        <div className={`bg-gradient-to-br ${bgColor} relative overflow-hidden transition-transform group-hover:scale-110 duration-500 ${
+          isLarge ? 'h-48' : 'h-40'
+        }`}>
+          {/* Decorative overlay */}
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300"></div>
+          <div className="absolute top-4 right-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:w-32 group-hover:h-32 transition-all duration-500"></div>
+        </div>
 
-        <div className="bg-amber-950 p-6 space-y-4 flex flex-col justify-between min-h-64">
+        {/* Content section */}
+        <div className={`bg-gradient-to-b from-amber-900 to-amber-950 p-6 md:p-8 flex flex-col justify-between h-full ${
+          isLarge ? 'min-h-48' : 'min-h-40'
+        }`}>
+          {/* Tags and text */}
           <div>
-            <div className="text-xs font-semibold text-amber-200 uppercase tracking-wider mb-2">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-yellow-300 mb-3 px-2 py-1 bg-yellow-300/10 rounded-full">
               {tag}
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold text-amber-50 mb-3 group-hover:text-yellow-300 transition-colors">
+            </span>
+
+            <h3 className="text-2xl md:text-3xl font-bold text-cream mb-2 group-hover:text-yellow-300 transition-colors duration-300 font-serif">
               {title}
             </h3>
-            <p className="text-amber-100 text-sm leading-relaxed">
+
+            <p className="text-cream/80 text-sm md:text-base leading-relaxed">
               {description}
             </p>
           </div>
 
-          <button
-            className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-              ctaStyle
-                ? ctaStyle
-                : 'bg-amber-50 text-amber-900 hover:bg-yellow-300'
-            }`}
-          >
-            {cta} <span className="ml-2">→</span>
+          {/* CTA Button */}
+          <button className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-yellow-300 text-amber-900 font-semibold rounded-lg hover:bg-yellow-200 transition-all duration-300 group/btn">
+            {cta}
+            <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
           </button>
         </div>
       </div>
