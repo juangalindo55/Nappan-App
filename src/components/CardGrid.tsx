@@ -4,7 +4,7 @@ import Card from './Card'
 
 const cards = [
   {
-    id: 'lunchbox',
+    id: 'lunchbox' as const,
     tag: 'Eventos · Cumpleaños',
     title: 'Lunch Box',
     description: 'Cajas con pancakes artísticos para eventos. Presentación premium.',
@@ -43,7 +43,7 @@ const cards = [
     bgColor: 'from-emerald-400 to-emerald-500',
     size: 'lg'
   }
-]
+] as const
 
 export default function CardGrid() {
   return (
