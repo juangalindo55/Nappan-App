@@ -1,36 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Lora', serif;
-
-  --gold: #DAA520;
-  --cream: #FFF8ED;
-  --brown: #2D1B0E;
-  --dark: #1A1008;
-  --terracotta: #C85A36;
-  --sage: #5A7C6F;
-}
-
-@theme inline {
-  --font-serif: var(--font-display);
+  --bg: #0C0806;
+  --surface-1: #161009;
+  --surface-2: #1E150C;
+  --surface-3: #261B10;
+  --gold: #E8A420;
+  --gold-dim: rgba(232, 164, 32, 0.12);
+  --cream: #F0E4CC;
+  --muted: #7A6A55;
+  --nav-height: 72px;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
-  scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
-  font-family: var(--font-body);
-  background: linear-gradient(135deg, #3d2817 0%, #5c3d28 40%, #8b6a47 70%, #f0e8d8 100%);
+  background: var(--bg);
   color: var(--cream);
+  min-height: 100%;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -38,34 +37,28 @@ a {
   color: inherit;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Scroll animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out;
-}
+.anim-up   { animation: fadeUp  0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-scale { animation: scaleIn 0.4s  cubic-bezier(0.22,1,0.36,1) both; }
+
+.d1 { animation-delay: 0.06s; }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; }
+.d4 { animation-delay: 0.24s; }
+.d5 { animation-delay: 0.30s; }
+.d6 { animation-delay: 0.36s; }
