@@ -1,0 +1,68 @@
+import type { Product } from './product.types'
+
+export const PRODUCTS: Product[] = [
+  {
+    id: 'nappanbox',
+    slug: 'nappanbox',
+    name: 'Nappan Box',
+    subtitle: 'Ultra realismo personalizado',
+    tag: 'Exclusivo',
+    href: '/products/nappanbox',
+    categoryId: 'nappan-box',
+    visual: {
+      gradient: 'radial-gradient(ellipse at 38% 42%, #1A3D28 0%, #0A1E14 55%, #040E09 100%)',
+      glow: 'rgba(40,160,90,0.28)',
+      accentColor: '#4ADE80',
+    },
+    sortOrder: 1,
+    isActive: true,
+  },
+  {
+    id: 'lunchbox',
+    slug: 'lunchbox',
+    name: 'Lunch Box',
+    subtitle: 'Cajas artísticas para eventos',
+    tag: 'Eventos',
+    href: '/products/lunchbox',
+    categoryId: 'lunch-box',
+    visual: {
+      gradient: 'radial-gradient(ellipse at 42% 38%, #3A1220 0%, #1C0810 55%, #0C0408 100%)',
+      glow: 'rgba(190,50,80,0.28)',
+      accentColor: '#F87171',
+    },
+    sortOrder: 2,
+    isActive: true,
+  },
+  {
+    id: 'fitbar',
+    slug: 'fitbar',
+    name: 'Fit Bar',
+    subtitle: 'Eat clean. Feel strong.',
+    tag: 'Proteína',
+    href: '/products/fitbar',
+    categoryId: 'fit-bar',
+    visual: {
+      gradient: 'radial-gradient(ellipse at 55% 35%, #3A2210 0%, #1C1008 55%, #0C0804 100%)',
+      glow: 'rgba(220,140,40,0.28)',
+      accentColor: '#FBBF24',
+    },
+    sortOrder: 3,
+    isActive: true,
+  },
+  {
+    id: 'eventos',
+    slug: 'eventos',
+    name: 'Eventos',
+    subtitle: 'Experiencia gastronómica en vivo',
+    tag: 'Premium',
+    href: '/products/eventos',
+    categoryId: 'events',
+    visual: {
+      gradient: 'radial-gradient(ellipse at 48% 42%, #251040 0%, #120820 55%, #080410 100%)',
+      glow: 'rgba(130,60,200,0.28)',
+      accentColor: '#C084FC',
+    },
+    sortOrder: 4,
+    isActive: true,
+  },
+]

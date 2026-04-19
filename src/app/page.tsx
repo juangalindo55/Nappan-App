@@ -1,5 +1,5 @@
 import BottomNav from '@/components/BottomNav'
-import HomeScreen from '@/components/HomeScreen'
+import HomeScreen from '@/features/home/HomeScreen'
 
 export default function Home() {
   return (
