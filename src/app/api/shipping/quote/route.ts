@@ -8,6 +8,7 @@ type QuoteRequest = {
 }
 
 async function geocodePostalCode(postalCode: string, apiKey: string) {
+  const errors: string[] = []
   const attempts = [
     {
       address: postalCode,
@@ -42,6 +43,16 @@ async function geocodePostalCode(postalCode: string, apiKey: string) {
         lng: location.lng,
       }
     }
+
+    if (payload.status) {
+      errors.push(payload.error_message ? `${payload.status}: ${payload.error_message}` : payload.status)
+    }
+  }
+
+  if (errors.some((error) => error.startsWith('REQUEST_DENIED'))) {
+    throw new Error(
+      'Google Maps rechazó la geocodificación. Revisa que la API key tenga Geocoding API habilitada y que permita uso desde servidor.',
+    )
   }
 
   throw new Error(`No se pudo geocodificar el código postal ${postalCode}.`)
