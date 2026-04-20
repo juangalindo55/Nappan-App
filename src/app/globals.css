@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --font-cormorant: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-dm-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --bg: #0C0806;
   --surface-1: #161009;
   --surface-2: #1E150C;
