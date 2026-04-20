@@ -2,16 +2,31 @@
 
 import { useCartStore } from "../../store/cart.store"
 import { submitOrder } from "../../services/cart.service"
+import { useState } from "react"
 import { useConfig } from "@/hooks/useConfig"
 
 export default function TestPage() {
     const { cart, addItem, removeItem, updateQuantity } = useCartStore()
     const { config } = useConfig()
+
+    const [selectedExtras, setSelectedExtras] = useState<any[]>([])
+
+    function toggleExtra(extra: any) {
+        setSelectedExtras(prev => {
+            const exists = prev.find(e => e.label === extra.label)
+
+            if (exists) {
+                return prev.filter(e => e.label !== extra.label)
+            }
+
+            return [...prev, extra]
+        })
+    }
+
     const handleAdd = () => {
         if (!config) return
 
         const includes = config.includes["LUNCHBOX-1"] || []
-        const extras = config.extras["LUNCHBOX-1"] || []
 
         addItem({
             type: "lunchbox",
@@ -23,9 +38,11 @@ export default function TestPage() {
                 art: "Osito",
                 fruit: "Fresa"
             },
-            includes, // ✅ dinámico
-            extras    // ✅ dinámico
+            includes,
+            extras: selectedExtras
         })
+
+        setSelectedExtras([])
     }
 
     const handleCheckout = async () => {
@@ -44,6 +61,21 @@ export default function TestPage() {
     return (
         <div style={{ padding: 20 }}>
             <h1>Test Carrito</h1>
+
+            {/* EXTRAS */}
+            <h3>Extras disponibles:</h3>
+
+            {config?.extras["LUNCHBOX-1"]?.map((extra, i) => (
+                <div key={i}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            onChange={() => toggleExtra(extra)}
+                        />
+                        {extra.label} (${extra.price})
+                    </label>
+                </div>
+            ))}
 
             {/* BOTÓN AGREGAR */}
             <button
@@ -76,13 +108,13 @@ export default function TestPage() {
                     }}
                 >
                     <p><b>{item.name}</b></p>
-                    {/* 👇 AQUÍ LO PEGAS */}
+
+                    {/* EXTRAS */}
                     {item.extras.map((extra, i) => (
                         <p key={i}>
                             + {extra.label} (${extra.price})
                         </p>
                     ))}
-
 
                     {/* CANTIDAD */}
                     <div style={{ display: "flex", gap: 10 }}>
@@ -117,10 +149,14 @@ export default function TestPage() {
             <h2>
                 Total: $
                 {cart.items.reduce((acc, item) => {
-                    const price = Number(item.base_price) || 0
+                    const base = Number(item.base_price) || 0
                     const qty = Number(item.quantity) || 0
 
-                    return acc + price * qty
+                    const extrasTotal = item.extras.reduce((sum, extra) => {
+                        return sum + (Number(extra.price) || 0)
+                    }, 0)
+
+                    return acc + (base + extrasTotal) * qty
                 }, 0)}
             </h2>
 
