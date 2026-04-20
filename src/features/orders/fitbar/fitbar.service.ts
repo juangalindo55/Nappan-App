@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 
 export type FitbarProductRow = {
   sku: string
@@ -8,6 +8,8 @@ export type FitbarProductRow = {
 }
 
 export async function listFitbarProducts() {
+  const supabase = getSupabaseClient()
+
   const { data, error } = await supabase
     .from('products')
     .select('sku,name,base_price,section')
