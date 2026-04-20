@@ -1,11 +1,11 @@
 import { notFound, redirect } from 'next/navigation'
 
 type ProductSlugPageProps = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
-export default function ProductSlugPage({ params }: ProductSlugPageProps) {
-  const { slug } = params
+export default async function ProductSlugPage({ params }: ProductSlugPageProps) {
+  const { slug } = await params
 
   if (slug === 'lunchbox') {
     redirect('/order/lunchbox')
