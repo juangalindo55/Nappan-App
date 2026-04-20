@@ -83,6 +83,16 @@ function isExtraAllowed(extra: LunchboxExtra, variant: LunchboxVariant) {
   return allowedVariant === 'both' || allowedVariant === variant
 }
 
+function getAvailableExtras(variant: LunchboxVariant): CartExtra[] {
+  return (Object.keys(extras) as LunchboxExtra[])
+    .filter((extra) => isExtraAllowed(extra, variant))
+    .map((extra) => ({
+      id: extra,
+      label: extras[extra].label,
+      price: extras[extra].price,
+    }))
+}
+
 function getValidationError(draft: LunchboxDraft) {
   if (draft.quantity < MIN_QUANTITY) {
     return `El pedido mínimo es de ${MIN_QUANTITY} lunchboxes.`
@@ -179,6 +189,7 @@ export default function LunchboxConfiguratorScreen() {
         design: draft.design,
         complement: draft.complement,
         fruitType: draft.fruitType,
+        availableExtras: getAvailableExtras(draft.variant),
       },
       includes: [],
       extras: draft.extras.map((extra) => ({

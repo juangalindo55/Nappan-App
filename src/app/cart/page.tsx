@@ -12,6 +12,10 @@ type ConfigExtra = {
     price: number
 }
 
+type CartItemConfigWithExtras = {
+    availableExtras?: ConfigExtra[]
+}
+
 function getExtraKey(sku: string, extra: { id?: string; label: string; price: number }) {
     return extra.id ?? `${sku}-${extra.label}-${extra.price}`
 }
@@ -25,11 +29,21 @@ function normalizeExtra(sku: string, extra: ConfigExtra): CartExtra {
 }
 
 function buildAvailableExtras(item: CartItem, rawExtras: ConfigExtra[]) {
+    const configuredExtras =
+        (item.config as CartItemConfigWithExtras | undefined)?.availableExtras ?? []
     const existingIdsBySignature = new Map(
         item.extras.map((extra) => [`${extra.label}-${extra.price}`, extra.id]),
     )
+    const extrasBySignature = new Map<string, ConfigExtra>()
 
-    return rawExtras.map((extra) => {
+    ;[...configuredExtras, ...rawExtras, ...item.extras].forEach((extra) => {
+        const signature = `${extra.label}-${extra.price}`
+        if (!extrasBySignature.has(signature)) {
+            extrasBySignature.set(signature, extra)
+        }
+    })
+
+    return Array.from(extrasBySignature.values()).map((extra) => {
         const signature = `${extra.label}-${extra.price}`
 
         return {

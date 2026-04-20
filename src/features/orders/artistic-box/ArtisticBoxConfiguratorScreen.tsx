@@ -50,6 +50,12 @@ const initialDraft: ArtisticDraft = {
   quantity: 1,
 }
 
+const availableExtras = (Object.keys(extras) as ArtisticExtra[]).map((extra) => ({
+  id: extra,
+  label: extras[extra].label,
+  price: extras[extra].price,
+}))
+
 function getValidationError(draft: ArtisticDraft) {
   if (draft.quantity < MIN_QUANTITY) {
     return 'La cantidad mínima es 1 caja.'
@@ -132,6 +138,7 @@ export default function ArtisticBoxConfiguratorScreen() {
         variant: draft.variant,
         ideaText: draft.ideaText,
         designLink: draft.designLink,
+        availableExtras,
       },
       includes: [],
       extras: draft.extras.map((extra) => ({
