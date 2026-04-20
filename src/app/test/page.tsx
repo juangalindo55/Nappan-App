@@ -4,14 +4,17 @@ import { useCartStore } from "../../store/cart.store"
 import { submitOrder } from "../../services/cart.service"
 import { useState } from "react"
 import { useConfig } from "@/hooks/useConfig"
+import type { CartExtra } from "@/domain/cart.domain"
+
+type ConfigExtra = CartExtra
 
 export default function TestPage() {
     const { cart, addItem, removeItem, updateQuantity } = useCartStore()
     const { config } = useConfig()
 
-    const [selectedExtras, setSelectedExtras] = useState<any[]>([])
+    const [selectedExtras, setSelectedExtras] = useState<ConfigExtra[]>([])
 
-    function toggleExtra(extra: any) {
+    function toggleExtra(extra: ConfigExtra) {
         setSelectedExtras(prev => {
             const exists = prev.find(e => e.label === extra.label)
 
@@ -52,9 +55,9 @@ export default function TestPage() {
                 phone: "8110000000"
             })
             alert("Pedido enviado 🚀")
-        } catch (err: any) {
+        } catch (err) {
             console.error(err)
-            alert(err.message)
+            alert(err instanceof Error ? err.message : "Error desconocido")
         }
     }
 
@@ -65,7 +68,7 @@ export default function TestPage() {
             {/* EXTRAS */}
             <h3>Extras disponibles:</h3>
 
-            {config?.extras["LUNCHBOX-1"]?.map((extra, i) => (
+            {(config?.extras["LUNCHBOX-1"] ?? []).map((extra: ConfigExtra, i: number) => (
                 <div key={i}>
                     <label>
                         <input
