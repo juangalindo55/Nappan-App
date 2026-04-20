@@ -1,7 +1,7 @@
 // /store/cart.store.ts
 
 import { create } from "zustand"
-import { Cart, CartItem } from "@/domain/cart.domain"
+import { Cart, CartItem, CartExtra } from "@/domain/cart.domain"
 import { calculateCart } from "@/domain/cart.pricing"
 import { validateCart } from "@/domain/cart.validators"
 import { v4 as uuid } from "uuid"
@@ -13,7 +13,8 @@ type CartStore = {
     removeItem: (id: string) => void
     updateQuantity: (id: string, qty: number) => void
 
-    addExtra: (itemId: string, extra: any) => void
+    updateItemExtras: (itemId: string, newExtras: CartExtra[]) => void
+    addExtra: (itemId: string, extra: CartExtra) => void
     removeExtra: (itemId: string, extraId: string) => void
 
     validate: () => { valid: boolean; errors: string[] }
@@ -64,30 +65,35 @@ export const useCartStore = create<CartStore>((set, get) => ({
         set({ cart: calculateCart(updated) })
     },
 
-    addExtra: (itemId, extra) => {
+    updateItemExtras: (itemId, newExtras) => {
         const updated = {
             ...get().cart,
             items: get().cart.items.map(i =>
-                i.id === itemId
-                    ? { ...i, extras: [...i.extras, { ...extra, id: uuid() }] }
-                    : i
+                i.id === itemId ? { ...i, extras: newExtras } : i
             )
         }
 
         set({ cart: calculateCart(updated) })
     },
 
-    removeExtra: (itemId, extraId) => {
-        const updated = {
-            ...get().cart,
-            items: get().cart.items.map(i =>
-                i.id === itemId
-                    ? { ...i, extras: i.extras.filter(e => e.id !== extraId) }
-                    : i
-            )
-        }
+    addExtra: (itemId, extra) => {
+        const item = get().cart.items.find((current) => current.id === itemId)
 
-        set({ cart: calculateCart(updated) })
+        if (!item) return
+
+        const newExtras = [...item.extras, { ...extra, id: extra.id || uuid() }]
+
+        get().updateItemExtras(itemId, newExtras)
+    },
+
+    removeExtra: (itemId, extraId) => {
+        const item = get().cart.items.find((current) => current.id === itemId)
+
+        if (!item) return
+
+        const newExtras = item.extras.filter((extra) => extra.id !== extraId)
+
+        get().updateItemExtras(itemId, newExtras)
     },
 
     validate: () => validateCart(get().cart),

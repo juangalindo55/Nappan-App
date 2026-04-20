@@ -1,6 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { useCartStore } from '@/store/cart.store'
+import type { CartExtra } from '@/domain/cart.domain'
 
 type LunchboxVariant = 'lunchbox1' | 'lunchbox2'
 type LunchboxDesign = 'osito' | 'capibara'
@@ -101,6 +104,7 @@ export default function LunchboxConfiguratorScreen() {
   const [draft, setDraft] = useState<LunchboxDraft>(initialDraft)
   const [error, setError] = useState('')
   const [addedMessage, setAddedMessage] = useState('')
+  const addItem = useCartStore((state) => state.addItem)
 
   const extrasTotal = useMemo(
     () => draft.extras.reduce((total, extra) => total + extras[extra].price, 0),
@@ -164,6 +168,25 @@ export default function LunchboxConfiguratorScreen() {
     }
 
     setError('')
+    addItem({
+      type: 'lunchbox',
+      sku: draft.variant,
+      name: variants[draft.variant].label,
+      quantity: draft.quantity,
+      base_price: variants[draft.variant].price,
+      config: {
+        variant: draft.variant,
+        design: draft.design,
+        complement: draft.complement,
+        fruitType: draft.fruitType,
+      },
+      includes: [],
+      extras: draft.extras.map((extra) => ({
+        id: extra,
+        label: extras[extra].label,
+        price: extras[extra].price,
+      })) as CartExtra[],
+    })
     setAddedMessage(
       `${draft.quantity} ${variants[draft.variant].label} agregadas al carrito.`,
     )
@@ -230,9 +253,17 @@ export default function LunchboxConfiguratorScreen() {
         ) : null}
 
         {addedMessage ? (
-          <p className="mt-3 rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
-            {addedMessage}
-          </p>
+          <div className="mt-3 space-y-2">
+            <p className="rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
+              {addedMessage}
+            </p>
+            <Link
+              href="/cart"
+              className="inline-flex w-full items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+            >
+              Ir al carrito
+            </Link>
+          </div>
         ) : null}
       </section>
 

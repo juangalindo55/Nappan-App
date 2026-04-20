@@ -14,9 +14,8 @@ export function calculateCart(cart: Cart): Cart {
         })
     })
 
-    const shipping = calculateShipping(subtotal)
-
-    const total = subtotal + extras_total + shipping
+    const shipping = 0
+    const total = subtotal + extras_total
 
     return {
         ...cart,
@@ -27,9 +26,4 @@ export function calculateCart(cart: Cart): Cart {
             total
         }
     }
-}
-
-function calculateShipping(subtotal: number): number {
-    if (subtotal > 2000) return 0
-    return 150
 }

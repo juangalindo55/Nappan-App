@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useCartStore } from '@/store/cart.store'
 
 function IconHome({ active }: { active: boolean }) {
   const c = active ? '#E8A420' : '#5A4A38'
@@ -24,14 +25,13 @@ function IconMenu({ active }: { active: boolean }) {
   )
 }
 
-function IconOrders({ active }: { active: boolean }) {
+function IconCart({ active }: { active: boolean }) {
   const c = active ? '#E8A420' : '#5A4A38'
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" fill={active ? 'rgba(232,164,32,0.08)' : 'none'} />
-      <rect x="9" y="3" width="6" height="4" rx="1" fill={active ? 'rgba(232,164,32,0.15)' : 'none'} />
-      <line x1="9" y1="12" x2="15" y2="12" />
-      <line x1="9" y1="16" x2="13" y2="16" />
+      <path d="M6 6h15l-1.5 8.5a2 2 0 01-2 1.5H8a2 2 0 01-2-1.5L4.5 3H2" fill={active ? 'rgba(232,164,32,0.08)' : 'none'} />
+      <circle cx="9" cy="20" r="1.3" fill={active ? 'rgba(232,164,32,0.12)' : 'none'} />
+      <circle cx="18" cy="20" r="1.3" fill={active ? 'rgba(232,164,32,0.12)' : 'none'} />
     </svg>
   )
 }
@@ -49,12 +49,15 @@ function IconProfile({ active }: { active: boolean }) {
 const tabs = [
   { label: 'Inicio',   href: '/',        Icon: IconHome },
   { label: 'Menú',     href: '/menu',    Icon: IconMenu },
-  { label: 'Pedidos',  href: '/orders',  Icon: IconOrders },
+  { label: 'Carrito',  href: '/cart',    Icon: IconCart },
   { label: 'Perfil',   href: '/profile', Icon: IconProfile },
 ]
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const itemCount = useCartStore((state) =>
+    state.cart.items.reduce((acc, item) => acc + item.quantity, 0),
+  )
 
   return (
     <nav
@@ -127,7 +130,7 @@ export default function BottomNav() {
           const active = pathname === href
           return (
             <Link key={href} href={href} className="flex-1">
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1 relative">
                 <Icon active={active} />
                 <span style={{
                   fontSize: '10px',
@@ -139,6 +142,14 @@ export default function BottomNav() {
                 }}>
                   {label}
                 </span>
+                {href === '/cart' && itemCount > 0 ? (
+                  <span
+                    className="absolute -top-0.5 right-[calc(50%-18px)] flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-[#0C0806]"
+                    style={{ background: '#E8A420' }}
+                  >
+                    {itemCount}
+                  </span>
+                ) : null}
               </div>
             </Link>
           )

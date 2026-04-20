@@ -1,4 +1,13 @@
+"use client"
+
+import Link from 'next/link'
+import { useCartStore } from '@/store/cart.store'
+
 export function HomeTopBar() {
+  const totalItems = useCartStore(
+    (state) => state.cart.items.reduce((acc, item) => acc + item.quantity, 0),
+  )
+
   return (
     <div
       className="flex items-center justify-between px-5 anim-up"
@@ -33,13 +42,14 @@ export function HomeTopBar() {
         </span>
       </div>
 
-      <button
-        className="relative w-10 h-10 flex items-center justify-center rounded-full"
+      <Link
+        href="/cart"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full"
         style={{
           background: '#1A1209',
           border: '1px solid rgba(232,164,32,0.08)',
         }}
-        aria-label="Ver pedido"
+        aria-label="Ver carrito"
       >
         <svg
           width="18"
@@ -64,9 +74,9 @@ export function HomeTopBar() {
             color: '#0C0806',
           }}
         >
-          0
+          {totalItems}
         </span>
-      </button>
+      </Link>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import { useCartStore } from '@/store/cart.store'
 import { listFitbarProducts, type FitbarProductRow } from './fitbar.service'
 
 type FitbarCategory = 'coffee' | 'shots' | 'food'
@@ -84,6 +86,7 @@ export default function FitbarOrderScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
+  const addItem = useCartStore((state) => state.addItem)
 
   useEffect(() => {
     let cancelled = false
@@ -154,6 +157,28 @@ export default function FitbarOrderScreen() {
       return
     }
 
+    const selectedItems = products
+      .filter((product) => (quantities[product.sku] ?? 0) > 0)
+      .map((product) => ({
+        sku: product.sku,
+        name: product.name,
+        quantity: quantities[product.sku] ?? 0,
+        base_price: product.base_price,
+      }))
+
+    addItem({
+      type: 'fitbar',
+      sku: 'fitbar-selection',
+      name: 'Barra bienestar',
+      quantity: 1,
+      base_price: total,
+      config: {
+        items: selectedItems,
+      },
+      includes: [],
+      extras: [],
+    })
+
     setError('')
     setFeedback('La selección completa se agregó como un solo artículo al carrito.')
   }
@@ -223,9 +248,17 @@ export default function FitbarOrderScreen() {
         ) : null}
 
         {feedback ? (
-          <p className="mt-3 rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
-            {feedback}
-          </p>
+          <div className="mt-3 space-y-2">
+            <p className="rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
+              {feedback}
+            </p>
+            <Link
+              href="/cart"
+              className="inline-flex w-full items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+            >
+              Ir al carrito
+            </Link>
+          </div>
         ) : null}
       </section>
 
@@ -265,7 +298,7 @@ export default function FitbarOrderScreen() {
                                 {product.name}
                               </p>
                               <p className="mt-1 text-xs text-[#F0E4CC]/54">
-                                {product.sku}
+                                Código: {product.sku}
                               </p>
                             </div>
                             <p className="text-sm font-bold text-[#E8A420]">
