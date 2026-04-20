@@ -8,28 +8,43 @@ type QuoteRequest = {
 }
 
 async function geocodePostalCode(postalCode: string, apiKey: string) {
-  const url = new URL('https://maps.googleapis.com/maps/api/geocode/json')
-  url.searchParams.set('address', `${postalCode}, Mexico`)
-  url.searchParams.set('components', 'country:MX')
-  url.searchParams.set('key', apiKey)
+  const attempts = [
+    {
+      address: postalCode,
+      components: `postal_code:${postalCode}|country:MX`,
+    },
+    {
+      address: `${postalCode}, Monterrey, Nuevo León, México`,
+    },
+    {
+      address: `Código postal ${postalCode}, Nuevo León, México`,
+    },
+  ]
 
-  const response = await fetch(url.toString(), { cache: 'no-store' })
-  const payload = await response.json()
+  for (const attempt of attempts) {
+    const url = new URL('https://maps.googleapis.com/maps/api/geocode/json')
+    url.searchParams.set('address', attempt.address)
+    url.searchParams.set('region', 'mx')
+    url.searchParams.set('language', 'es')
+    url.searchParams.set('key', apiKey)
 
-  if (payload.status !== 'OK' || !payload.results?.length) {
-    throw new Error(`No se pudo geocodificar el código postal ${postalCode}.`)
+    if (attempt.components) {
+      url.searchParams.set('components', attempt.components)
+    }
+
+    const response = await fetch(url.toString(), { cache: 'no-store' })
+    const payload = await response.json()
+    const location = payload.results?.[0]?.geometry?.location
+
+    if (payload.status === 'OK' && location) {
+      return {
+        lat: location.lat,
+        lng: location.lng,
+      }
+    }
   }
 
-  const location = payload.results[0]?.geometry?.location
-
-  if (!location) {
-    throw new Error(`No se pudo obtener la ubicación para ${postalCode}.`)
-  }
-
-  return {
-    lat: location.lat,
-    lng: location.lng,
-  }
+  throw new Error(`No se pudo geocodificar el código postal ${postalCode}.`)
 }
 
 async function getDrivingDistanceKm(
