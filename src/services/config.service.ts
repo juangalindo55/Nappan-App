@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase"
+import { getSupabaseClient } from "@/lib/supabase"
 
 export type AppConfigItem = {
     key: string
@@ -6,6 +6,8 @@ export type AppConfigItem = {
 }
 
 export async function fetchAppConfig(): Promise<AppConfigItem[]> {
+    const supabase = getSupabaseClient()
+
     const { data, error } = await supabase
         .from("app_config")
         .select("key, value")
