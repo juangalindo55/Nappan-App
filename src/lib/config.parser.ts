@@ -1,6 +1,12 @@
+type ParsedExtra = {
+    id: string
+    label: string
+    price: number
+}
+
 type ParsedConfig = {
     includes: Record<string, string[]>
-    extras: Record<string, string[]>
+    extras: Record<string, ParsedExtra[]>
     shipping: {
         km: number
         price: number
@@ -39,6 +45,7 @@ export function parseConfig(config: { key: string; value: string }[]): ParsedCon
             const [label, price] = value.split("|")
 
             parsed.extras[sku].push({
+                id: key.replace("extra_label_", "extra_"),
                 label: label.trim(),
                 price: Number(price) || 0
             })
