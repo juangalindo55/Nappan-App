@@ -118,6 +118,9 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null)
   const [orders, setOrders] = useState<CustomerOrder[]>([])
 
+  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || "").split(",").map(p => p.trim()).filter(Boolean)
+  const isAdmin = profile?.phone && adminPhones.includes(profile.phone)
+
   async function handleLookup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -397,22 +400,24 @@ export default function ProfileScreen() {
                 </div>
               </section>
 
-              <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
-                  Administración
-                </p>
-                <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/62">
-                  Accede al panel administrativo para gestionar productos, precios, configuración y estadísticas.
-                </p>
-                <Link
-                  href="/admin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99]"
-                >
-                  Ir al panel
-                </Link>
-              </section>
+              {isAdmin ? (
+                <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                    Administración
+                  </p>
+                  <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/62">
+                    Accede al panel administrativo para gestionar productos, precios, configuración y estadísticas.
+                  </p>
+                  <Link
+                    href="/admin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99]"
+                  >
+                    Ir al panel
+                  </Link>
+                </section>
+              ) : null}
             </>
           ) : null}
         </div>
