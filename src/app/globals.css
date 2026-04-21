@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  --font-cormorant: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-dm-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg: #0C0806;
+  --surface-1: #161009;
+  --surface-2: #1E150C;
+  --surface-3: #261B10;
+  --gold: #E8A420;
+  --gold-dim: rgba(232, 164, 32, 0.12);
+  --cream: #F0E4CC;
+  --muted: #7A6A55;
+  --nav-height: 72px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  min-height: 100%;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.anim-up   { animation: fadeUp  0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-scale { animation: scaleIn 0.4s  cubic-bezier(0.22,1,0.36,1) both; }
+
+.d1 { animation-delay: 0.06s; }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; }
+.d4 { animation-delay: 0.24s; }
+.d5 { animation-delay: 0.30s; }
+.d6 { animation-delay: 0.36s; }
