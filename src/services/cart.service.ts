@@ -14,13 +14,14 @@ export async function submitOrder(cart: Cart, customer: CustomerData): Promise<s
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`
 
     const { error } = await supabase.from("orders").insert({
-        order_number: orderNumber, // 👈 COMA AQUÍ
+        order_number: orderNumber,
 
         total: cart.summary.total,
         raw_cart: cart,
         customer_data: customer,
 
         section: cart.type,
+        status: 'pending',
 
         customer_name: customer.name,
         customer_phone: customer.phone
