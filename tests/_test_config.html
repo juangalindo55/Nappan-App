@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Config Test - Nappan</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .test { padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .pass { background: #d4edda; }
+        .fail { background: #f8d7da; }
+        .info { background: #d1ecf1; }
+    </style>
+</head>
+<body>
+    <h1>Nappan Config Test</h1>
+    <div id="results"></div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        const results = [];
+        
+        // Test 1: Config exists
+        if (window.NappanConfig) {
+            results.push({ 
+                test: '✓ window.NappanConfig exists', 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '✗ window.NappanConfig missing', 
+                pass: false 
+            });
+        }
+        
+        // Test 2: Supabase URL
+        if (window.NappanConfig?.SUPABASE_URL) {
+            results.push({ 
+                test: `✓ Supabase URL: ${window.NappanConfig.SUPABASE_URL}`, 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '✗ Supabase URL missing', 
+                pass: false 
+            });
+        }
+        
+        // Test 3: Supabase Key
+        if (window.NappanConfig?.SUPABASE_ANON_KEY) {
+            const key = window.NappanConfig.SUPABASE_ANON_KEY;
+            const masked = key.substring(0, 10) + '...' + key.substring(key.length - 10);
+            results.push({ 
+                test: `✓ Supabase Key: ${masked}`, 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '✗ Supabase Key missing', 
+                pass: false 
+            });
+        }
+        
+        // Test 4: Google Maps Key
+        if (window.NappanConfig?.GOOGLE_MAPS_API_KEY) {
+            results.push({ 
+                test: `✓ Google Maps Key configured`, 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '⚠ Google Maps Key empty (OK for development)', 
+                pass: true 
+            });
+        }
+        
+        // Test 5: WhatsApp Number
+        if (window.NappanConfig?.WHATSAPP_NUMBER) {
+            results.push({ 
+                test: `✓ WhatsApp Number: ${window.NappanConfig.WHATSAPP_NUMBER}`, 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '✗ WhatsApp Number missing', 
+                pass: false 
+            });
+        }
+        
+        // Test 6: WA_NUMBER utility
+        if (WA_NUMBER) {
+            results.push({ 
+                test: `✓ WA_NUMBER utility: ${WA_NUMBER}`, 
+                pass: true 
+            });
+        } else {
+            results.push({ 
+                test: '✗ WA_NUMBER utility missing', 
+                pass: false 
+            });
+        }
+        
+        // Render results
+        const div = document.getElementById('results');
+        results.forEach(r => {
+            const elem = document.createElement('div');
+            elem.className = `test ${r.pass ? 'pass' : 'fail'}`;
+            elem.textContent = r.test;
+            div.appendChild(elem);
+        });
+        
+        const allPass = results.every(r => r.pass);
+        const summary = document.createElement('div');
+        summary.className = `test ${allPass ? 'pass' : 'info'}`;
+        summary.innerHTML = `<strong>${allPass ? '✅ All tests passed!' : '⚠️ Some tests need attention'}</strong><br>${results.filter(r => r.pass).length}/${results.length} passed`;
+        div.appendChild(summary);
+        
+        console.log('Config Test Results:', results);
+    </script>
+</body>
+</html>

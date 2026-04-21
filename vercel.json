@@ -1,4 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next"
+  "buildCommand": "echo 'Static site with API routes - no build needed'",
+  "outputDirectory": "."
 }

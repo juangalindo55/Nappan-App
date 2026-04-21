@@ -1,0 +1,50 @@
+# Guía y Notas para Aider
+
+Este archivo contiene el contexto del proyecto, directrices y convenciones específicas para que Aider actúe de manera eficiente en el proyecto Nappan.
+
+## Rol y Directrices Generales
+*   **Rol:** Ingeniero de software experto.
+*   **Precisión:** Realizar estricta y únicamente lo que el usuario solicita. No refactorizar, comentar ni modificar partes del código que no estén relacionadas con la tarea actual.
+*   **Estilo:** Mantener las convenciones de código existentes, usar las librerías presentes (como Supabase) y escribir código limpio, eficiente y bien estructurado.
+*   **Respuestas:** Concisas, directas y utilizando siempre el formato de bloques `SEARCH/REPLACE` para proponer cambios.
+
+## Contexto del Proyecto
+*   **Nombre:** Nappan (aparentemente relacionado con venta de pancakes/comida y gestión administrativa).
+*   **Stack Tecnológico:**
+    *   Frontend: HTML, CSS, JavaScript Vanilla/ES6 (arquitectura modular en `/js`).
+    *   Backend/BaaS: Supabase (PostgreSQL, Auth, RPCs).
+    *   API/Funciones: Vercel Serverless Functions (`/api/`).
+*   **Módulos Clave:**
+    *   `/js/admin-modules/`: Lógica del panel de administración (órdenes, clientes, estado, UI).
+    *   `/js/supabase-client.js`: Capa principal de abstracción para la base de datos y autenticación.
+    *   `/js/chatbot.js`: Asistente virtual integrado en la UI.
+
+## Notas Técnicas y Convenciones
+*   El estado global del panel de administración se maneja mediante cachés e invalidaciones (ej. `AdminState`).
+*   Las actualizaciones de la interfaz gráfica dependen de `UI.showToast`, `UI.setLoading`, etc.
+*   Al realizar integraciones con la base de datos, siempre asegurar de verificar si `supabaseClient` (o `window.NappanDB`) está inicializado y disponible.
+
+## Despliegue en Vercel (Fase 9)
+
+**Configuración crítica para producción:**
+*   **Production Branch:** Debe estar configurado a `master` (no `main`)
+*   **Auto-assign Custom Domains:** Habilitado para asignar www.nappan.net automáticamente
+*   **Production Deployment:** NO debe estar fijado. Usar "Latest from master" para despliegues automáticos
+*   Cada `git push origin master` desencadena un nuevo despliegue automático a producción
+*   Los cambios se publican en www.nappan.net inmediatamente después del push
+
+**Calculadora de envío:**
+*   Usa geocodificación dinámica desde `js/config.js` para obtener coordenadas de origen del código postal 64349
+*   OSRM (Open Source Routing Machine) calcula distancias sin API key
+*   Tiers: 0-3km ($50), 3-8km ($85), 8-15km ($130), 15-20km ($150), 20-45km ($200), >45km (cotización)
+
+**Troubleshooting:**
+*   Si los cambios no aparecen en producción: verificar que Production Branch = `master` y que el Production Deployment no está pinned
+*   Si la calculadora de envío muestra distancia incorrecta: revisar que `originAddress` en `js/config.js` use código postal
+
+## Capacidades y Limitaciones (Tokens/Costos)
+*   Como modelo de lenguaje, **no tengo una calculadora interna** para rastrear el consumo acumulado de tokens o el dinero gastado durante la sesión.
+*   El cálculo de costos y tokens lo maneja exclusivamente el cliente local (Aider) y se reporta en la terminal del usuario.
+
+## Tareas Pendientes / Bitácora
+*   *(Espacio reservado para futuras instrucciones o tareas a corto plazo que el usuario asigne)*

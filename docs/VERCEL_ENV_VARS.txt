@@ -1,0 +1,40 @@
+═══════════════════════════════════════════════════════════════════════════
+VARIABLES DE AMBIENTE PARA VERCEL - NAPPAN APP
+═══════════════════════════════════════════════════════════════════════════
+
+INSTRUCCIONES:
+1. Ve a: https://vercel.com/juangalindo55s-projects/nappan-app
+2. Click en "Settings"
+3. Click en "Environment Variables" (lado izquierdo)
+4. Para CADA variable de abajo:
+   - Nombre: [copiar el nombre]
+   - Valor: [copiar el valor]
+   - Marcar: Preview + Production
+   - Click "Add"
+5. Espera a que Vercel redeploy (2-3 minutos)
+
+═══════════════════════════════════════════════════════════════════════════
+
+VARIABLE 1:
+Nombre: SUPABASE_URL
+Valor: https://rbhjacmuelcjgxdyxmuh.supabase.co
+
+═══════════════════════════════════════════════════════════════════════════
+
+VARIABLE 2:
+Nombre: SUPABASE_ANON_KEY
+Valor: sb_publishable_d958WcFSLNa6yVan61MiWQ_e7FS8NL1
+
+═══════════════════════════════════════════════════════════════════════════
+
+VARIABLE 3:
+Nombre: GOOGLE_MAPS_API_KEY
+Valor: AIzaSyBnpclaToCM90xqFNsEtWWJFWwJGyAMJcA
+
+═══════════════════════════════════════════════════════════════════════════
+
+VARIABLE 4:
+Nombre: WHATSAPP_NUMBER
+Valor: 528123509768
+
+═══════════════════════════════════════════════════════════════════════════
