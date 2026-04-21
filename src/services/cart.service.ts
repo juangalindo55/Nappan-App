@@ -1,7 +1,7 @@
 // /services/cart.service.ts
 
-import { createClient } from "@supabase/supabase-js"
 import { Cart } from "@/domain/cart.domain"
+import { getSupabaseClient } from "@/lib/supabase"
 
 type CustomerData = {
     name: string
@@ -9,18 +9,7 @@ type CustomerData = {
 }
 
 export async function submitOrder(cart: Cart, customer: CustomerData) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (!supabaseUrl) {
-        throw new Error("Falta configurar NEXT_PUBLIC_SUPABASE_URL.")
-    }
-
-    if (!supabaseKey) {
-        throw new Error("Falta configurar NEXT_PUBLIC_SUPABASE_ANON_KEY.")
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = getSupabaseClient()
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`
 

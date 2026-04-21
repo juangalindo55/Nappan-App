@@ -5,7 +5,7 @@ import { fetchAppConfig } from "@/services/config.service"
 import { parseConfig } from "@/lib/config.parser"
 
 export function useConfig() {
-    const [config, setConfig] = useState<any>(null)
+    const [config, setConfig] = useState<ReturnType<typeof parseConfig> | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {

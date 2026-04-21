@@ -1,6 +1,26 @@
 import { getSupabaseClient } from '@/lib/supabase'
 
-type AnyRecord = Record<string, any>
+type AnyRecord = Record<string, unknown>
+
+const CUSTOMER_TABLE_CANDIDATES = (() => {
+  const configured =
+    typeof process !== 'undefined'
+      ? process.env.NEXT_PUBLIC_CUSTOMER_TABLES ?? process.env.NEXT_PUBLIC_CUSTOMER_TABLE
+      : undefined
+
+  if (!configured) {
+    return ['customers']
+  }
+
+  const tables = configured
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+
+  return tables.length > 0 ? tables : ['customers']
+})()
+
+const PHONE_COLUMN_CANDIDATES = ['phone'] as const
 
 export type CustomerOrder = {
   order_number: string | null
@@ -29,9 +49,92 @@ function normalizePhone(phone: string) {
   return phone.replace(/\D/g, '')
 }
 
+function buildPhoneCandidates(phone: string) {
+  const normalized = normalizePhone(phone)
+  const candidates = new Set<string>([normalized])
+
+  if (normalized.length === 10) {
+    candidates.add(`52${normalized}`)
+    candidates.add(`+52${normalized}`)
+    candidates.add(`521${normalized}`)
+    candidates.add(`+521${normalized}`)
+  }
+
+  if (normalized.length === 12 && normalized.startsWith('52')) {
+    const local = normalized.slice(2)
+    candidates.add(local)
+    candidates.add(`+${normalized}`)
+    candidates.add(`1${normalized}`)
+    candidates.add(`+1${normalized}`)
+  }
+
+  if (normalized.length === 13 && normalized.startsWith('521')) {
+    const local = normalized.slice(3)
+    const country = normalized.slice(1)
+    candidates.add(local)
+    candidates.add(country)
+    candidates.add(`+${normalized}`)
+    candidates.add(`+${country}`)
+  }
+
+  return Array.from(candidates).filter(Boolean)
+}
+
+function buildPhoneLikePatterns(phone: string) {
+  return buildPhoneCandidates(phone).map((candidate) => `%${candidate.split('').join('%')}%`)
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+
+  if (error && typeof error === 'object') {
+    const candidate = error as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown }
+    const message =
+      typeof candidate.message === 'string' && candidate.message.trim() !== ''
+        ? candidate.message
+        : 'Error inesperado de Supabase.'
+    const details = typeof candidate.details === 'string' ? candidate.details : ''
+    const hint = typeof candidate.hint === 'string' ? candidate.hint : ''
+    const code = typeof candidate.code === 'string' ? candidate.code : ''
+
+    return [message, details, hint, code ? `code: ${code}` : ''].filter(Boolean).join(' | ')
+  }
+
+  return String(error)
+}
+
+function toError(error: unknown) {
+  return error instanceof Error ? error : new Error(getErrorMessage(error))
+}
+
 function isMissingTableError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error)
-  return message.toLowerCase().includes('relation') && message.toLowerCase().includes('does not exist')
+  const message = getErrorMessage(error)
+  const lower = message.toLowerCase()
+  const code =
+    error && typeof error === 'object' && 'code' in error
+      ? String((error as { code?: unknown }).code ?? '').toLowerCase()
+      : ''
+
+  return (
+    (lower.includes('relation') && lower.includes('does not exist')) ||
+    lower.includes("could not find the table") ||
+    lower.includes('pgrst205') ||
+    code === 'pgrst205' ||
+    code === '42p01'
+  )
+}
+
+function isMissingColumnError(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase()
+  const code =
+    error && typeof error === 'object' && 'code' in error
+      ? String((error as { code?: unknown }).code ?? '').toLowerCase()
+      : ''
+
+  return (
+    code === '42703' ||
+    message.includes('column') && message.includes('does not exist')
+  )
 }
 
 function toNumber(value: unknown) {
@@ -56,6 +159,36 @@ function toStringArray(value: unknown) {
   }
 
   return []
+}
+
+function normalizeConfigToken(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function parsePercentFromConfigValue(value: string) {
+  const match = value.match(/-?\d+(\.\d+)?/)
+  if (!match) {
+    return null
+  }
+
+  const parsed = Number(match[0])
+
+  if (Number.isNaN(parsed)) {
+    return null
+  }
+
+  return parsed
+}
+
+function buildTierDiscountConfigKeys(tierToken: string) {
+  const normalized = tierToken.trim().toLowerCase()
+  const compact = normalized.replace(/[^a-z0-9]/g, '')
+  const snake = normalized.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+
+  const keys = new Set<string>()
+  if (snake) keys.add(`tier_${snake}_discount`)
+  if (compact) keys.add(`tier_${compact}_discount`)
+  return Array.from(keys)
 }
 
 function mapTier(row: AnyRecord | null) {
@@ -92,23 +225,132 @@ function mapTier(row: AnyRecord | null) {
   }
 }
 
-async function findRowByPhone(tableName: string, phone: string) {
-  const supabase = getSupabaseClient()
-  const { data, error } = await supabase
-    .from(tableName)
-    .select('*')
-    .eq('phone', phone)
-    .maybeSingle()
-
-  if (error) {
-    if (isMissingTableError(error)) {
-      return { row: null, missingTable: true }
+function mapTierFromCustomerRow(row: AnyRecord | null) {
+  if (!row) {
+    return {
+      tierName: null,
+      tierSlug: null,
+      discountPercent: null,
+      benefits: [] as string[],
     }
-
-    throw error
   }
 
-  return { row: data as AnyRecord | null, missingTable: false }
+  const membershipTier =
+    typeof row.membership_tier === 'string'
+      ? row.membership_tier
+      : typeof row.membershipTier === 'string'
+        ? row.membershipTier
+        : null
+
+  return {
+    tierName:
+      membershipTier ??
+      (typeof row.tier_name === 'string'
+        ? row.tier_name
+        : typeof row.tier_slug === 'string'
+          ? row.tier_slug
+          : null),
+    tierSlug:
+      membershipTier ??
+      (typeof row.tier_slug === 'string'
+        ? row.tier_slug
+        : typeof row.tier_name === 'string'
+          ? row.tier_name
+          : null),
+    discountPercent:
+      toNumber(row.discount_percent) ??
+      toNumber(row.membership_discount) ??
+      toNumber(row.discount) ??
+      null,
+    benefits:
+      toStringArray(row.benefits).length > 0
+        ? toStringArray(row.benefits)
+        : toStringArray(row.perks),
+  }
+}
+
+async function findRowByPhone(tableName: string, phone: string) {
+  const supabase = getSupabaseClient()
+  const phoneCandidates = buildPhoneCandidates(phone)
+  const phoneLikePatterns = buildPhoneLikePatterns(phone)
+
+  for (const phoneColumn of PHONE_COLUMN_CANDIDATES) {
+    for (const candidate of phoneCandidates) {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq(phoneColumn, candidate)
+        .limit(1)
+        .maybeSingle()
+
+      if (error) {
+        if (isMissingTableError(error)) {
+          return { row: null, missingTable: true }
+        }
+
+        if (isMissingColumnError(error)) {
+          break
+        }
+
+        const code =
+          typeof error === 'object' && error && 'code' in error
+            ? String((error as { code?: unknown }).code ?? '').toLowerCase()
+            : ''
+
+        // If there are duplicated rows for the same phone, pick the first one.
+        if (code === 'pgrst116') {
+          const { data: listData, error: listError } = await supabase
+            .from(tableName)
+            .select('*')
+            .eq(phoneColumn, candidate)
+            .limit(1)
+
+          if (listError) {
+            throw toError(listError)
+          }
+
+          if (Array.isArray(listData) && listData.length > 0) {
+            return { row: listData[0] as AnyRecord, missingTable: false }
+          }
+
+          continue
+        }
+
+        throw toError(error)
+      }
+
+      if (data) {
+        return { row: data as AnyRecord, missingTable: false }
+      }
+    }
+
+    // Fallback for mixed formats like "+52 81 23 50 97 68".
+    for (const likePattern of phoneLikePatterns) {
+      const { data: likeData, error: likeError } = await supabase
+        .from(tableName)
+        .select('*')
+        .like(phoneColumn, likePattern)
+        .limit(1)
+
+      if (likeError) {
+        if (isMissingTableError(likeError)) {
+          return { row: null, missingTable: true }
+        }
+
+        if (isMissingColumnError(likeError)) {
+          break
+        }
+
+        throw toError(likeError)
+      }
+
+      if (Array.isArray(likeData) && likeData.length > 0) {
+        return { row: likeData[0] as AnyRecord, missingTable: false }
+      }
+    }
+  }
+
+  return { row: null, missingTable: false }
 }
 
 async function insertRow(tableName: string, payload: Record<string, unknown>) {
@@ -124,14 +366,14 @@ async function insertRow(tableName: string, payload: Record<string, unknown>) {
       return { row: null, missingTable: true }
     }
 
-    throw error
+    throw toError(error)
   }
 
   return { row: data as AnyRecord | null, missingTable: false }
 }
 
 async function loadCustomerRow(phone: string, name: string) {
-  for (const tableName of ['customers', 'profiles']) {
+  for (const tableName of CUSTOMER_TABLE_CANDIDATES) {
     const found = await findRowByPhone(tableName, phone)
     if (found.missingTable) continue
 
@@ -153,11 +395,11 @@ async function loadCustomerRow(phone: string, name: string) {
     }
   }
 
-  throw new Error('No se encontró una tabla de clientes compatible en Supabase.')
+  return null
 }
 
 async function loadCustomerByPhone(phone: string) {
-  for (const tableName of ['customers', 'profiles']) {
+  for (const tableName of CUSTOMER_TABLE_CANDIDATES) {
     const found = await findRowByPhone(tableName, phone)
     if (found.missingTable) continue
 
@@ -170,42 +412,152 @@ async function loadCustomerByPhone(phone: string) {
 }
 
 async function loadTier(row: AnyRecord | null) {
-  const directTier = mapTier(row)
+  const directTier = mapTierFromCustomerRow(row)
 
   const tierId = row?.tier_id ?? row?.tierId
-  const tierSlug = row?.tier_slug ?? row?.tierSlug
-
-  if (!tierId && !tierSlug) {
-    return directTier
-  }
+  const membershipTier = row?.membership_tier ?? row?.membershipTier
+  const tierSlug = row?.tier_slug ?? row?.tierSlug ?? membershipTier
 
   const supabase = getSupabaseClient()
 
-  for (const tableName of ['customer_tiers', 'tiers']) {
-    let query = supabase.from(tableName).select('*')
+  async function withConfigDiscount(base: ReturnType<typeof mapTier>) {
+    const tierToken = base.tierSlug ?? base.tierName
 
-    if (tierId) {
-      query = query.eq('id', tierId)
-    } else if (tierSlug) {
-      query = query.eq('slug', tierSlug)
+    if (!tierToken) {
+      return base
     }
 
-    const { data, error } = await query.maybeSingle()
+    try {
+      const { data, error } = await supabase
+        .from('app_config')
+        .select('key, value')
+        .limit(500)
 
-    if (error) {
-      if (isMissingTableError(error)) {
-        continue
+      if (error || !Array.isArray(data)) {
+        return base
       }
 
-      throw error
-    }
+      const expectedKeys = buildTierDiscountConfigKeys(String(tierToken))
+      const exactMatch = data.find((item) => {
+        const key = typeof item.key === 'string' ? item.key.trim().toLowerCase() : ''
+        return expectedKeys.includes(key)
+      })
 
-    if (data) {
-      return mapTier(data as AnyRecord)
+      if (exactMatch && typeof exactMatch.value === 'string') {
+        const parsedExact = parsePercentFromConfigValue(exactMatch.value)
+        if (parsedExact !== null) {
+          return {
+            ...base,
+            discountPercent: parsedExact,
+          }
+        }
+      }
+
+      const normalizedTier = normalizeConfigToken(String(tierToken))
+      const fallbackMatch = data.find((item) => {
+        const key = typeof item.key === 'string' ? item.key : ''
+        const normalizedKey = normalizeConfigToken(key)
+        return normalizedKey.includes(`tier${normalizedTier}discount`)
+      })
+
+      if (!fallbackMatch || typeof fallbackMatch.value !== 'string') {
+        return base
+      }
+
+      const parsedFallback = parsePercentFromConfigValue(fallbackMatch.value)
+      if (parsedFallback === null) {
+        return base
+      }
+
+      return {
+        ...base,
+        discountPercent: parsedFallback,
+      }
+    } catch {
+      return base
     }
   }
 
-  return directTier
+  if (!tierId && !tierSlug) {
+    return withConfigDiscount(directTier)
+  }
+
+  // If tier comes from membership_tier and there is no relational tier id,
+  // resolve everything from customer row + app_config to avoid 404 noise
+  // when customer_tiers/tiers tables do not exist in this project.
+  if (!tierId && membershipTier) {
+    return withConfigDiscount(directTier)
+  }
+
+  for (const tableName of ['customer_tiers', 'tiers']) {
+    if (tierId) {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', tierId)
+        .maybeSingle()
+
+      if (error) {
+        if (isMissingTableError(error) || isMissingColumnError(error)) {
+          continue
+        }
+
+        throw toError(error)
+      }
+
+      if (data) {
+        return withConfigDiscount(mapTier(data as AnyRecord))
+      }
+    }
+
+    if (!tierSlug) {
+      continue
+    }
+
+    const slugValue = String(tierSlug).trim()
+
+    if (!slugValue) {
+      continue
+    }
+
+    let matchedTier: AnyRecord | null = null
+
+    for (const column of ['slug', 'tier_slug', 'name', 'tier_name', 'label']) {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .ilike(column, slugValue)
+        .limit(1)
+
+      if (error) {
+        if (isMissingTableError(error)) {
+          matchedTier = null
+          break
+        }
+
+        if (isMissingColumnError(error)) {
+          continue
+        }
+
+        throw toError(error)
+      }
+
+      if (Array.isArray(data) && data.length > 0) {
+        matchedTier = data[0] as AnyRecord
+        break
+      }
+    }
+
+    if (matchedTier) {
+      return withConfigDiscount(mapTier(matchedTier))
+    }
+
+    if (tierId) {
+      continue
+    }
+  }
+
+  return withConfigDiscount(directTier)
 }
 
 async function loadOrders(phone: string) {
@@ -218,7 +570,11 @@ async function loadOrders(phone: string) {
     .limit(5)
 
   if (error) {
-    throw error
+    if (isMissingTableError(error)) {
+      return []
+    }
+
+    return []
   }
 
   return (data ?? []).map((order) => ({
@@ -240,6 +596,23 @@ export async function resolveCustomerProfile(input: {
   }
 
   const customerLookup = await loadCustomerRow(normalizedPhone, input.name)
+
+  if (!customerLookup) {
+    return {
+      foundExisting: false,
+      profile: {
+        id: null,
+        name: input.name.trim(),
+        phone: normalizedPhone,
+        tierName: null,
+        tierSlug: null,
+        discountPercent: null,
+        benefits: [],
+      },
+      orders: await loadOrders(normalizedPhone),
+    }
+  }
+
   const tier = await loadTier(customerLookup.row)
   const orders = await loadOrders(normalizedPhone)
 
@@ -324,6 +697,23 @@ export async function createBasicCustomerProfile(input: {
   }
 
   const created = await loadCustomerRow(normalizedPhone, cleanName)
+
+  if (!created) {
+    return {
+      foundExisting: false,
+      profile: {
+        id: null,
+        name: cleanName,
+        phone: normalizedPhone,
+        tierName: null,
+        tierSlug: null,
+        discountPercent: null,
+        benefits: [],
+      },
+      orders: await loadOrders(normalizedPhone),
+    }
+  }
+
   const tier = await loadTier(created.row)
   const orders = await loadOrders(normalizedPhone)
 

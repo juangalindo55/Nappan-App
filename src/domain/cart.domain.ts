@@ -19,7 +19,7 @@ export type CartItem = {
     quantity: number
     base_price: number
 
-    config?: Record<string, any>
+    config?: Record<string, unknown>
 
     includes: string[]
 

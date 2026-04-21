@@ -5,6 +5,7 @@ import { useMemo, useState } from "react"
 import { useCartStore } from "@/store/cart.store"
 import { useConfig } from "@/hooks/useConfig"
 import type { CartExtra, CartItem } from "@/domain/cart.domain"
+import { loadCustomerProfileSession } from "@/lib/customer-profile-session"
 
 type ConfigExtra = {
     id?: string
@@ -66,9 +67,16 @@ export default function CartPage() {
     const [quoteDistanceKm, setQuoteDistanceKm] = useState<number | null>(null)
     const [quoteError, setQuoteError] = useState('')
     const [quoteLoading, setQuoteLoading] = useState(false)
+    const [discountPercent] = useState<number>(() => {
+        const stored = loadCustomerProfileSession()
+        const nextDiscount = stored?.discountPercent ?? 0
+        return nextDiscount > 0 ? nextDiscount : 0
+    })
 
     const extrasBySku = useMemo(() => config?.extras ?? {}, [config])
-    const totalWithShipping = summary.total + (quotePrice ?? 0)
+    const discountAmount = Math.round(summary.total * (discountPercent / 100))
+    const discountedTotal = Math.max(0, summary.total - discountAmount)
+    const totalWithShipping = discountedTotal + (quotePrice ?? 0)
 
     const isEmpty = items.length === 0
 
@@ -172,7 +180,17 @@ export default function CartPage() {
                             <dl className="mt-3 space-y-2 text-sm">
                                 <SummaryRow label="Subtotal" value={summary.subtotal} />
                                 <SummaryRow label="Extras" value={summary.extras_total} />
-                                <SummaryRow label="Total" value={summary.total} highlight />
+                                {discountPercent > 0 ? (
+                                    <SummaryRow
+                                        label={`Descuento (${discountPercent}%)`}
+                                        value={-discountAmount}
+                                    />
+                                ) : null}
+                                <SummaryRow
+                                    label={discountPercent > 0 ? "Total con descuento" : "Total"}
+                                    value={discountedTotal}
+                                    highlight
+                                />
                             </dl>
 
                             <p className="mt-3 text-sm leading-5 text-[#F0E4CC]/58">
@@ -231,7 +249,7 @@ export default function CartPage() {
                                         <p className="flex items-center justify-between gap-3 border-t border-[#E8A420]/10 pt-2">
                                             <span className="text-[#F0E4CC]/60">Total con envío</span>
                                             <span className="text-base font-bold text-[#E8A420]">
-                                                ${(summary.total + quotePrice).toLocaleString('es-MX')}
+                                                ${(discountedTotal + quotePrice).toLocaleString('es-MX')}
                                             </span>
                                         </p>
                                     </div>

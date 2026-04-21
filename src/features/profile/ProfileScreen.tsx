@@ -9,6 +9,25 @@ import {
   type CustomerOrder,
   type CustomerProfile,
 } from "@/services/customer.service"
+import {
+  clearCustomerProfileSession,
+  saveCustomerProfileSession,
+} from "@/lib/customer-profile-session"
+
+function getFriendlyErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message
+  }
+
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === "string" && message.trim() !== "") {
+      return message
+    }
+  }
+
+  return fallback
+}
 
 function moneyFormat(value: number | null) {
   if (value === null) return "—"
@@ -121,13 +140,16 @@ export default function ProfileScreen() {
       setFoundExisting(result.foundExisting)
       setPhone(result.profile.phone)
       setDraftName(result.profile.name)
+      saveCustomerProfileSession({
+        name: result.profile.name,
+        phone: result.profile.phone,
+        tierName: result.profile.tierName,
+        tierSlug: result.profile.tierSlug,
+        discountPercent: result.profile.discountPercent,
+      })
       setLookupDone(true)
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "No pudimos leer el perfil. Intenta otra vez.",
-      )
+      setError(getFriendlyErrorMessage(submitError, "No pudimos leer el perfil. Intenta otra vez."))
     } finally {
       setLoading(false)
     }
@@ -149,19 +171,23 @@ export default function ProfileScreen() {
       setFoundExisting(result.foundExisting)
       setPhone(result.profile.phone)
       setDraftName(result.profile.name)
+      saveCustomerProfileSession({
+        name: result.profile.name,
+        phone: result.profile.phone,
+        tierName: result.profile.tierName,
+        tierSlug: result.profile.tierSlug,
+        discountPercent: result.profile.discountPercent,
+      })
       setLookupDone(true)
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "No pudimos crear el perfil. Intenta otra vez.",
-      )
+      setError(getFriendlyErrorMessage(submitError, "No pudimos crear el perfil. Intenta otra vez."))
     } finally {
       setLoading(false)
     }
   }
 
   function handleReset() {
+    clearCustomerProfileSession()
     setPhone("")
     setDraftName("")
     setProfile(null)

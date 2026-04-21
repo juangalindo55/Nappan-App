@@ -6,18 +6,21 @@ export function useCart() {
     const items = useCartStore((state) => state.cart.items)
     const addItem = useCartStore((state) => state.addItem)
     const clearCart = useCartStore((state) => state.reset)
-    const updateItemExtras = useCartStore((state) => state.updateItemExtras)
 
     // 🧠 helpers útiles
     const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
 
-    const totalPrice = useCartStore((state) => state.cart.summary.total)
+    const totalPrice = items.reduce((acc, item) => {
+        const price = Number(item.base_price) || 0
+        const qty = Number(item.quantity) || 0
+
+        return acc + price * qty
+    }, 0)
 
     return {
         items,
         addItem,
         clearCart,
-        updateItemExtras,
         totalItems,
         totalPrice,
     }
