@@ -118,8 +118,19 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null)
   const [orders, setOrders] = useState<CustomerOrder[]>([])
 
-  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || "").split(",").map(p => p.trim()).filter(Boolean)
-  const isAdmin = profile?.phone && adminPhones.includes(profile.phone)
+  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || "")
+    .split(",")
+    .map(p => p.trim().replace(/\D/g, ""))
+    .filter(Boolean)
+  const isAdmin = profile?.phone && adminPhones.includes(profile.phone.replace(/\D/g, ""))
+
+  // Debug logging
+  console.log("ProfileScreen render:", {
+    envVar: process.env.NEXT_PUBLIC_ADMIN_PHONES,
+    adminPhones,
+    profilePhone: profile?.phone,
+    isAdmin,
+  })
 
   async function handleLookup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
