@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nappan — Eventos en Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css?v=4">
+<!-- Supabase Integration (Phase 1) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-client.js"></script>
+<!-- Vercel Speed Insights -->
+<script>
+  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body class="page-eventos">
+<!-- HEADER -->
+<header>
+  <button class="back-btn" onclick="window.location.href='../index.html'">← Inicio</button>
+<img src="../images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" />
+  <div></div>
+</header>
+
+<!-- HERO -->
+<div class="ev-hero">
+  <div class="ev-tag">Experiencia · En Vivo</div>
+  <h1>Eventos <span>en Vivo</span></h1>
+  <p>Llevamos el arte del pancake a tu evento. Cada invitado recibe un pancake artístico, hecho al momento frente a ellos.</p>
+</div>
+
+<!-- SERVICE CARD -->
+<div class="ev-content">
+
+  <div class="ev-service-card">
+    <div class="ev-service-title">La experiencia Nappan</div>
+    <ul class="ev-includes">
+      <li>🎨 Artista en vivo haciendo pancakes personalizados</li>
+      <li>🥞 Un pancake artístico completo por invitado</li>
+      <li>🍯 Toppings: miel, frutas, Nutella, crema batida</li>
+      <li>🛠️ Montaje completo del stand (equipo, iluminación, decoración)</li>
+      <li>📸 Experiencia visual perfecta para fotos y redes</li>
+      <li>⏱️ Servicio de 2 a 4 horas (según paquete)</li>
+    </ul>
+    <div class="ev-service-note">* Precio por cotización según número de invitados, ubicación y duración</div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="ev-steps-title">¿Cómo funciona?</div>
+  <div class="ev-steps">
+    <div class="ev-step">
+      <div class="ev-step-num">1</div>
+      <div class="ev-step-icon">📋</div>
+      <div class="ev-step-name">Cuéntanos de tu evento</div>
+      <div class="ev-step-desc">Llena el formulario con los detalles de tu celebración</div>
+    </div>
+    <div class="ev-step">
+      <div class="ev-step-num">2</div>
+      <div class="ev-step-icon">💬</div>
+      <div class="ev-step-name">Te contactamos</div>
+      <div class="ev-step-desc">Te enviamos cotización personalizada por WhatsApp</div>
+    </div>
+    <div class="ev-step">
+      <div class="ev-step-num">3</div>
+      <div class="ev-step-icon">🎉</div>
+      <div class="ev-step-name">¡Disfrutas!</div>
+      <div class="ev-step-desc">Llegamos, montamos y creamos arte en vivo para tus invitados</div>
+    </div>
+  </div>
+
+  <!-- EVENT TYPE PILLS -->
+  <div class="ev-types">
+    <span class="ev-type-pill" onclick="selectPill(this, '🎂 Cumpleaños', 'cumpleanos')">🎂 Cumpleaños</span>
+    <span class="ev-type-pill" onclick="selectPill(this, '💪 Wellness', 'wellness')">💪 Wellness</span>
+    <span class="ev-type-pill" onclick="selectPill(this, '🏢 Evento corporativo', 'corporativos')">🏢 Corporativos</span>
+    <span class="ev-type-pill" onclick="selectPill(this, '👶 Baby shower', 'babyshower')">👶 Baby Showers</span>
+    <span class="ev-type-pill" onclick="selectPill(this, '🎓 Graduación', 'graduaciones')">🎓 Graduaciones</span>
+    <span class="ev-type-pill" onclick="selectPill(this, '🎪 Feria / Festival', 'ferias')">🎪 Ferias</span>
+  </div>
+
+  <!-- GALERÍA DINÁMICA (se despliega al seleccionar un pill) -->
+  <div class="ev-gallery" id="ev-gallery">
+    <div class="ev-gallery-label" id="ev-gallery-label">✨ Así se ve en un evento</div>
+    <div class="ev-gallery-grid">
+      <div class="ev-gallery-img" id="ev-gallery-img1">
+        <div class="ev-gallery-placeholder">📸<br><span>Foto 1</span></div>
+      </div>
+      <div class="ev-gallery-img" id="ev-gallery-img2">
+        <div class="ev-gallery-placeholder">📸<br><span>Foto 2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTE FORM -->
+  <div class="form-section">
+    <div class="form-title">📋 Solicitar cotización</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>👤 Tu nombre</label>
+        <input type="text" id="ev-name" placeholder="Ej. María García"/>
+      </div>
+      <div class="form-field">
+        <label>📱 Tu teléfono</label>
+        <input type="tel" id="ev-phone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomerEvenso(this.value)"/>
+      </div>
+      <div class="form-field">
+        <label>🎉 Tipo de evento</label>
+        <select id="ev-type">
+          <option value="">Selecciona el tipo de evento</option>
+          <option value="🎂 Cumpleaños">🎂 Cumpleaños</option>
+          <option value="💪 Wellness">💪 Wellness</option>
+          <option value="🏢 Evento corporativo">🏢 Evento corporativo</option>
+          <option value="👶 Baby shower">👶 Baby shower</option>
+          <option value="🎓 Graduación">🎓 Graduación</option>
+          <option value="🎪 Feria / Festival">🎪 Feria / Festival</option>
+          <option value="🎄 Posada / Fiesta navideña">🎄 Posada / Fiesta navideña</option>
+          <option value="✨ Otro">✨ Otro</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>👥 Número de invitados</label>
+        <input type="number" id="ev-guests" placeholder="Ej. 50" min="1"/>
+      </div>
+      <div class="form-field">
+        <label>📅 Fecha del evento</label>
+        <input type="date" id="ev-date"/>
+      </div>
+      <div class="form-field">
+        <label>⏰ Horario aproximado</label>
+        <input type="text" id="ev-time" placeholder="Ej. 4:00 PM – 7:00 PM"/>
+      </div>
+      <div class="form-field full">
+        <label>📍 Lugar del evento</label>
+        <input type="text" id="ev-location" placeholder="Ej. Salón La Hacienda, Monterrey"/>
+      </div>
+      <div class="form-field full">
+        <label>🎨 Temática o preferencias</label>
+        <textarea id="ev-theme" placeholder="Ej. Temática de unicornios, colores pastel, personajes específicos..."></textarea>
+      </div>
+      <div class="form-field full">
+        <label>📝 Notas adicionales</label>
+        <textarea id="ev-notes" placeholder="Estacionamiento, acceso al lugar, detalles adicionales..." style="min-height:70px;"></textarea>
+      </div>
+    </div>
+
+    <div class="note-box">
+      * Agenda con mínimo 2 semanas de anticipación.<br>
+      * Cotización personalizada según invitados, ubicación y duración.<br>
+      * Se separa con el 50% de anticipo.<br>
+      * Servicio disponible en Monterrey y zona metropolitana. Pregunta por disponibilidad fuera del área 📍
+    </div>
+
+    <button class="submit-btn" onclick="sendEventoWhatsApp()">
+      💬 Solicitar cotización por WhatsApp
+    </button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="ev-toast" id="ev-toast"></div>
+
+<script>
+  // GALLERY_PHOTOS se cargará desde Supabase
+  let GALLERY_PHOTOS = {};
+
+  // Cargar galería desde Supabase (o usar valores default si falla)
+  async function loadGalleryPhotos() {
+    try {
+      if (window.NappanDB) {
+        const galleryData = await window.NappanDB.loadGalleryPhotos();
+
+        // Convertir formato de Supabase al formato esperado
+        for (const eventType in galleryData) {
+          const images = galleryData[eventType].images || [];
+          GALLERY_PHOTOS[eventType] = {
+            label: galleryData[eventType].label || eventType,
+            img1: images.length > 0 ? images[0].image_url : null,
+            img2: images.length > 1 ? images[1].image_url : null
+          };
+        }
+        console.log('✓ Galería cargada desde Supabase');
+      }
+    } catch (error) {
+      console.warn('No se pudo cargar galería, usando defaults:', error);
+      // Defaults si Supabase falla
+      GALLERY_PHOTOS = {
+        cumpleanos:   { label: '🎂 Cumpleaños · Así lo hacemos',  img1: null, img2: null },
+        wellness:     { label: '💪 Wellness · Energía en vivo',   img1: '../images/wellness-event.webp', img2: null },
+        corporativos: { label: '🏢 Corporativos · Marca en vivo', img1: null, img2: null },
+      };
+    }
+  }
+
+  // Inicializar galería
+  loadGalleryPhotos();
+
+  function selectPill(pillEl, selectValue, galleryKey) {
+    // 1. Resaltar pill activo
+    document.querySelectorAll('.ev-type-pill').forEach(p => p.classList.remove('active'));
+    pillEl.classList.add('active');
+
+    // 2. Auto-completar el select del formulario
+    const select = document.getElementById('ev-type');
+    if (select) {
+      select.value = selectValue;
+      // Feedback visual: brillo en el campo
+      select.classList.add('field-flash');
+      setTimeout(() => select.classList.remove('field-flash'), 600);
+    }
+
+    // 3. Actualizar galería
+    const data = GALLERY_PHOTOS[galleryKey];
+    const gallery = document.getElementById('ev-gallery');
+    const label   = document.getElementById('ev-gallery-label');
+    const img1    = document.getElementById('ev-gallery-img1');
+    const img2    = document.getElementById('ev-gallery-img2');
+
+    label.textContent = data.label;
+
+    // Foto 1
+    if (data.img1) {
+      img1.style.backgroundImage = `url('${data.img1}')`;
+      img1.style.backgroundSize  = 'cover';
+      img1.style.backgroundPosition = 'center';
+      img1.innerHTML = '';
+    } else {
+      img1.style.backgroundImage = '';
+      img1.innerHTML = '<div class="ev-gallery-placeholder">📸<br><span>Próximamente</span></div>';
+    }
+
+    // Foto 2
+    if (data.img2) {
+      img2.style.backgroundImage = `url('${data.img2}')`;
+      img2.style.backgroundSize  = 'cover';
+      img2.style.backgroundPosition = 'center';
+      img2.innerHTML = '';
+    } else {
+      img2.style.backgroundImage = '';
+      img2.innerHTML = '<div class="ev-gallery-placeholder">📸<br><span>Próximamente</span></div>';
+    }
+
+    // 4. Mostrar galería con animación
+    gallery.classList.add('visible');
+
+    // 5. Sin scroll — la galería se actualiza en su lugar
+  }
+</script>
+
+<script src="../js/utils.js"></script>
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('ev-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return `${day} ${months[parseInt(m)-1]} ${y}`;
+  }
+
+  async function lookupCustomerEvenso(phoneValue) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      const nameInput = document.getElementById('ev-name');
+      if (nameInput) nameInput.value = customer.name;
+    }
+  }
+
+  async function sendEventoWhatsApp() {
+    const name     = document.getElementById('ev-name').value.trim();
+    const phone    = document.getElementById('ev-phone').value.trim();
+    const type     = document.getElementById('ev-type').value;
+    const guests   = document.getElementById('ev-guests').value.trim();
+    const date     = document.getElementById('ev-date').value;
+    const time     = document.getElementById('ev-time').value.trim();
+    const location = document.getElementById('ev-location').value.trim();
+    const theme    = document.getElementById('ev-theme').value.trim();
+    const notes    = document.getElementById('ev-notes').value.trim();
+
+    if (!name)     { showToast('⚠️ Ingresa tu nombre'); return; }
+    if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
+    if (!type)     { showToast('⚠️ Selecciona el tipo de evento'); return; }
+    if (!guests)   { showToast('⚠️ Indica el número de invitados'); return; }
+    if (!date)     { showToast('⚠️ Selecciona la fecha del evento'); return; }
+    if (!location) { showToast('⚠️ Indica el lugar del evento'); return; }
+
+    let msg = `🎪 *COTIZACIÓN EVENTOS EN VIVO*\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `👤 *Cliente:* ${name}\n`;
+    if (phone) msg += `📱 *Teléfono:* ${phone}\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `📋 *DETALLES DEL EVENTO*\n`;
+    msg += `🎉 *Tipo:* ${type}\n`;
+    msg += `👥 *Invitados:* ${guests} personas\n`;
+    msg += `📅 *Fecha:* ${formatDate(date)}\n`;
+    if (time)  msg += `⏰ *Horario:* ${time}\n`;
+    msg += `📍 *Lugar:* ${location}\n`;
+    if (theme) msg += `🎨 *Temática:* ${theme}\n`;
+    if (notes) {
+      msg += `━━━━━━━━━━━━━━━━\n`;
+      msg += `📝 *Notas:* ${notes}\n`;
+    }
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `_Esperamos tu cotización personalizada_ ✨`;
+    if (!window.NappanDB) {
+      showToast('No se pudo conectar para guardar tu pedido');
+      return;
+    }
+
+    const saveResult = await NappanDB.saveOrder({
+      section: 'eventos',
+      customer_name: name,
+      customer_phone: phone || null,
+      event_type: type,
+      guest_count: parseInt(guests),
+      delivery_date: date,
+      delivery_time: time,
+      delivery_address: location,
+      whatsapp_sent: true,
+      notes: `Temática: ${theme}. ${notes || ''}`,
+      raw_cart: JSON.stringify({
+        eventType: type,
+        guests,
+        location,
+        theme
+      })
+    });
+
+    if (!saveResult) {
+      console.warn('Order save failed before WhatsApp handoff');
+      showToast('No se pudo guardar tu pedido. Intenta de nuevo');
+      return;
+    }
+
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+  }
+
+  // Min date = 14 days from today
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 14);
+  document.getElementById('ev-date').min = minDate.toISOString().split('T')[0];
+</script>
+
+<script src="../js/chatbot.js"></script>
+
+<!-- FLOATING NAV -->
+<div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>
+<div class="nav-modal" id="navModal">
+  <div class="nav-modal-title">Ir a</div>
+  <a class="nav-item nav-lunchbox" href="nappan-lunchbox.html">
+    <span class="nav-item-icon">🎂</span> Lunch Box
+  </a>
+  <a class="nav-item nav-nappanbox" href="nappan-box.html">
+    <span class="nav-item-icon">📦</span> Nappan Box
+  </a>
+  <a class="nav-item nav-fitbar" href="nappan-fitbar.html">
+    <span class="nav-item-icon">💪</span> Fit Bar
+  </a>
+  <a class="nav-item nav-eventos" href="nappan-eventos.html">
+    <span class="nav-item-icon">🎉</span> Eventos en Vivo
+  </a>
+</div>
+<button class="nav-float-btn" id="navFloatBtn" onclick="toggleNavModal()" aria-label="Navegación">☰</button>
+<script>
+  function toggleNavModal() {
+    document.getElementById('navModal').classList.toggle('open');
+    document.getElementById('navOverlay').classList.toggle('open');
+    document.getElementById('navFloatBtn').classList.toggle('open');
+  }
+</script>
+</body>
+</html>

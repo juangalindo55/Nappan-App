@@ -1,0 +1,13 @@
+# --- PRIVACIDAD ---
+# Ocultar la llave de Gemini y otras variables sensibles
+.env
+.env.local
+
+# --- EFICIENCIA ---
+# No es necesario que Claude analice miles de archivos de librerías
+node_modules/
+
+# --- ARCHIVOS DE SISTEMA ---
+.DS_Store
+Thumbs.db
+.git/   

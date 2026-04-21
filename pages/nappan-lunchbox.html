@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nappan — Lunch Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css?v=3">
+<!-- Supabase Integration (Phase 1) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<!-- OSRM-based shipping calculator: no Google Maps API key needed -->
+<!-- Cache bust: 2026-04-12 clear CDN cache -->
+
+<!-- Vercel Speed Insights -->
+<script>
+  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+
+</head>
+<body class="page-lunchbox">
+<!-- HEADER -->
+<header>
+  <button class="back-btn" onclick="window.location.href='../index.html'">← Inicio</button>
+<img src="../images/Logo Dorado Nappan V2.svg" alt="Nappan" class="logo-img" />
+  <button class="cart-btn" onclick="toggleCart()">
+    🛒 Mi pedido
+    <span class="cart-badge" id="cartBadge">0</span>
+  </button>
+</header>
+
+<!-- HERO -->
+<div class="hero" style="position:relative;overflow:hidden;padding:0;">
+  <div class="hero-bg" style="
+    position:absolute;inset:0;
+    background-image:url('../images/bg-card-lunchbox.jpg');
+    background-size:cover;
+    background-position:center;
+    filter:brightness(0.45) saturate(1.2);
+    z-index:0;
+  "></div>
+  <div class="hero-content">
+    <h1>¡Lunch Boxes<br><span><strong>ARTÍSTICOS!</strong></span></h1>
+    <p>Pancakes de arte, sabor y creatividad<br>perfectos para eventos y cumpleaños 🎉</p>
+  </div>
+</div>
+
+<!-- BIRTHDAY BANNER -->
+<div class="birthday-banner">
+  <span class="b-icon">🎂</span>
+  <p><strong>¿Celebras cumpleaños?</strong> Incluimos de regalo un Pancake artístico sencillo con la temática del festejado para el cumpleañero 🎁✨</p>
+</div>
+
+<!-- DATE & INFO -->
+<div class="section-title">📅 Datos del pedido</div>
+<div class="date-section">
+  <div class="date-card">
+    <div class="date-field">
+      <label>👤 Tu nombre</label>
+      <input type="text" id="clientName" placeholder="Ej. María García" />
+    </div>
+    <div class="date-field">
+      <label>📱 Tu teléfono</label>
+      <input type="tel" id="clientPhone" placeholder="Ej. 81 1234 5678" required onblur="lookupCustomerLB(this.value)"/>
+    </div>
+    <div class="date-field">
+      <label>📅 Fecha de entrega</label>
+      <input type="date" id="deliveryDate" />
+    </div>
+    <div class="date-field">
+      <label>⏰ Hora aproximada</label>
+      <input type="time" id="deliveryTime" />
+    </div>
+    <div class="date-field">
+      <label>💳 Método de pago</label>
+      <select id="paymentMethod" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-family:inherit; font-size:14px; background:white;">
+        <option value="EFECTIVO">💵 EFECTIVO</option>
+        <option value="TRANSFERENCIA SPEI">🏦 TRANSFERENCIA SPEI</option>
+      </select>
+    </div>
+    <div class="date-field" style="flex:100%">
+      <label>📍 Dirección / Notas especiales</label>
+      <textarea id="notes" placeholder="Dirección de entrega, temática del evento, nombre del cumpleañero..."></textarea>
+    </div>
+    <div class="date-field" style="flex:100%">
+      <label>🚚 Código Postal para calcular envío <span style="font-weight:400;opacity:0.65;font-size:12px;">(opcional)</span></label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="deliveryCP" placeholder="Ej. 64349" maxlength="5" inputmode="numeric"
+          style="max-width:130px;"
+          onkeypress="if(event.key==='Enter'){event.preventDefault();calculateShipping();}"/>
+        <button onclick="calculateShipping()" style="padding:10px 16px;background:#DAA520;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1A1008'" onmouseout="this.style.background='#DAA520'">Calcular 🗺️</button>
+      </div>
+      <div id="shippingResult" style="margin-top:8px;font-size:13px;font-weight:500;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- MENU -->
+<div class="section-title">📦 Elige tu Lunch Box</div>
+<div style="text-align: center; margin-bottom: 25px;">
+  <button id="openGalleryBtn" class="pill-btn" onclick="openLunchboxGallery()">
+    🖼️ Ver Galeria de ejemplos
+  </button>
+</div>
+
+<div class="menu-grid">
+
+  <!-- BOX 1 -->
+  <div class="product-card" id="card1">
+    <div class="card-header" style="
+      background-image: url('../images/bg-box1-header.jpg');
+      background-size: cover;
+      background-position: center center;
+      position: relative;
+      overflow: hidden;
+      min-height: 160px;
+    ">
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
+      <span class="price-badge" id="price-LUNCHBOX-1" style="z-index:2;">$125</span>
+      <div style="position:relative;z-index:1;padding-top:24px;">
+        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 1</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <ul class="items-list">
+        <li>🥞 PancakeART + miel</li>
+        <li style="display:flex;flex-direction:column;gap:8px;">
+          <span>🍓 Elige tu Fruta o Gelatina:</span>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType1" value="Fruta" id="fruit1" />
+              Fruta (Uva, Durazno, Fresa)
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType1" value="Gelatina" id="gelatin1" />
+              Gelatina
+            </label>
+          </div>
+        </li>
+        <li>🧃 Juguito Kool-Aid americano (−70% azúcar)</li>
+        <li>🍴 Cubierto y servilleta</li>
+        <li>📦 Se entrega en cajita</li>
+      </ul>
+
+      <div class="extras-title">🎨 Elige tu PancakeART</div>
+      <div class="art-selector">
+        <div class="art-options" id="art1">
+          <div class="art-opt active" data-art="Osito" onclick="selectArt(1, this)">
+            <span class="art-emoji">🐻</span>
+            <div class="art-name">Osito</div>
+          </div>
+          <div class="art-opt" data-art="Capibara" onclick="selectArt(1, this)">
+            <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
+            <div class="art-name">Capibara</div>
+          </div>
+          <div class="art-opt" data-art="Pollito" onclick="selectArt(1, this)">
+            <span class="art-emoji">🐥</span>
+            <div class="art-name">Pollito</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="extras-section">
+        <div class="extras-title">➕ Extras</div>
+        <div id="extras-list-1">
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="25">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🐙 Salchipulpos + catsup</span>
+            <span class="extra-price">+$25</span>
+          </div>
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🍫 Upgrade a Nucolato</span>
+            <span class="extra-price">+$5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('qty1', -1)" aria-label="Reducir cantidad">−</button>
+          <span class="qty-val" id="qty1">20</span>
+          <button class="qty-btn" onclick="changeQty('qty1', +1)" aria-label="Aumentar cantidad">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart(1)">
+          🛒 Agregar al pedido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOX 2 -->
+  <div class="product-card" id="card2">
+    <div class="card-header box2" style="
+      background-image: url('../images/bg-box2-header.jpg');
+      background-size: 60%;
+      background-position: center center;
+      position: relative;
+      overflow: hidden;
+      min-height: 160px;
+    ">
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:0;"></div>
+      <span class="price-badge" id="price-LUNCHBOX-2" style="z-index:2;">$130</span>
+      <div style="position:relative;z-index:1;padding-top:24px;">
+        <div class="product-name" style="color:white;text-shadow:0 2px 8px rgba(0,0,0,0.6);font-weight:bold;">Lunch Box 2</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <ul class="items-list">
+        <li>🥐 ½ Croissant (jamón, queso)</li>
+        <li>🥞 PancakeART + miel</li>
+        <li style="display:flex;flex-direction:column;gap:8px;">
+          <span>🍓 Elige tu Fruta o Gelatina:</span>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-left:20px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType2" value="Fruta" id="fruit2" />
+              Fruta (Uva, Durazno, Fresa)
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="fruitType2" value="Gelatina" id="gelatin2" />
+              Gelatina
+            </label>
+          </div>
+        </li>
+        <li>🧃 Juguito Kool-Aid (−70% azúcar)</li>
+        <li>🥔 Bolsa chica papitas Kirkland (−% sodio)</li>
+        <li>🍴 Cubierto y servilleta</li>
+        <li>🛍️ Se entrega en cajita</li>
+      </ul>
+
+      <div class="extras-title">🎨 Elige tu PancakeART</div>
+      <div class="art-selector">
+        <div class="art-options" id="art2">
+          <div class="art-opt active" data-art="Osito" onclick="selectArt(2, this)">
+            <span class="art-emoji">🐻</span>
+            <div class="art-name">Osito</div>
+          </div>
+          <div class="art-opt" data-art="Capibara" onclick="selectArt(2, this)">
+            <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
+            <div class="art-name">Capibara</div>
+          </div>
+          <div class="art-opt" data-art="Pollito" onclick="selectArt(2, this)">
+            <span class="art-emoji">&#x1F425;</span>
+            <div class="art-name">Pollito</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="extras-section">
+        <div class="extras-title">➕ Extras</div>
+        <div id="extras-list-2">
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="20">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🥐 Upgrade a croissant completo</span>
+            <span class="extra-price">+$20</span>
+          </div>
+          <div class="extra-option" onclick="toggleExtra(this)" data-price="5">
+            <div class="check-box">✓</div>
+            <span class="extra-label">🍫 Upgrade a Nucolato</span>
+            <span class="extra-price">+$5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('qty2', -1)" aria-label="Reducir cantidad">−</button>
+          <span class="qty-val" id="qty2">20</span>
+          <button class="qty-btn" onclick="changeQty('qty2', +1)" aria-label="Aumentar cantidad">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart(2)">
+          🛒 Agregar al pedido
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<!-- CART PANEL -->
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-top">
+    <h2>🛒 Mi pedido</h2>
+    <button class="close-btn" onclick="toggleCart()" aria-label="Cerrar carrito">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <span class="empty-icon">🥞</span>
+      <p>Tu carrito está vacío</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="order-summary" id="orderSummary">
+      <div class="summary-empty">📋 Llena los datos del pedido abajo para ver el resumen aquí.</div>
+    </div>
+    <div id="shippingRow" style="display:none;justify-content:space-between;align-items:center;padding:5px 0 2px;font-size:13px;color:#555;border-top:1px solid #f0e6d3;margin-top:4px;"></div>
+    <div class="total-row">
+      <span class="total-label">Total</span>
+      <span class="total-amount" id="cartTotal">$0</span>
+    </div>
+    <button class="whatsapp-btn" id="whatsappBtn" onclick="sendWhatsApp()" disabled>
+      <span class="wa-icon">💬</span> Enviar pedido por WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+
+
+<script src="../js/utils.js"></script>
+<script>
+  let cart = [];
+  let cartOpen = false;
+  const capybaraImg = '../images/pancakeart-capibara.png';
+
+  // ── Estado de envío ────────────────────────────────────────
+  let shippingCost  = 0;    // 0 = no calculado / fuera de zona
+  let shippingLabel = '';   // 'calculated' | 'out_of_range' | 'error' | ''
+  let shippingCP    = '';   // CP capturado
+
+  // Phase 5: Customer recurring detection
+  let currentCustomer = null;
+  let tierDiscount = 0;
+
+  const products = {
+    1: { name: 'Lunch Box 1', basePrice: 125, icon: '🐣', extras: { 'Salchipulpos + catsup 🐙': 25 }, sku: 'LUNCHBOX-1' },
+    2: { name: 'Lunch Box 2', basePrice: 130, icon: '🥐', extras: { 'Upgrade croissant completo 🥐': 0 }, sku: 'LUNCHBOX-2' }
+  };
+
+  // Load dynamic prices from Supabase
+  async function loadDynamicPrices() {
+    // Esperar a que NappanDB esté disponible
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    try {
+      if (window.NappanDB) {
+        console.log('Cargando precios dinámicos...');
+        const appConfig = await window.NappanDB.loadAppConfig();
+        const productsFromDB = await window.NappanDB.loadProducts('lunchbox');
+        console.log('Productos desde DB:', productsFromDB);
+
+        for (const dbProduct of productsFromDB) {
+          let boxId = null;
+          if (dbProduct.sku === 'LUNCHBOX-1') boxId = 1;
+          else if (dbProduct.sku === 'LUNCHBOX-2') boxId = 2;
+
+          if (boxId) {
+            products[boxId].basePrice = dbProduct.base_price;
+            const el = document.getElementById(`price-LUNCHBOX-${boxId}`);
+            if (el) {
+              el.textContent = '$' + dbProduct.base_price;
+              console.log(`✓ Precio LUNCHBOX-${boxId} actualizado a $` + dbProduct.base_price);
+            }
+            
+            // Cargar extras dinámicamente
+            try {
+              const extrasArray = await window.NappanDB.loadExtras(dbProduct.id);
+              if (extrasArray && extrasArray.length > 0) {
+                const extrasContainer = document.getElementById(`extras-list-${boxId}`);
+                if (extrasContainer) {
+                  extrasContainer.innerHTML = extrasArray.map((ex, idx) => {
+                    const labelKey = `extra_label_${dbProduct.sku}_${idx + 1}`;
+                    const label = appConfig[labelKey] || ex.label;
+                    return `
+                    <div class="extra-option" onclick="toggleExtra(this)" data-price="${ex.price}">
+                      <div class="check-box">✓</div>
+                      <span class="extra-label">${label}</span>
+                      <span class="extra-price">+$${ex.price}</span>
+                    </div>
+                  `;
+                  }).join('');
+                  console.log(`✓ Extras LUNCHBOX-${boxId} actualizados`);
+                }
+              }
+            } catch(e) {
+              console.warn(`Error al cargar extras para LUNCHBOX-${boxId}:`, e);
+            }
+          }
+        }
+        console.log('✓ Precios cargados de Supabase');
+      } else {
+        console.warn('NappanDB no disponible después de intentos');
+      }
+    } catch (error) {
+      console.warn('No se pudieron cargar precios dinámicos:', error);
+    }
+  }
+
+  // 1. Ejecutar inmediatamente para el contenido estático
+  linkifyNucolato();
+
+  // 2. Intentar de nuevo tras la carga dinámica (o fallo de la misma)
+  loadDynamicPrices().finally(() => {
+    linkifyNucolato();
+    // Re-ejecutar un par de veces por si hay retrasos en el renderizado
+    setTimeout(linkifyNucolato, 1000);
+    setTimeout(linkifyNucolato, 3000);
+  });
+
+  function linkifyNucolato() {
+    // Selectores para los elementos que podrían tener la palabra
+    const targets = document.querySelectorAll('.extra-label, .items-list li, span, li');
+    
+    targets.forEach(el => {
+      const regex = /Nucolato/gi; // Definido aquí para resetear el estado en cada elemento
+      
+      // Verificamos si la palabra existe en el texto plano del elemento
+      if (regex.test(el.textContent) && !el.querySelector('.nucolato-link')) {
+        // Reemplazamos en el HTML para no perder emojis u otros estilos
+        el.innerHTML = el.innerHTML.replace(regex, (match) => {
+          return `<a href="https://www.instagram.com/nucolato/" target="_blank" class="nucolato-link" style="color: #DAA520; text-decoration: underline; font-weight: 800;" onclick="event.stopPropagation()">${match}</a>`;
+        });
+      }
+    });
+  }
+
+  function changeQty(id, delta) {
+    const el = document.getElementById(id);
+    let val = parseInt(el.textContent) + delta;
+    if (val < 20) val = 20;
+    el.textContent = val;
+  }
+
+  function selectArt(box, el) {
+    document.querySelectorAll(`#art${box} .art-opt`).forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function toggleExtra(el) {
+    el.classList.toggle('selected');
+  }
+
+  function addToCart(boxId) {
+    // Block if other box type already in cart
+    const otherBoxInCart = cart.find(i => i.boxId !== boxId);
+    if (otherBoxInCart) {
+      showToast(`⚠️ Ya tienes un ${otherBoxInCart.name} en tu pedido`);
+      return;
+    }
+
+    const p = products[boxId];
+    const qty = parseInt(document.getElementById(`qty${boxId}`).textContent);
+
+    // Check if fruit type is selected
+    const selectedFruit = document.querySelector(`input[name="fruitType${boxId}"]:checked`);
+    if (!selectedFruit) {
+      showToast(`⚠️ Por favor selecciona Fruta o Gelatina`);
+      return;
+    }
+
+    // Get selected art
+    const activeArt = document.querySelector(`#art${boxId} .art-opt.active`);
+    const artName = activeArt ? activeArt.dataset.art : 'Osito';
+
+    // Block if different art type already in cart
+    const otherArtInCart = cart.find(i => i.art !== artName);
+    if (otherArtInCart) {
+      showToast(`⚠️ Ya tienes ${otherArtInCart.art} en tu pedido. Un pedido = una sola figura.`);
+      return;
+    }
+
+    // Get extras
+    const card = document.getElementById(`card${boxId}`);
+    const checkedExtras = [];
+    let extrasTotal = 0;
+
+    card.querySelectorAll('.extra-option.selected').forEach(opt => {
+      const label = opt.querySelector('.extra-label').textContent;
+      const price = parseInt(opt.dataset.price) || 0;
+      checkedExtras.push({ label, price });
+      extrasTotal += price;
+    });
+
+    const unitPrice = p.basePrice + extrasTotal;
+    const totalPrice = unitPrice * qty;
+
+    const item = {
+      id: Date.now(),
+      boxId,
+      name: p.name,
+      icon: p.icon,
+      art: artName,
+      fruitType: selectedFruit.value,
+      qty,
+      unitPrice,
+      totalPrice,
+      extras: checkedExtras
+    };
+
+    cart.push(item);
+    renderCart();
+    updateCardLock();
+    showToast(`✅ ${qty}x ${p.name} agregado!`);
+    if (!cartOpen) toggleCart();
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    renderCart();
+    updateCardLock();
+  }
+
+  function updateCardLock() {
+    const activeBoxId = cart.length > 0 ? cart[0].boxId : null;
+    const artInCart = cart.length > 0 ? cart[0].art : null;
+
+    [1, 2].forEach(id => {
+      const card = document.getElementById(`card${id}`);
+      const overlay = card.querySelector('.lock-overlay');
+
+      if (activeBoxId && activeBoxId !== id) {
+        // Lock entire card (different box type)
+        card.style.opacity = '0.45';
+        card.style.pointerEvents = 'none';
+        if (!overlay) {
+          const div = document.createElement('div');
+          div.className = 'lock-overlay';
+          div.innerHTML = `<div class="lock-msg">🔒 Para pedir este box,<br>envía primero tu pedido actual<br>y haz uno nuevo.</div>`;
+          card.appendChild(div);
+        }
+      } else {
+        // Unlock card
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+        const existingOverlay = card.querySelector('.lock-overlay');
+        if (existingOverlay) existingOverlay.remove();
+
+        // Lock art options that differ from what's in cart
+        const artOpts = card.querySelectorAll('.art-opt');
+        artOpts.forEach(opt => {
+          if (artInCart && opt.dataset.art !== artInCart) {
+            opt.classList.add('locked');
+            opt.title = '1 diseño por pedido';
+          } else {
+            opt.classList.remove('locked');
+            opt.title = '';
+          }
+        });
+      }
+    });
+  }
+
+  function renderCart() {
+    const container = document.getElementById('cartItems');
+    const badge = document.getElementById('cartBadge');
+    const totalEl = document.getElementById('cartTotal');
+    const btn = document.getElementById('whatsappBtn');
+
+    const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+    badge.textContent = totalItems;
+
+    if (cart.length === 0) {
+      container.innerHTML = `<div class="cart-empty"><span class="empty-icon">🥞</span><p>Tu carrito está vacío</p></div>`;
+      totalEl.textContent = '$0';
+      btn.disabled = true;
+      return;
+    }
+
+    let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
+    const discountAmount = tierDiscount > 0 ? Math.round(subtotal * tierDiscount / 100 * 100) / 100 : 0;
+    const productsTotal  = subtotal - discountAmount;
+    const total          = productsTotal + shippingCost;
+
+    // Fila de envío en el carrito
+    const shippingRow = document.getElementById('shippingRow');
+    if (shippingRow) {
+      if (shippingLabel === 'calculated' && shippingCost > 0) {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío (CP ${shippingCP})</span><span style="font-weight:600;color:#2e7d32;">+$${shippingCost} MXN</span>`;
+      } else if (shippingLabel === 'out_of_range' || shippingLabel === 'error') {
+        shippingRow.style.display = 'flex';
+        shippingRow.innerHTML = `<span>🚚 Envío</span><span style="color:#E6AC00;font-weight:500;">Por cotizar</span>`;
+      } else {
+        shippingRow.style.display = 'none';
+      }
+    }
+
+    if (tierDiscount > 0) {
+      totalEl.textContent = `$${subtotal} → $${total} (${tierDiscount}% desc.)`;
+    } else {
+      totalEl.textContent = `$${total}`;
+    }
+    btn.disabled = false;
+
+    container.innerHTML = cart.map(item => {
+      const extrasText = item.extras.length ? item.extras.map(e => e.label).join(', ') : 'Sin extras';
+      const colorDot = item.boxId === 1
+        ? 'background:#FFD93D; border:2px solid #E6B800;'
+        : 'background:#FFB3C6; border:2px solid #E8809A;';
+      return `
+        <div class="cart-item">
+          <div class="item-tag" style="${colorDot}"></div>
+          <div class="item-details">
+            <div class="item-name">${item.qty}x ${item.name}</div>
+            <div class="item-meta">
+              ${
+                item.art === 'Capibara' ? `<img src="${capybaraImg}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;border-radius:50%;margin-right:4px;">` :
+                item.art === 'Osito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐻</span>` :
+                item.art === 'Pollito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐥</span>` : ''
+              }${item.art} · 🍓 ${item.fruitType} · ${extrasText}
+            </div>
+            <div class="item-bottom">
+              <div class="item-price">$${item.totalPrice}</div>
+              <button class="remove-btn" onclick="removeFromCart(${item.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleCart() {
+    cartOpen = !cartOpen;
+    document.getElementById('cartPanel').classList.toggle('open', cartOpen);
+    document.getElementById('cartOverlay').classList.toggle('open', cartOpen);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ── CALCULADORA DE ENVÍO ───────────────────────────────────
+  const SHIPPING_ORIGIN = 'Cumbres, Monterrey, 64349, Mexico';
+
+  // Tarifas dinámicas cargadas de admin
+  let shippingTiers = [
+    { km: 3, price: 50 },
+    { km: 8, price: 85 },
+    { km: 15, price: 130 },
+    { km: 20, price: 150 },
+    { km: 45, price: 200 }
+  ];
+
+  async function loadShippingTiers() {
+    try {
+      const config = await window.NappanDB.loadAppConfig();
+      const tiers = [];
+      for (let i = 1; i <= 5; i++) {
+        const km = config['shipping_tier_' + i + '_km'];
+        const price = config['shipping_tier_' + i + '_price'];
+        if (km !== undefined && km !== null && price !== undefined && price !== null) {
+          tiers.push({ km: parseFloat(km), price: parseFloat(price) });
+        }
+      }
+      if (tiers.length > 0) {
+        shippingTiers = tiers;
+      }
+    } catch (e) {
+      console.log('Usando tarifas de envío por defecto');
+    }
+  }
+
+  function getShippingCost(km) {
+    for (const tier of shippingTiers) {
+      if (km <= tier.km) return tier.price;
+    }
+    return null;
+  }
+
+  async function calculateShipping() {
+    // Cargar tarifas si aún son las por defecto
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
+    const cpInput  = document.getElementById('deliveryCP');
+    const resultEl = document.getElementById('shippingResult');
+    const cp = cpInput ? cpInput.value.trim() : '';
+
+    if (!/^\d{5}$/.test(cp)) {
+      if (resultEl) resultEl.innerHTML = '<span style="color:#c0392b;">❌ Ingresa un CP válido de 5 dígitos</span>';
+      return;
+    }
+
+    shippingCP = cp;
+    if (resultEl) resultEl.innerHTML = '<span style="color:#888;">⏳ Calculando distancia...</span>';
+
+    // Timeout global si el SDK nunca carga
+    clearTimeout(window._shippingTimeout);
+    window._shippingTimeout = setTimeout(() => {
+      shippingCost  = 0;
+      shippingLabel = 'error';
+      if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+      renderCart();
+    }, 8000);
+
+    const tryCalc = async () => {
+      clearTimeout(window._shippingTimeout);
+
+      const apiTimeout = setTimeout(() => {
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        renderCart();
+      }, 6000);
+
+      try {
+        // Use Google Maps for distance calculation
+        await window.initGoogleMapsAPI();
+
+        const service = new google.maps.DistanceMatrixService();
+        const origin = SHIPPING_ORIGIN;
+        const destination = cp + ', Monterrey, Mexico';
+
+        service.getDistanceMatrix({
+          origins: [origin],
+          destinations: [destination],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+        }, (response, status) => {
+          clearTimeout(apiTimeout);
+
+          if (status !== 'OK') {
+            console.error('Distance Matrix failed:', status);
+            handleError();
+            return;
+          }
+
+          const element = response.rows[0].elements[0];
+          if (element.status !== 'OK') {
+            console.warn('No route found for:', destination);
+            shippingCost  = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura. Cotizamos por WhatsApp.</span>`;
+            renderCart();
+            return;
+          }
+
+          const km = element.distance.value / 1000;
+          const cost = getShippingCost(km);
+
+          if (cost === null) {
+            shippingCost  = 0;
+            shippingLabel = 'out_of_range';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#E6AC00;">⚠️ Zona fuera de cobertura (${km.toFixed(1)} km). Cotizamos por WhatsApp.</span>`;
+          } else {
+            shippingCost  = cost;
+            shippingLabel = 'calculated';
+            if (resultEl) resultEl.innerHTML = `<span style="color:#2e7d32;">✅ Envío estimado: <strong>$${cost} MXN</strong> (${km.toFixed(1)} km)</span>`;
+          }
+          renderCart();
+        });
+
+        function handleError() {
+          shippingCost  = 0;
+          shippingLabel = 'error';
+          if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+          renderCart();
+        }
+
+      } catch(e) {
+        clearTimeout(apiTimeout);
+        shippingCost  = 0;
+        shippingLabel = 'error';
+        if (resultEl) resultEl.innerHTML = '<span style="color:#E6AC00;">⚠️ No pudimos calcular. Se enviará como "por cotizar".</span>';
+        renderCart();
+      }
+    };
+
+    tryCalc();
+  }
+
+  async function lookupCustomerLB(phoneValue) {
+    if (!phoneValue || phoneValue.replace(/\D/g,'').length < 8) return;
+
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    // Cargar tarifas de envío dinámicas (una sola vez)
+    if (shippingTiers.length === 5 && shippingTiers[0].price === 50) {
+      await loadShippingTiers();
+    }
+
+    const customer = await window.NappanDB.findCustomerByPhone(phoneValue.replace(/\D/g,''));
+    if (customer) {
+      currentCustomer = customer;
+      const nameInput = document.getElementById('clientName');
+      if (nameInput) nameInput.value = customer.name;
+      await applyTierDiscount(customer.membership_tier);
+      showWelcomeBadge(customer);
+    }
+  }
+
+  function showWelcomeBadge(customer) {
+    let badgeHtml = `<div class="welcome-badge" style="background:linear-gradient(135deg,#DAA520,#FFD93D);color:#1A1008;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-weight:600;text-align:center;">
+      👋 ¡Bienvenida de regreso, ${customer.name}!<br>
+      <span style="font-size:13px;opacity:0.9;">Tier: <span class="tier-badge tier-${customer.membership_tier}" style="display:inline-block;padding:3px 8px;border-radius:12px;background:rgba(255,255,255,0.3);">${customer.membership_tier}</span> — Descuento: ${tierDiscount}%</span>
+    </div>`;
+    const cartPanel = document.querySelector('.cart-panel');
+    if (cartPanel) {
+      const existing = cartPanel.querySelector('.welcome-badge');
+      if (existing) existing.remove();
+      cartPanel.insertBefore(createElementFromHTML(badgeHtml), cartPanel.firstChild);
+    }
+  }
+
+  function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString;
+    return div.firstChild;
+  }
+
+  async function applyTierDiscount(tier) {
+    let maxAttempts = 50;
+    while (!window.NappanDB && maxAttempts > 0) {
+      await new Promise(r => setTimeout(r, 100));
+      maxAttempts--;
+    }
+
+    if (!window.NappanDB) return;
+
+    const config = await window.NappanDB.loadAppConfig();
+    if (tier === 'premium') tierDiscount = parseFloat(config.tier_premium_discount || 0);
+    else if (tier === 'business') tierDiscount = parseFloat(config.tier_business_discount || 0);
+    else tierDiscount = 0;
+
+    renderCart();
+  }
+
+  async function sendWhatsApp() {
+    const name = document.getElementById('clientName').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
+    const date = document.getElementById('deliveryDate').value;
+    const time = document.getElementById('deliveryTime').value;
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const notes = document.getElementById('notes').value.trim();
+
+    if (cart.length === 0) { showToast('⚠️ Tu carrito está vacío'); return; }
+    if (!name) { showToast('⚠️ Ingresa tu nombre por favor'); return; }
+    if (!phone || phone.replace(/\D/g, '').length < 8) { showToast('⚠️ Ingresa un teléfono válido'); return; }
+    if (!date) { showToast('⚠️ Selecciona una fecha de entrega'); return; }
+
+    let subtotal = cart.reduce((s, i) => s + i.totalPrice, 0);
+    const discountAmount = Math.round(subtotal * tierDiscount / 100 * 100) / 100;
+    const productsTotal  = subtotal - discountAmount;
+    const total          = productsTotal + shippingCost;
+
+    let msg = `🥞 *PEDIDO NAPPANCAKES*\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `👤 *Cliente:* ${name}\n`;
+    if (phone) msg += `📱 *Teléfono:* ${phone}\n`;
+    msg += `📅 *Fecha:* ${formatDate(date)}\n`;
+    if (time) msg += `⏰ *Hora:* ${time}\n`;
+    msg += `💳 *Pago:* ${paymentMethod}\n`;
+    if (notes) msg += `📍 *Dirección:* ${notes}\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `*PRODUCTOS:*\n`;
+
+    cart.forEach(item => {
+      msg += `\n🎁 ${item.qty}x ${item.name} — $${item.totalPrice}\n`;
+      msg += `   🎨 PancakeART: ${item.art}\n`;
+      msg += `   🍓 Fruta/Gelatina: ${item.fruitType}\n`;
+      if (item.extras.length) {
+        msg += `   ➕ Extras: ${item.extras.map(e => e.label).join(', ')}\n`;
+      }
+    });
+
+    msg += `\n━━━━━━━━━━━━━━━━\n`;
+    if (tierDiscount > 0) {
+      msg += `💰 *Subtotal productos:* $${subtotal} MXN\n`;
+      msg += `🎁 *Descuento (${tierDiscount}%):* -$${discountAmount} MXN\n`;
+    }
+    if (shippingLabel === 'calculated' && shippingCost > 0) {
+      msg += `🚚 *Envío (CP ${shippingCP}):* $${shippingCost} MXN\n`;
+    } else {
+      msg += `🚚 *Envío:* Por cotizar\n`;
+    }
+    msg += `💰 *TOTAL: $${total} MXN*\n`;
+    msg += `\n¡Gracias por tu pedido! 🐻✨`;
+
+    if (!window.NappanDB) {
+      showToast('❌ No se pudo conectar para guardar tu pedido. Intenta de nuevo.');
+      return;
+    }
+
+    const saveResult = await NappanDB.saveOrder({
+      section: 'lunchbox',
+      customer_name: name,
+      customer_phone: phone || null,
+      delivery_date: date,
+      delivery_time: time,
+      delivery_address: notes,
+      subtotal: subtotal,
+      discount_amount: discountAmount,
+      shipping_cost: shippingCost,
+      total: total,
+      whatsapp_sent: true,
+      notes: notes,
+      membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
+      raw_cart: JSON.parse(JSON.stringify(cart))
+    });
+
+    if (!saveResult) {
+      console.warn('Order save failed before WhatsApp handoff');
+      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo.');
+      return;
+    }
+
+    const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }
+
+  function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-');
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return `${d} ${months[parseInt(m)-1]} ${y}`;
+  }
+
+  function updateSummary() {
+    const name  = document.getElementById('clientName').value.trim();
+    const date  = document.getElementById('deliveryDate').value;
+    const time  = document.getElementById('deliveryTime').value;
+    const notes = document.getElementById('notes').value.trim();
+    const box   = document.getElementById('orderSummary');
+
+    if (!name && !date) {
+      box.innerHTML = `<div class="summary-empty">📋 Llena los datos del pedido abajo para ver el resumen aquí.</div>`;
+      return;
+    }
+
+    let html = '';
+    if (name)  html += `<div class="summary-row"><span>👤</span><span><b>${name}</b></span></div>`;
+    if (date)  html += `<div class="summary-row"><span>📅</span><span>${formatDate(date)}${time ? ' &nbsp;⏰ ' + time : ''}</span></div>`;
+    if (notes) html += `<div class="summary-row"><span>📍</span><span>${notes}</span></div>`;
+
+    box.innerHTML = html;
+  }
+
+  // Set min date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('deliveryDate').min = today;
+
+  // Wire up live summary updates
+  ['clientName','deliveryDate','deliveryTime','notes'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateSummary);
+  });
+
+ 
+
+
+</script>
+
+<script>
+  renderCart();
+</script>
+
+<script src="../js/chatbot.js"></script>
+
+<!-- FLOATING NAV -->
+<div class="nav-overlay" id="navOverlay" onclick="toggleNavModal()"></div>
+<div class="nav-modal" id="navModal">
+  <div class="nav-modal-title">Ir a</div>
+  <a class="nav-item nav-lunchbox" href="nappan-lunchbox.html">
+    <span class="nav-item-icon">🎂</span> Lunch Box
+  </a>
+  <a class="nav-item nav-nappanbox" href="nappan-box.html">
+    <span class="nav-item-icon">📦</span> Nappan Box
+  </a>
+  <a class="nav-item nav-fitbar" href="nappan-fitbar.html">
+    <span class="nav-item-icon">💪</span> Fit Bar
+  </a>
+  <a class="nav-item nav-eventos" href="nappan-eventos.html">
+    <span class="nav-item-icon">🎉</span> Eventos en Vivo
+  </a>
+</div>
+<button class="nav-float-btn" id="navFloatBtn" onclick="toggleNavModal()" aria-label="Navegación">☰</button>
+
+<!-- LUNCHBOX GALLERY MODAL -->
+<div id="lbGalleryModal" class="gallery-modal">
+  <span class="gallery-close" onclick="closeLunchboxGallery()">&times;</span>
+  <div class="gallery-content-wrapper">
+    <button class="gallery-arrow left" onclick="moveLbGallery(-1)">&#10094;</button>
+    <div class="gallery-slider-container">
+      <div class="gallery-slider" id="lbGallerySlider">
+        <!-- Imágenes inyectadas vía JS al abrir -->
+      </div>
+    </div>
+    <button class="gallery-arrow right" onclick="moveLbGallery(1)">&#10095;</button>
+  </div>
+</div>
+
+<script>
+  // --- Lógica de Galería On-Demand ---
+  let lbGalleryCurrentIdx = 0;
+  let lbGalleryLoaded = false;
+  // Reemplaza estas URLs con tus fotos reales luego
+  const lbGalleryImages = [
+    'https://placehold.co/800x1000/2D1B0E/FFF8ED?text=Foto+1',
+    'https://placehold.co/800x1000/DAA520/FFF8ED?text=Foto+2',
+    'https://placehold.co/800x1000/FF8C42/FFF8ED?text=Foto+3',
+    'https://placehold.co/800x1000/FFB3C6/1A1008?text=Foto+4',
+    'https://placehold.co/800x1000/A8E6CF/1A1008?text=Foto+5',
+    'https://placehold.co/800x1000/FF6B6B/FFF8ED?text=Foto+6',
+    'https://placehold.co/800x1000/FFD93D/2D1B0E?text=Foto+7'
+  ];
+
+  function openLunchboxGallery() {
+    const modal = document.getElementById('lbGalleryModal');
+    const slider = document.getElementById('lbGallerySlider');
+    
+    if (!lbGalleryLoaded) {
+      // Carga perezosa (Lazy Load) solo al abrir
+      lbGalleryImages.forEach(src => {
+        const slide = document.createElement('div');
+        slide.className = 'gallery-slide';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Ejemplo Lunchbox';
+        slide.appendChild(img);
+        slider.appendChild(slide);
+      });
+      lbGalleryLoaded = true;
+    }
+    
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+    updateLbGalleryPosition();
+  }
+
+  function closeLunchboxGallery() {
+    document.getElementById('lbGalleryModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function moveLbGallery(dir) {
+    lbGalleryCurrentIdx += dir;
+    if (lbGalleryCurrentIdx < 0) lbGalleryCurrentIdx = lbGalleryImages.length - 1;
+    if (lbGalleryCurrentIdx >= lbGalleryImages.length) lbGalleryCurrentIdx = 0;
+    updateLbGalleryPosition();
+  }
+
+  function updateLbGalleryPosition() {
+    const slider = document.getElementById('lbGallerySlider');
+    slider.style.transform = `translateX(-${lbGalleryCurrentIdx * 100}%)`;
+  }
+  
+  // Cerrar con tecla ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLunchboxGallery();
+  });
+</script>
+
+<script>
+  function toggleNavModal() {
+    document.getElementById('navModal').classList.toggle('open');
+    document.getElementById('navOverlay').classList.toggle('open');
+    document.getElementById('navFloatBtn').classList.toggle('open');
+  }
+</script>
+</body>
+</html>
