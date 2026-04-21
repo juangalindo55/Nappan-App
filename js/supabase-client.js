@@ -103,39 +103,50 @@ async function saveOrder(orderPayload) {
       p_discount_amount: orderPayload.discount_amount || 0,
       p_shipping_cost: orderPayload.shipping_cost || 0,
       p_total: orderPayload.total || 0,
-      p_whatsapp_sent: orderPayload.whatsapp_sent || true,
+      p_whatsapp_sent: orderPayload.whatsapp_sent !== undefined ? orderPayload.whatsapp_sent : true,
       p_notes: orderPayload.notes || null,
-      p_raw_cart: orderPayload.raw_cart || {},
+      p_raw_cart: typeof orderPayload.raw_cart === 'string' ? JSON.parse(orderPayload.raw_cart) : (orderPayload.raw_cart || {}),
       p_membership_tier: orderPayload.membership_tier || 'individual'
     });
 
     if (orderError) {
       console.error('❌ Order insert failed:', orderError);
+      if (orderError.message) console.error('Error Message:', orderError.message);
+      if (orderError.details) console.error('Error Details:', orderError.details);
       return null;
     }
 
-    console.log('✓ Order saved:', order.order_number);
+    if (!order || !order.id) {
+      console.error('❌ Order insert succeeded but returned no data/ID:', order);
+      return null;
+    }
+
+    console.log('✓ Order saved:', order.order_number || order.id);
 
     let customerSyncError = null;
 
     if (cleanPhone) {
-      const customerSync = await syncCustomerFromOrder(order.id, orderPayload, order.created_at);
-      customerSyncError = customerSync.error;
+      try {
+        const customerSync = await syncCustomerFromOrder(order.id, orderPayload, order.created_at);
+        customerSyncError = customerSync.error;
 
-      if (customerSyncError) {
-        console.error('❌ Customer sync failed after order insert:', customerSyncError);
-      } else {
-        console.log('✓ Customer synced for phone:', cleanPhone);
+        if (customerSyncError) {
+          console.error('❌ Customer sync failed after order insert:', customerSyncError);
+        } else {
+          console.log('✓ Customer synced for phone:', cleanPhone);
+        }
+      } catch (syncErr) {
+        console.warn('⚠️ Non-fatal error during customer sync:', syncErr);
       }
     }
 
     return {
       order_id: order.id,
-      order_number: order.order_number,
+      order_number: order.order_number || 'N/A',
       customer_synced: !customerSyncError
     };
   } catch (error) {
-    console.error('❌ saveOrder error:', error);
+    console.error('❌ saveOrder unexpected error:', error);
     return null;
   }
 }

@@ -723,14 +723,15 @@ _*Recuerda separar con el 50% de anticipo_ 🙌`;
         total: total,
         whatsapp_sent: true,
         notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Personaje: ${character}. ${desc ? 'Detalles: ' + desc + '. ' : ''}${notes || ''}`,
-        raw_cart: JSON.stringify({
+        membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
+        raw_cart: {
           type: 'normal',
           character,
           description: desc,
           extras: hasExtra ? extraQty : 0,
           base_price: nappaBoxPrice,
           extra_price: hasExtra ? extraQty * nbExtraPrice : 0
-        })
+        }
       });
 
       if (!saveResult) {
@@ -835,14 +836,14 @@ _*Recuerda separar con el 50% de anticipo_ 🙌
         whatsapp_sent: true,
         notes: `${forWho ? 'Para: ' + forWho + '. ' : ''}Diseño: ${design}. ${ref ? 'Referencia: ' + ref + '. ' : ''}${notes || ''}`,
         membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
-        raw_cart: JSON.stringify({
+        raw_cart: {
           type: 'premium',
           design,
           reference: ref,
           extras: hasExtra ? extraQty : 0,
           base_price: premiumBoxPrice,
-          extra_price: hasExtra ? extraQty * pmExtraPrice : 0
-        })
+          extra_price: hasExtra ? extraQty * pbExtraPrice : 0
+        }
       });
 
       if (!saveResult) {

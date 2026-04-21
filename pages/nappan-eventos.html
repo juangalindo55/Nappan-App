@@ -336,22 +336,21 @@
       delivery_address: location,
       whatsapp_sent: true,
       notes: `Temática: ${theme}. ${notes || ''}`,
-      raw_cart: JSON.stringify({
+      raw_cart: {
         eventType: type,
         guests,
         location,
         theme
-      })
+      }
     });
 
     if (!saveResult) {
       console.warn('Order save failed before WhatsApp handoff');
-      showToast('No se pudo guardar tu pedido. Intenta de nuevo');
+      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo');
       return;
     }
 
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
   }
 
   // Min date = 14 days from today

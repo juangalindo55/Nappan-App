@@ -199,38 +199,6 @@
     </div>
   </section>
 
-  <!-- COMBOS SECTION -->
-  <section class="product-section combos-section">
-    <div class="section-header">
-      <span class="section-icon">🛍️</span>
-      <h2>Combos</h2>
-      <p class="section-subtitle">Ahorra más comprando combo</p>
-    </div>
-
-    <div class="combos-grid">
-      <div class="combo-card combo-fit">
-        <div class="combo-icon">☕</div>
-        <h3>Combo Fit</h3>
-        <p class="combo-items">☕ Coffee + 🥞 Pancakes</p>
-        <div class="combo-price" id="price-FITBAR-COMBO-FIT">$135</div>
-        <div class="product-footer">
-          <input type="number" id="qty-combo-fit" class="qty-input" value="1" min="1">
-          <button class="add-btn combo-btn" onclick="addToCartShot('Combo Fit', 135, 'qty-combo-fit')">+ Agregar</button>
-        </div>
-      </div>
-
-      <div class="combo-card combo-shots">
-        <div class="combo-icon">🍹</div>
-        <h3>Combo Shots</h3>
-        <p class="combo-items">🍹 Shots + 🥞 Pancakes</p>
-        <div class="combo-price" id="price-FITBAR-COMBO-SHOTS">$75</div>
-        <div class="product-footer">
-          <input type="number" id="qty-combo-shots" class="qty-input" value="1" min="1">
-          <button class="add-btn combo-btn" onclick="addToCartShot('Combo Shots', 75, 'qty-combo-shots')">+ Agregar</button>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- RESUMEN DE PEDIDO -->
   <div class="order-summary">
@@ -333,9 +301,7 @@
             'FITBAR-ENERGY-BOOST': { elId: 'price-FITBAR-ENERGY-BOOST', name: 'Energy Boost' },
             'FITBAR-GOLDEN-POWER': { elId: 'price-FITBAR-GOLDEN-POWER', name: 'Golden Power' },
             'FITBAR-POWER-PANCAKES': { elId: 'price-FITBAR-POWER-PANCAKES', name: 'Power Pancakes' },
-            'FITBAR-PROTEIN-MINIS': { elId: 'price-FITBAR-PROTEIN-MINIS', name: 'Protein Minis' },
-            'FITBAR-COMBO-FIT': { elId: 'price-FITBAR-COMBO-FIT', name: 'Combo Fit' },
-            'FITBAR-COMBO-SHOTS': { elId: 'price-FITBAR-COMBO-SHOTS', name: 'Combo Shots' }
+            'FITBAR-PROTEIN-MINIS': { elId: 'price-FITBAR-PROTEIN-MINIS', name: 'Protein Minis' }
           };
 
           const mapping = skuMap[dbProduct.sku];
@@ -365,9 +331,7 @@
     'Energy Boost': 29,
     'Golden Power': 29,
     'Power Pancakes': 90,
-    'Protein Minis': 55,
-    'Combo Fit': 135,
-    'Combo Shots': 75
+    'Protein Minis': 55
   };
 
   loadDynamicPrices();
@@ -401,9 +365,7 @@
       'Cold Brew': '../images/cold-brew.webp',
       'Black Coffee': '../images/black-coffee.webp',
       'Power Pancakes': null,
-      'Protein Minis': '../images/Protein Minipancakes.webp',
-      'Combo Fit': null,
-      'Combo Shots': null
+      'Protein Minis': '../images/Protein Minipancakes.webp'
     };
 
     const image = imagePath || productImages[productName] || null;
