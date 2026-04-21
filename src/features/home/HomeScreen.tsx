@@ -9,7 +9,7 @@ import { ProductGrid } from './components/ProductGrid'
 import { useHomeData } from './hooks/useHomeData'
 
 export default function HomeScreen() {
-  const { featuredProduct, greeting, products } = useHomeData()
+  const { featuredProduct, greeting, products, loading, error } = useHomeData()
 
   return (
     <div
@@ -22,18 +22,42 @@ export default function HomeScreen() {
       <HomeTopBar />
       <HomeGreeting greeting={greeting} />
 
-      {featuredProduct ? (
-        <div className="px-4 mb-6">
-          <FeaturedProductCard
-            key={featuredProduct.id}
-            product={featuredProduct}
-          />
+      {error ? (
+        <div className="mx-4 rounded-lg border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
+          {error}
         </div>
       ) : null}
 
-      <HomeSectionHeader />
-      <ProductGrid products={products} />
-      <EventPromo />
+      {loading ? (
+        <>
+          <div className="px-4 mb-6">
+            <div className="h-40 rounded-lg bg-[#181209] animate-pulse" />
+          </div>
+          <div className="px-4">
+            <div className="h-8 w-32 bg-[#181209] rounded mb-4 animate-pulse" />
+            <div className="grid grid-cols-1 gap-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-32 rounded-lg bg-[#181209] animate-pulse" />
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {featuredProduct ? (
+            <div className="px-4 mb-6">
+              <FeaturedProductCard
+                key={featuredProduct.id}
+                product={featuredProduct}
+              />
+            </div>
+          ) : null}
+
+          <HomeSectionHeader />
+          <ProductGrid products={products} />
+          <EventPromo />
+        </>
+      )}
     </div>
   )
 }

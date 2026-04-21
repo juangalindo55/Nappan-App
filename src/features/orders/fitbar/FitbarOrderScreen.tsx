@@ -181,6 +181,7 @@ export default function FitbarOrderScreen() {
 
     setError('')
     setFeedback('La selección completa se agregó como un solo artículo al carrito.')
+    setQuantities({})
   }
 
   return (

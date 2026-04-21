@@ -8,7 +8,7 @@ type CustomerData = {
     phone: string
 }
 
-export async function submitOrder(cart: Cart, customer: CustomerData) {
+export async function submitOrder(cart: Cart, customer: CustomerData): Promise<string> {
     const supabase = getSupabaseClient()
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`
@@ -31,5 +31,5 @@ export async function submitOrder(cart: Cart, customer: CustomerData) {
         throw new Error(error.message)
     }
 
-    return true
+    return orderNumber
 }

@@ -46,7 +46,7 @@ const categories: CategoryCard[] = [
     description: 'Estación de pancake art preparada en vivo para tus invitados.',
     constraints: 'Servicio por cotización · sin carrito',
     cta: 'Cotizar evento',
-    href: '/menu?category=live-event',
+    href: '/order/live-event',
   },
 ]
 

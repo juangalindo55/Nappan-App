@@ -7,7 +7,7 @@ export const PRODUCTS: Product[] = [
     name: 'Nappan Box',
     subtitle: 'Ultra realismo personalizado',
     tag: 'Exclusivo',
-    href: '/products/nappanbox',
+    href: '/order/artistic-box',
     categoryId: 'nappan-box',
     visual: {
       gradient: 'radial-gradient(ellipse at 38% 42%, #1A3D28 0%, #0A1E14 55%, #040E09 100%)',
@@ -23,7 +23,7 @@ export const PRODUCTS: Product[] = [
     name: 'Lunch Box',
     subtitle: 'Cajas artísticas para eventos',
     tag: 'Eventos',
-    href: '/products/lunchbox',
+    href: '/order/lunchbox',
     categoryId: 'lunch-box',
     visual: {
       gradient: 'radial-gradient(ellipse at 42% 38%, #3A1220 0%, #1C0810 55%, #0C0408 100%)',
@@ -39,7 +39,7 @@ export const PRODUCTS: Product[] = [
     name: 'Fit Bar',
     subtitle: 'Eat clean. Feel strong.',
     tag: 'Proteína',
-    href: '/products/fitbar',
+    href: '/order/fitbar',
     categoryId: 'fit-bar',
     visual: {
       gradient: 'radial-gradient(ellipse at 55% 35%, #3A2210 0%, #1C1008 55%, #0C0804 100%)',
@@ -55,7 +55,7 @@ export const PRODUCTS: Product[] = [
     name: 'Eventos',
     subtitle: 'Experiencia gastronómica en vivo',
     tag: 'Premium',
-    href: '/products/eventos',
+    href: '/order/live-event',
     categoryId: 'events',
     visual: {
       gradient: 'radial-gradient(ellipse at 48% 42%, #251040 0%, #120820 55%, #080410 100%)',

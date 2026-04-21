@@ -201,6 +201,7 @@ export default function LunchboxConfiguratorScreen() {
     setAddedMessage(
       `${draft.quantity} ${variants[draft.variant].label} agregadas al carrito.`,
     )
+    setDraft(initialDraft)
   }
 
   return (

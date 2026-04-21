@@ -2,10 +2,12 @@
 
 import Link from "next/link"
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useCartStore } from "@/store/cart.store"
 import { useConfig } from "@/hooks/useConfig"
 import type { CartExtra, CartItem } from "@/domain/cart.domain"
 import { loadCustomerProfileSession } from "@/lib/customer-profile-session"
+import BottomNav from "@/components/BottomNav"
 
 type ConfigExtra = {
     id?: string
@@ -56,6 +58,7 @@ function buildAvailableExtras(item: CartItem, rawExtras: ConfigExtra[]) {
 }
 
 export default function CartPage() {
+    const router = useRouter()
     const items = useCartStore((state) => state.cart.items)
     const summary = useCartStore((state) => state.cart.summary)
     const removeItem = useCartStore((state) => state.removeItem)
@@ -69,8 +72,12 @@ export default function CartPage() {
     const [quoteLoading, setQuoteLoading] = useState(false)
     const [discountPercent] = useState<number>(() => {
         const stored = loadCustomerProfileSession()
-        const nextDiscount = stored?.discountPercent ?? 0
-        return nextDiscount > 0 ? nextDiscount : 0
+        const pct = stored?.discountPercent ?? 0
+        return pct > 0 ? pct : 0
+    })
+    const [hasTier] = useState<boolean>(() => {
+        const stored = loadCustomerProfileSession()
+        return stored?.tierName != null
     })
 
     const extrasBySku = useMemo(() => config?.extras ?? {}, [config])
@@ -117,6 +124,7 @@ export default function CartPage() {
     }
 
     return (
+        <>
         <main className="min-h-dvh bg-[#0C0806] px-4 pb-32 pt-5 text-[#F0E4CC]">
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
                 <header className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
@@ -148,6 +156,20 @@ export default function CartPage() {
                     </section>
                 ) : (
                     <>
+                        {!hasTier ? (
+                            <div className="flex items-center justify-between gap-3 rounded-lg border border-[#E8A420]/10 bg-[#181209] px-4 py-3">
+                                <p className="text-sm text-[#F0E4CC]/70">
+                                    ¿Tienes descuento de membresía?
+                                </p>
+                                <Link
+                                    href="/profile"
+                                    className="shrink-0 rounded-md border border-[#E8A420]/25 px-3 py-1.5 text-xs font-semibold text-[#E8A420] transition active:scale-[0.99]"
+                                >
+                                    Ver perfil →
+                                </Link>
+                            </div>
+                        ) : null}
+
                         <section className="space-y-3">
                             {items.map((item) => {
                                 const availableExtras = buildAvailableExtras(
@@ -265,8 +287,9 @@ export default function CartPage() {
                                 </Link>
                                 <button
                                     type="button"
-                                    className="flex-1 rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99]"
-                                    disabled={loading}
+                                    onClick={() => router.push('/checkout')}
+                                    className="flex-1 rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99] disabled:opacity-60"
+                                    disabled={loading || items.length === 0}
                                 >
                                     {loading ? "Cargando..." : `Continuar${quotePrice !== null ? ` · $${totalWithShipping.toLocaleString('es-MX')}` : ''}`}
                                 </button>
@@ -276,6 +299,8 @@ export default function CartPage() {
                 )}
             </div>
         </main>
+        <BottomNav />
+        </>
     )
 }
 
@@ -326,6 +351,16 @@ function CartItemEditable({
                     <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/60">
                         Base: ${item.base_price.toLocaleString("es-MX")} · Cantidad: {item.quantity}
                     </p>
+                    {item.type === 'artistic' && (item.config as { ideaText?: string; designLink?: string }).ideaText && (
+                        <p className="mt-1 truncate text-xs text-[#F0E4CC]/50">
+                            Diseño: {((item.config as { ideaText?: string }).ideaText || '').substring(0, 40)}…
+                        </p>
+                    )}
+                    {item.type === 'artistic' && (item.config as { ideaText?: string; designLink?: string }).designLink && (
+                        <p className="mt-1 truncate text-xs text-[#F0E4CC]/50">
+                            Ref: {((item.config as { designLink?: string }).designLink || '').substring(0, 40)}…
+                        </p>
+                    )}
                 </div>
 
                 <button
@@ -337,38 +372,49 @@ function CartItemEditable({
                 </button>
             </div>
 
-            <div className="mt-4 flex items-center gap-2">
-                <button
-                    type="button"
-                    onClick={() => onQuantityChange(Math.max(1, item.quantity - 1))}
-                    className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
-                    aria-label="Disminuir cantidad"
-                >
-                    -
-                </button>
+            {item.sku === 'fitbar-selection' ? (
+                <div className="mt-4 flex items-center justify-between gap-3">
+                    <p className="text-sm text-[#F0E4CC]/60">
+                        Selección de barra bienestar · cantidad fija
+                    </p>
+                    <p className="text-lg font-bold text-[#E8A420]">
+                        ${itemTotal.toLocaleString("es-MX")}
+                    </p>
+                </div>
+            ) : (
+                <div className="mt-4 flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => onQuantityChange(Math.max(1, item.quantity - 1))}
+                        className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                        aria-label="Disminuir cantidad"
+                    >
+                        -
+                    </button>
 
-                <input
-                    type="number"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(event) => onQuantityChange(Math.max(1, Number(event.target.value) || 1))}
-                    className="h-11 min-w-0 flex-1 rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-center text-base font-bold text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
-                    aria-label="Cantidad del producto"
-                />
+                    <input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(event) => onQuantityChange(Math.max(1, Number(event.target.value) || 1))}
+                        className="h-11 min-w-0 flex-1 rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-center text-base font-bold text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
+                        aria-label="Cantidad del producto"
+                    />
 
-                <button
-                    type="button"
-                    onClick={() => onQuantityChange(item.quantity + 1)}
-                    className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
-                    aria-label="Aumentar cantidad"
-                >
-                    +
-                </button>
+                    <button
+                        type="button"
+                        onClick={() => onQuantityChange(item.quantity + 1)}
+                        className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                        aria-label="Aumentar cantidad"
+                    >
+                        +
+                    </button>
 
-                <p className="ml-auto text-lg font-bold text-[#E8A420]">
-                    ${itemTotal.toLocaleString("es-MX")}
-                </p>
-            </div>
+                    <p className="ml-auto text-lg font-bold text-[#E8A420]">
+                        ${itemTotal.toLocaleString("es-MX")}
+                    </p>
+                </div>
+            )}
 
             <div className="mt-4">
                 <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">

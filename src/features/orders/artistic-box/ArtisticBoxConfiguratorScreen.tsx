@@ -148,6 +148,7 @@ export default function ArtisticBoxConfiguratorScreen() {
       })) as CartExtra[],
     })
     setAddedMessage(`${draft.quantity} ${variants[draft.variant].label} agregada al carrito.`)
+    setDraft(initialDraft)
   }
 
   return (

@@ -1,6 +1,7 @@
 // /store/cart.store.ts
 
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 import { Cart, CartItem, CartExtra } from "@/domain/cart.domain"
 import { calculateCart } from "@/domain/cart.pricing"
 import { validateCart } from "@/domain/cart.validators"
@@ -21,18 +22,22 @@ type CartStore = {
     reset: () => void
 }
 
-export const useCartStore = create<CartStore>((set, get) => ({
-    cart: {
-        version: "v1",
-        type: "mixed",
-        items: [],
-        summary: {
-            subtotal: 0,
-            extras_total: 0,
-            shipping: 0,
-            total: 0
-        }
-    },
+const emptyCart: Cart = {
+    version: "v1",
+    type: "mixed",
+    items: [],
+    summary: {
+        subtotal: 0,
+        extras_total: 0,
+        shipping: 0,
+        total: 0
+    }
+}
+
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+    cart: emptyCart,
 
     addItem: (item) => {
         const newItem = { ...item, id: uuid() }
@@ -112,4 +117,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
                 }
             }
         })
-}))
+    }),
+    {
+      name: 'nappan-cart'
+    }
+  )
+)

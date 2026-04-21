@@ -120,6 +120,13 @@ export default function ProfileScreen() {
 
   async function handleLookup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const digitsOnly = phone.replace(/\D/g, '')
+    if (digitsOnly.length < 10) {
+      setError("Ingresa un número de teléfono válido (mínimo 10 dígitos).")
+      return
+    }
+
     setLoading(true)
     setError("")
     setLookupDone(false)
@@ -157,6 +164,18 @@ export default function ProfileScreen() {
 
   async function handleCreateProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const digitsOnly = phone.replace(/\D/g, '')
+    if (digitsOnly.length < 10) {
+      setError("Ingresa un número de teléfono válido (mínimo 10 dígitos).")
+      return
+    }
+
+    if (!draftName.trim()) {
+      setError("Ingresa tu nombre para continuar.")
+      return
+    }
+
     setLoading(true)
     setError("")
 
