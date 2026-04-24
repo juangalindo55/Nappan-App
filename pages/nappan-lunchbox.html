@@ -995,9 +995,6 @@
     </div>
     <button class="gallery-arrow right" onclick="moveLbGallery(1)">&#10095;</button>
   </div>
-  <div class="gallery-dots" id="lbGalleryDots">
-    <!-- Dots inyectados vía JS al abrir -->
-  </div>
 </div>
 
 <script>
@@ -1022,7 +1019,6 @@
   async function openLunchboxGallery() {
     const modal = document.getElementById('lbGalleryModal');
     const slider = document.getElementById('lbGallerySlider');
-    const dotsContainer = document.getElementById('lbGalleryDots');
 
     if (!lbGalleryLoaded) {
       // Cargar imágenes desde Supabase
@@ -1046,18 +1042,6 @@
         img.alt = `Ejemplo Lunchbox ${idx + 1}`;
         slide.appendChild(img);
         slider.appendChild(slide);
-      });
-
-      // Crear dots de navegación
-      lbGalleryImages.forEach((_, idx) => {
-        const dot = document.createElement('span');
-        dot.className = 'gallery-dot';
-        if (idx === 0) dot.classList.add('active');
-        dot.onclick = () => {
-          lbGalleryCurrentIdx = idx;
-          updateLbGalleryPosition();
-        };
-        dotsContainer.appendChild(dot);
       });
 
       // Agregar soporte para swipe/touch
@@ -1113,12 +1097,6 @@
     if (progress) {
       progress.textContent = `Foto ${lbGalleryCurrentIdx + 1} de ${lbGalleryImages.length}`;
     }
-
-    // Actualizar dots activos
-    const dots = document.querySelectorAll('.gallery-dot');
-    dots.forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === lbGalleryCurrentIdx);
-    });
   }
 
   // Cerrar con tecla ESC
