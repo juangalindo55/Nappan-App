@@ -894,36 +894,27 @@
     msg += `💰 *TOTAL: $${total} MXN*\n`;
     msg += `\n¡Gracias por tu pedido! 🐻✨`;
 
-    if (!window.NappanDB) {
-      showToast('❌ No se pudo conectar para guardar tu pedido. Intenta de nuevo.');
-      return;
-    }
-
-    const saveResult = await NappanDB.saveOrder({
-      section: 'lunchbox',
-      customer_name: name,
-      customer_phone: phone || null,
-      delivery_date: date,
-      delivery_time: time,
-      delivery_address: notes,
-      subtotal: subtotal,
-      discount_amount: discountAmount,
-      shipping_cost: shippingCost,
-      total: total,
-      whatsapp_sent: true,
-      notes: notes,
-      membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
-      raw_cart: JSON.parse(JSON.stringify(cart))
-    });
-
-    if (!saveResult) {
-      console.warn('Order save failed before WhatsApp handoff');
-      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo.');
-      return;
-    }
-
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
+
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'lunchbox',
+        customer_name: name,
+        customer_phone: phone || null,
+        delivery_date: date,
+        delivery_time: time,
+        delivery_address: notes,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        shipping_cost: shippingCost,
+        total: total,
+        whatsapp_sent: true,
+        notes: notes,
+        membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
+        raw_cart: JSON.parse(JSON.stringify(cart))
+      }).catch(err => console.warn('Order save failed:', err));
+    }
   }
 
   function formatDate(dateStr) {
@@ -994,14 +985,18 @@
 <!-- LUNCHBOX GALLERY MODAL -->
 <div id="lbGalleryModal" class="gallery-modal">
   <span class="gallery-close" onclick="closeLunchboxGallery()">&times;</span>
+  <div class="gallery-progress" id="lbGalleryProgress">Foto 1 de 7</div>
   <div class="gallery-content-wrapper">
     <button class="gallery-arrow left" onclick="moveLbGallery(-1)">&#10094;</button>
-    <div class="gallery-slider-container">
+    <div class="gallery-slider-container" id="lbGalleryContainer">
       <div class="gallery-slider" id="lbGallerySlider">
         <!-- Imágenes inyectadas vía JS al abrir -->
       </div>
     </div>
     <button class="gallery-arrow right" onclick="moveLbGallery(1)">&#10095;</button>
+  </div>
+  <div class="gallery-dots" id="lbGalleryDots">
+    <!-- Dots inyectados vía JS al abrir -->
   </div>
 </div>
 
@@ -1009,6 +1004,9 @@
   // --- Lógica de Galería On-Demand ---
   let lbGalleryCurrentIdx = 0;
   let lbGalleryLoaded = false;
+  let lbGalleryTouchStartX = 0;
+  let lbGalleryTouchEndX = 0;
+
   // Reemplaza estas URLs con tus fotos reales luego
   const lbGalleryImages = [
     'https://placehold.co/800x1000/2D1B0E/FFF8ED?text=Foto+1',
@@ -1023,29 +1021,67 @@
   function openLunchboxGallery() {
     const modal = document.getElementById('lbGalleryModal');
     const slider = document.getElementById('lbGallerySlider');
-    
+    const dotsContainer = document.getElementById('lbGalleryDots');
+
     if (!lbGalleryLoaded) {
       // Carga perezosa (Lazy Load) solo al abrir
-      lbGalleryImages.forEach(src => {
+      lbGalleryImages.forEach((src, idx) => {
         const slide = document.createElement('div');
         slide.className = 'gallery-slide';
         const img = document.createElement('img');
         img.src = src;
-        img.alt = 'Ejemplo Lunchbox';
+        img.alt = `Ejemplo Lunchbox ${idx + 1}`;
         slide.appendChild(img);
         slider.appendChild(slide);
       });
+
+      // Crear dots de navegación
+      lbGalleryImages.forEach((_, idx) => {
+        const dot = document.createElement('span');
+        dot.className = 'gallery-dot';
+        if (idx === 0) dot.classList.add('active');
+        dot.onclick = () => {
+          lbGalleryCurrentIdx = idx;
+          updateLbGalleryPosition();
+        };
+        dotsContainer.appendChild(dot);
+      });
+
+      // Agregar soporte para swipe/touch
+      const container = document.getElementById('lbGalleryContainer');
+      container.addEventListener('touchstart', (e) => {
+        lbGalleryTouchStartX = e.changedTouches[0].screenX;
+      }, false);
+
+      container.addEventListener('touchend', (e) => {
+        lbGalleryTouchEndX = e.changedTouches[0].screenX;
+        handleLbSwipe();
+      }, false);
+
       lbGalleryLoaded = true;
     }
-    
+
     modal.classList.add('open');
-    document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+    document.body.style.overflow = 'hidden';
     updateLbGalleryPosition();
   }
 
   function closeLunchboxGallery() {
     document.getElementById('lbGalleryModal').classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  function handleLbSwipe() {
+    const swipeThreshold = 50;
+    const diff = lbGalleryTouchStartX - lbGalleryTouchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        moveLbGallery(1);
+      } else {
+        moveLbGallery(-1);
+      }
+    }
   }
 
   function moveLbGallery(dir) {
@@ -1058,8 +1094,20 @@
   function updateLbGalleryPosition() {
     const slider = document.getElementById('lbGallerySlider');
     slider.style.transform = `translateX(-${lbGalleryCurrentIdx * 100}%)`;
+
+    // Actualizar indicador de progreso
+    const progress = document.getElementById('lbGalleryProgress');
+    if (progress) {
+      progress.textContent = `Foto ${lbGalleryCurrentIdx + 1} de ${lbGalleryImages.length}`;
+    }
+
+    // Actualizar dots activos
+    const dots = document.querySelectorAll('.gallery-dot');
+    dots.forEach((dot, idx) => {
+      dot.classList.toggle('active', idx === lbGalleryCurrentIdx);
+    });
   }
-  
+
   // Cerrar con tecla ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLunchboxGallery();
