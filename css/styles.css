@@ -802,6 +802,10 @@ body.page-lunchbox .art-options {
 
 body.page-lunchbox .art-opt {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     padding: 10px 6px;
     border-radius: 14px;
