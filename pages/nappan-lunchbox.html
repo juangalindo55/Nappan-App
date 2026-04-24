@@ -159,9 +159,9 @@
             <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
             <div class="art-name">Capibara</div>
           </div>
-          <div class="art-opt" data-art="Pollito" onclick="selectArt(1, this)">
-            <span class="art-emoji">🐥</span>
-            <div class="art-name">Pollito</div>
+          <div class="art-opt" data-art="Super Mario" onclick="selectArt(1, this)">
+            <img src="../images/mario.webp" style="width:36px;height:36px;object-fit:contain;" alt="Super Mario"/>
+            <div class="art-name">Super Mario</div>
           </div>
         </div>
       </div>
@@ -245,9 +245,9 @@
             <img src="../images/pancakeart-capibara.png" style="width:36px;height:36px;object-fit:contain;" alt="Capibara"/>
             <div class="art-name">Capibara</div>
           </div>
-          <div class="art-opt" data-art="Pollito" onclick="selectArt(2, this)">
-            <span class="art-emoji">&#x1F425;</span>
-            <div class="art-name">Pollito</div>
+          <div class="art-opt" data-art="Super Mario" onclick="selectArt(2, this)">
+            <img src="../images/mario.webp" style="width:36px;height:36px;object-fit:contain;" alt="Super Mario"/>
+            <div class="art-name">Super Mario</div>
           </div>
         </div>
       </div>
@@ -326,6 +326,7 @@
   let cart = [];
   let cartOpen = false;
   const capybaraImg = '../images/pancakeart-capibara.png';
+  const marioImg = '../images/mario.webp';
 
   // ── Estado de envío ────────────────────────────────────────
   let shippingCost  = 0;    // 0 = no calculado / fuera de zona
@@ -614,7 +615,7 @@
               ${
                 item.art === 'Capibara' ? `<img src="${capybaraImg}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;border-radius:50%;margin-right:4px;">` :
                 item.art === 'Osito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐻</span>` :
-                item.art === 'Pollito' ? `<span style="font-size:16px;vertical-align:middle;margin-right:4px;">🐥</span>` : ''
+                item.art === 'Super Mario' ? `<img src="${marioImg}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;border-radius:50%;margin-right:4px;">` : ''
               }${item.art} · 🍓 ${item.fruitType} · ${extrasText}
             </div>
             <div class="item-bottom">
