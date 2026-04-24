@@ -1006,9 +1006,10 @@
   let lbGalleryLoaded = false;
   let lbGalleryTouchStartX = 0;
   let lbGalleryTouchEndX = 0;
+  let lbGalleryImages = [];
 
-  // Reemplaza estas URLs con tus fotos reales luego
-  const lbGalleryImages = [
+  // Placeholders como fallback si no hay fotos en la DB
+  const lbGalleryPlaceholders = [
     'https://placehold.co/800x1000/2D1B0E/FFF8ED?text=Foto+1',
     'https://placehold.co/800x1000/DAA520/FFF8ED?text=Foto+2',
     'https://placehold.co/800x1000/FF8C42/FFF8ED?text=Foto+3',
@@ -1018,12 +1019,24 @@
     'https://placehold.co/800x1000/FFD93D/2D1B0E?text=Foto+7'
   ];
 
-  function openLunchboxGallery() {
+  async function openLunchboxGallery() {
     const modal = document.getElementById('lbGalleryModal');
     const slider = document.getElementById('lbGallerySlider');
     const dotsContainer = document.getElementById('lbGalleryDots');
 
     if (!lbGalleryLoaded) {
+      // Cargar imágenes desde Supabase
+      if (window.NappanDB) {
+        const dbImages = await window.NappanDB.loadLunchboxGallery();
+        if (dbImages && dbImages.length > 0) {
+          lbGalleryImages = dbImages;
+        } else {
+          lbGalleryImages = lbGalleryPlaceholders;
+        }
+      } else {
+        lbGalleryImages = lbGalleryPlaceholders;
+      }
+
       // Carga perezosa (Lazy Load) solo al abrir
       lbGalleryImages.forEach((src, idx) => {
         const slide = document.createElement('div');

@@ -795,38 +795,27 @@
 
     message += `✨ Pedido generado desde Nappan Fit Edition`;
 
-    if (!window.NappanDB) {
-      showToast('❌ No se pudo conectar para guardar tu pedido', 'warning');
-      return;
-    }
-
-    const saveResult = await NappanDB.saveOrder({
-      section: 'fitbar',
-      customer_name: clientName,
-      customer_phone: clientPhone || null,
-      delivery_date: deliveryDate,
-      delivery_time: deliveryTime,
-      subtotal: subtotal,
-      discount_amount: discountAmount,
-      shipping_cost: shippingCost,
-      total: total,
-      whatsapp_sent: true,
-      notes: specialNotes,
-      membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
-      raw_cart: JSON.parse(JSON.stringify(cartPFB))
-    });
-
-    if (!saveResult) {
-      console.warn('Order save failed before WhatsApp handoff');
-      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo', 'warning');
-      return;
-    }
-
-    // URL de WhatsApp
+    // Abrir WhatsApp primero (dentro del gesto del usuario, antes de cualquier await)
     const whatsappURL = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
-
-    // Abrir WhatsApp
     window.open(whatsappURL, '_blank');
+
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'fitbar',
+        customer_name: clientName,
+        customer_phone: clientPhone || null,
+        delivery_date: deliveryDate,
+        delivery_time: deliveryTime,
+        subtotal: subtotal,
+        discount_amount: discountAmount,
+        shipping_cost: shippingCost,
+        total: total,
+        whatsapp_sent: true,
+        notes: specialNotes,
+        membership_tier: currentCustomer ? currentCustomer.membership_tier : 'individual',
+        raw_cart: JSON.parse(JSON.stringify(cartPFB))
+      }).catch(err => console.warn('Order save failed:', err));
+    }
 
     // Limpiar formulario
     setTimeout(() => {

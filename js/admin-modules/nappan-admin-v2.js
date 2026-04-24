@@ -1016,6 +1016,26 @@
       }
       document.getElementById('galleryContainer').innerHTML = galleryHtml;
 
+      // Load lunchbox gallery
+      const allGallery = await window.NappanDB.loadGalleryPhotos();
+      if (allGallery['lunchbox']) {
+        let lunchboxGalleryHtml = '';
+        lunchboxGalleryHtml += '<div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+        lunchboxGalleryHtml += '<h4 style="margin-bottom: 10px;">Carrusel Lunchbox</h4>';
+        if (allGallery['lunchbox'].images) {
+          allGallery['lunchbox'].images.forEach((img, idx) => {
+            lunchboxGalleryHtml += '<div style="margin-bottom: 10px;">';
+            lunchboxGalleryHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px;">Imagen ' + (idx + 1) + ' URL</label>';
+            lunchboxGalleryHtml += '<input type="text" class="lunchbox-gallery-url" data-event="lunchbox" data-slot="' + (idx + 1) + '" value="' + (img.image_url || '') + '" placeholder="https://... o images/ejemplo.webp" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 12px;">';
+            lunchboxGalleryHtml += '</div>';
+          });
+        }
+        lunchboxGalleryHtml += '</div>';
+        document.getElementById('lunchboxGalleryContainer').innerHTML = lunchboxGalleryHtml;
+      } else {
+        document.getElementById('lunchboxGalleryContainer').innerHTML = '<div class="loading">No hay galería configurada</div>';
+      }
+
       // Load extras
       await loadExtrasForConfig();
     } catch (error) {
@@ -1195,6 +1215,36 @@
 
       if (success) {
         showToast('✓ Galería actualizada', 'success');
+        invalidateCache('config');
+        await loadConfig();
+      } else {
+        showToast('Error guardando algunas fotos', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error.message, 'error');
+    }
+  }
+
+  async function saveLunchboxGallery() {
+    try {
+      const inputs = document.querySelectorAll('.lunchbox-gallery-url');
+      let success = true;
+
+      for (const input of inputs) {
+        const eventType = input.dataset.event;
+        const slot = input.dataset.slot;
+        const imageUrl = input.value.trim() || null;
+
+        const { error } = await window.NappanDB.updateGalleryPhoto(eventType, parseInt(slot), imageUrl);
+
+        if (error) {
+          success = false;
+        }
+      }
+
+      if (success) {
+        showToast('✓ Galería Lunchbox actualizada', 'success');
         invalidateCache('config');
         await loadConfig();
       } else {
@@ -1505,6 +1555,9 @@
           break;
         case 'save-gallery':
           saveGallery();
+          break;
+        case 'save-lunchbox-gallery':
+          saveLunchboxGallery();
           break;
         case 'stats-quick-range':
           setQuickDateRange(actionEl.dataset.range);

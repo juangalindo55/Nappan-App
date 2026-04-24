@@ -285,6 +285,31 @@ async function loadGalleryPhotos() {
   }
 }
 
+// Load lunchbox gallery photos specifically
+async function loadLunchboxGallery() {
+  if (!supabaseClient) return [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('event_gallery')
+      .select('*')
+      .eq('event_type_key', 'lunchbox')
+      .eq('is_active', true)
+      .order('slot', { ascending: true });
+
+    if (error) throw error;
+
+    const urls = [];
+    (data || []).forEach(row => {
+      urls[row.slot - 1] = row.image_url || null;
+    });
+
+    return urls.filter(url => url !== null);
+  } catch (error) {
+    console.error('loadLunchboxGallery failed:', error);
+    return [];
+  }
+}
+
 // Load pricing rules
 async function loadActivePricingRules() {
   if (!supabaseClient) return [];
@@ -704,6 +729,7 @@ const NappanDBAPI = {
   loadProductsWithExtras,
   loadArtOptions,
   loadGalleryPhotos,
+  loadLunchboxGallery,
   loadActivePricingRules,
   findCustomerByPhone,
   signIn,

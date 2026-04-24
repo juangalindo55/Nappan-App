@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../css/styles.css?v=4">
 <!-- Supabase Integration (Phase 1) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js"></script>
 <script src="../js/supabase-client.js"></script>
 <!-- Vercel Speed Insights -->
 <script>
@@ -320,37 +321,28 @@
     }
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `_Esperamos tu cotización personalizada_ ✨`;
-    if (!window.NappanDB) {
-      showToast('No se pudo conectar para guardar tu pedido');
-      return;
-    }
-
-    const saveResult = await NappanDB.saveOrder({
-      section: 'eventos',
-      customer_name: name,
-      customer_phone: phone || null,
-      event_type: type,
-      guest_count: parseInt(guests),
-      delivery_date: date,
-      delivery_time: time,
-      delivery_address: location,
-      whatsapp_sent: true,
-      notes: `Temática: ${theme}. ${notes || ''}`,
-      raw_cart: {
-        eventType: type,
-        guests,
-        location,
-        theme
-      }
-    });
-
-    if (!saveResult) {
-      console.warn('Order save failed before WhatsApp handoff');
-      showToast('❌ No se pudo guardar tu pedido. Intenta de nuevo');
-      return;
-    }
-
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    if (window.NappanDB) {
+      NappanDB.saveOrder({
+        section: 'eventos',
+        customer_name: name,
+        customer_phone: phone || null,
+        event_type: type,
+        guest_count: parseInt(guests),
+        delivery_date: date,
+        delivery_time: time,
+        delivery_address: location,
+        whatsapp_sent: true,
+        notes: `Temática: ${theme}. ${notes || ''}`,
+        raw_cart: {
+          eventType: type,
+          guests,
+          location,
+          theme
+        }
+      }).catch(err => console.warn('Order save failed:', err));
+    }
   }
 
   // Min date = 14 days from today
