@@ -12,8 +12,8 @@ export function HomeTopBar() {
     <div
       className="flex items-center justify-between px-5 anim-up"
       style={{
-        paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
-        paddingBottom: '10px',
+        paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
+        paddingBottom: '12px',
       }}
     >
       <div className="flex items-baseline gap-1.5">
@@ -22,8 +22,8 @@ export function HomeTopBar() {
             fontFamily: 'var(--font-cormorant)',
             fontStyle: 'italic',
             fontWeight: 700,
-            fontSize: '26px',
-            color: '#E8A420',
+            fontSize: '28px',
+            color: '#FFF6E5',
             letterSpacing: '-0.01em',
           }}
         >
@@ -32,7 +32,7 @@ export function HomeTopBar() {
         <span
           style={{
             fontSize: '11px',
-            color: '#5A4A38',
+            color: '#A58B69',
             fontFamily: 'var(--font-dm-sans)',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
@@ -44,20 +44,20 @@ export function HomeTopBar() {
 
       <Link
         href="/cart"
-        className="relative flex h-10 w-10 items-center justify-center rounded-full"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full transition active:scale-95"
         style={{
-          background: '#1A1209',
-          border: '1px solid rgba(232,164,32,0.08)',
+          background: 'rgba(26,18,9,0.92)',
+          border: '1px solid rgba(232,164,32,0.1)',
         }}
         aria-label="Ver carrito"
       >
         <svg
-          width="18"
-          height="18"
+          width="19"
+          height="19"
           viewBox="0 0 24 24"
           fill="none"
           stroke="#F0E4CC"
-          strokeWidth="1.5"
+          strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -66,10 +66,10 @@ export function HomeTopBar() {
           <path d="M16 10a4 4 0 01-8 0" />
         </svg>
         <span
-          className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
+          className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full"
           style={{
             background: '#E8A420',
-            fontSize: '8px',
+            fontSize: '9px',
             fontWeight: 700,
             color: '#0C0806',
           }}

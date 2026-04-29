@@ -16,6 +16,8 @@ export function ProductCard({ delay, product }: ProductCardProps) {
           height: '155px',
           background: product.visual.gradient,
           animationDelay: delay,
+          border: '1px solid rgba(255,255,255,0.05)',
+          boxShadow: '0 18px 40px rgba(0,0,0,0.24)',
         }}
       >
         <div

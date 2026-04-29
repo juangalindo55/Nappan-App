@@ -11,7 +11,12 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
     <Link href={product.href}>
       <div
         className="relative rounded-2xl overflow-hidden anim-scale d1"
-        style={{ height: '270px', background: product.visual.gradient }}
+        style={{
+          minHeight: '280px',
+          background: product.visual.gradient,
+          border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.30)',
+        }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
@@ -26,15 +31,15 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
         <div
           className="absolute bottom-0 left-0 right-0"
           style={{
-            height: '65%',
+            height: '70%',
             background:
-              'linear-gradient(to top, rgba(4,8,6,0.92) 0%, transparent 100%)',
+              'linear-gradient(to top, rgba(4,8,6,0.95) 0%, rgba(4,8,6,0.72) 60%, transparent 100%)',
           }}
         />
 
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <span
-            className="inline-block mb-3 px-2 py-1 rounded-full"
+            className="inline-block mb-3 rounded-full px-2.5 py-1"
             style={{
               fontSize: '10px',
               fontFamily: 'var(--font-dm-sans)',
@@ -54,10 +59,11 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
               fontFamily: 'var(--font-cormorant)',
               fontStyle: 'italic',
               fontWeight: 600,
-              fontSize: '42px',
-              lineHeight: 1.05,
+              fontSize: 'clamp(34px, 7vw, 42px)',
+              lineHeight: 1.02,
               color: '#F0E4CC',
-              marginBottom: '6px',
+              marginBottom: '8px',
+              maxWidth: '10ch',
             }}
           >
             {product.name}
@@ -65,19 +71,20 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
 
           <p
             style={{
-              fontSize: '13px',
+              fontSize: '14px',
               color: 'rgba(240,228,204,0.55)',
               fontFamily: 'var(--font-dm-sans)',
-              marginBottom: '14px',
+              marginBottom: '16px',
+              maxWidth: '22ch',
             }}
           >
             {product.subtitle}
           </p>
 
-          <div className="flex items-center gap-1.5">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E8A420]/18 bg-[#E8A420]/12 px-3 py-2">
             <span
               style={{
-                fontSize: '13px',
+                fontSize: '12px',
                 color: '#E8A420',
                 fontFamily: 'var(--font-dm-sans)',
                 fontWeight: 500,

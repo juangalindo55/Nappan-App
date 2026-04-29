@@ -3,12 +3,13 @@ import { GoldShimmer } from './ProductChrome'
 
 export function EventPromo() {
   return (
-    <div className="px-4 mt-8 anim-up d4">
+    <div className="px-4 mt-10 pb-2 anim-up d4">
       <div
         className="rounded-2xl p-5 relative overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, #1A1209 0%, #0E0907 100%)',
           border: '1px solid rgba(232,164,32,0.08)',
+          boxShadow: '0 18px 50px rgba(0,0,0,0.26)',
         }}
       >
         <GoldShimmer />
@@ -16,7 +17,7 @@ export function EventPromo() {
           style={{
             fontSize: '11px',
             fontFamily: 'var(--font-dm-sans)',
-            color: '#5A4A38',
+            color: '#A58B69',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
             marginBottom: '6px',
@@ -28,16 +29,17 @@ export function EventPromo() {
           style={{
             fontFamily: 'var(--font-cormorant)',
             fontStyle: 'italic',
-            fontSize: '22px',
+            fontSize: '24px',
             color: '#F0E4CC',
-            marginBottom: '14px',
+            marginBottom: '16px',
+            maxWidth: '18ch',
           }}
         >
           Hacemos pancakes artísticos en tu celebración
         </p>
         <Link href="/products/eventos">
           <span
-            className="inline-flex items-center gap-1.5 rounded-lg"
+            className="inline-flex items-center gap-1.5 rounded-full"
             style={{
               padding: '9px 18px',
               background: 'rgba(232,164,32,0.1)',
