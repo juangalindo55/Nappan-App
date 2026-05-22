@@ -8,14 +8,12 @@ import type { CartExtra } from '@/domain/cart.domain'
 type LunchboxVariant = 'lunchbox1' | 'lunchbox2'
 type LunchboxDesign = 'osito' | 'capibara'
 type LunchboxComplement = 'fruta' | 'gelatina'
-type FruitType = 'uva' | 'durazno' | 'fresa'
 type LunchboxExtra = 'salchipulpos' | 'nucolato' | 'croissant'
 
 type LunchboxDraft = {
   variant: LunchboxVariant
   design: LunchboxDesign
   complement: LunchboxComplement
-  fruitType: FruitType | ''
   extras: LunchboxExtra[]
   quantity: number
 }
@@ -40,15 +38,15 @@ const designs: Record<LunchboxDesign, string> = {
   capibara: 'Capibara',
 }
 
-const complements: Record<LunchboxComplement, string> = {
-  fruta: 'Fruta',
-  gelatina: 'Gelatina',
-}
-
-const fruitTypes: Record<FruitType, string> = {
-  uva: 'Uva',
-  durazno: 'Durazno',
-  fresa: 'Fresa',
+const complements: Record<LunchboxComplement, { label: string; description: string }> = {
+  fruta: {
+    label: 'Fruta',
+    description: 'Uva, Durazno y Fresa',
+  },
+  gelatina: {
+    label: 'Gelatina',
+    description: 'Mosaico de colores',
+  },
 }
 
 const extras: Record<LunchboxExtra, { label: string; price: number; allowedVariant: LunchboxVariant | 'both' }> = {
@@ -73,7 +71,6 @@ const initialDraft: LunchboxDraft = {
   variant: 'lunchbox1',
   design: 'osito',
   complement: 'fruta',
-  fruitType: '',
   extras: [],
   quantity: MIN_QUANTITY,
 }
@@ -96,10 +93,6 @@ function getAvailableExtras(variant: LunchboxVariant): CartExtra[] {
 function getValidationError(draft: LunchboxDraft) {
   if (draft.quantity < MIN_QUANTITY) {
     return `El pedido mínimo es de ${MIN_QUANTITY} lunchboxes.`
-  }
-
-  if (draft.complement === 'fruta' && !draft.fruitType) {
-    return 'Elige el tipo de fruta para continuar.'
   }
 
   const invalidExtra = draft.extras.find((extra) => !isExtraAllowed(extra, draft.variant))
@@ -141,7 +134,6 @@ export default function LunchboxConfiguratorScreen() {
     setDraft((current) => ({
       ...current,
       complement,
-      fruitType: complement === 'fruta' ? current.fruitType : '',
     }))
     clearFeedback()
   }
@@ -188,7 +180,6 @@ export default function LunchboxConfiguratorScreen() {
         variant: draft.variant,
         design: draft.design,
         complement: draft.complement,
-        fruitType: draft.fruitType,
         availableExtras: getAvailableExtras(draft.variant),
       },
       includes: [],
@@ -328,33 +319,13 @@ export default function LunchboxConfiguratorScreen() {
             {(Object.keys(complements) as LunchboxComplement[]).map((complement) => (
               <ChoiceButton
                 key={complement}
-                label={complements[complement]}
+                label={complements[complement].label}
+                description={complements[complement].description}
                 selected={draft.complement === complement}
                 onClick={() => updateComplement(complement)}
               />
             ))}
           </div>
-
-          {draft.complement === 'fruta' ? (
-            <div className="mt-3 rounded-md border border-[#E8A420]/10 bg-[#0C0806] p-3">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
-                Tipo de fruta
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {(Object.keys(fruitTypes) as FruitType[]).map((fruitType) => (
-                  <ChoiceButton
-                    key={fruitType}
-                    label={fruitTypes[fruitType]}
-                    selected={draft.fruitType === fruitType}
-                    onClick={() => {
-                      setDraft((current) => ({ ...current, fruitType }))
-                      clearFeedback()
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
         </ConfigSection>
 
         <ConfigSection eyebrow="4" title="Extras">
@@ -454,14 +425,14 @@ export default function LunchboxConfiguratorScreen() {
           <dl className="mt-3 space-y-2 text-sm">
             <SummaryRow label="Caja" value={variants[draft.variant].label} />
             <SummaryRow label="Diseño" value={designs[draft.design]} />
-            <SummaryRow label="Complemento" value={complements[draft.complement]} />
-            {draft.complement === 'fruta' ? (
-              <SummaryRow
-                label="Fruta"
-                value={draft.fruitType ? fruitTypes[draft.fruitType] : 'Pendiente'}
-                muted={!draft.fruitType}
-              />
-            ) : null}
+            <SummaryRow
+              label="Complemento"
+              value={
+                draft.complement === 'fruta'
+                  ? `Fruta (${complements.fruta.description})`
+                  : complements.gelatina.label
+              }
+            />
             <SummaryRow
               label="Extras"
               value={
@@ -500,10 +471,12 @@ function ConfigSection({
 
 function ChoiceButton({
   label,
+  description,
   onClick,
   selected,
 }: {
   label: string
+  description?: string
   onClick: () => void
   selected: boolean
 }) {
@@ -511,13 +484,18 @@ function ChoiceButton({
     <button
       type="button"
       onClick={onClick}
-      className={`min-h-12 rounded-md border px-3 py-2 text-center text-sm font-semibold leading-5 transition active:scale-[0.99] ${
+      className={`flex min-h-[56px] flex-col items-center justify-center rounded-md border px-3 py-2 text-center transition active:scale-[0.99] ${
         selected
           ? 'border-[#E8A420]/75 bg-[#E8A420]/12 text-[#FFF6E5]'
           : 'border-[#E8A420]/10 bg-[#100B07] text-[#F0E4CC]/68'
       }`}
     >
-      {label}
+      <span className="text-sm font-semibold leading-tight">{label}</span>
+      {description ? (
+        <span className="mt-1 text-[10px] leading-tight opacity-60">
+          {description}
+        </span>
+      ) : null}
     </button>
   )
 }

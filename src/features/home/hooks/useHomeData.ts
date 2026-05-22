@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { listProducts } from '@/features/products/product.service'
+import { getProductSnapshot, listProducts } from '@/features/products/product.service'
 import type { Product } from '@/features/products/product.types'
 
 type HomeData = {
@@ -21,30 +21,30 @@ function getGreeting(date = new Date()) {
 }
 
 export function useHomeData(): HomeData {
-  const [products, setProducts] = useState<Product[]>([])
   const [greeting] = useState(() => getGreeting())
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<Product[]>(() => getProductSnapshot())
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false
+    let mounted = true
 
     async function loadProducts() {
       try {
-        setLoading(true)
+        setLoading(products.length === 0)
         setError(null)
-        const nextProducts = await listProducts()
 
-        if (!cancelled) {
-          setProducts(nextProducts)
+        const data = await listProducts()
+
+        if (mounted) {
+          setProducts(data)
         }
       } catch (err) {
-        if (!cancelled) {
-          setError('No pudimos cargar los productos. Intenta recargar la página.')
-          setProducts([])
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'No pudimos cargar los productos.')
         }
       } finally {
-        if (!cancelled) {
+        if (mounted) {
           setLoading(false)
         }
       }
@@ -53,9 +53,9 @@ export function useHomeData(): HomeData {
     loadProducts()
 
     return () => {
-      cancelled = true
+      mounted = false
     }
-  }, [])
+  }, [products.length])
 
   return {
     featuredProduct: products[0] ?? null,

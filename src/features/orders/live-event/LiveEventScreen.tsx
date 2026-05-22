@@ -1,22 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
-import { loadCustomerProfileSession } from '@/lib/customer-profile-session'
+import { useBookingStore } from '@/store/booking.store'
+import { useUserStore } from '@/store/user.store'
 
 export default function LiveEventScreen() {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [guestCount, setGuestCount] = useState('')
-  const [eventDate, setEventDate] = useState('')
+  const profile = useUserStore((state) => state.profile)
+  const liveEventDraft = useBookingStore((state) => state.liveEventDraft)
+  const updateLiveEventDraft = useBookingStore((state) => state.updateLiveEventDraft)
+  const { name, phone, guestCount, eventDate } = liveEventDraft
 
   useEffect(() => {
-    const session = loadCustomerProfileSession()
-    if (session) {
-      if (session.name) setName(session.name)
-      if (session.phone) setPhone(session.phone)
-    }
-  }, [])
+    if (!profile) return
+
+    updateLiveEventDraft({
+      name: name || profile.name,
+      phone: phone || profile.phone,
+    })
+  }, [name, phone, profile, updateLiveEventDraft])
 
   function handleWhatsAppInquiry() {
     const digitsOnly = phone.replace(/\D/g, '')
@@ -55,7 +57,7 @@ export default function LiveEventScreen() {
               <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Nombre</span>
               <input
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => updateLiveEventDraft({ name: e.target.value })}
                 placeholder="Tu nombre"
                 className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
               />
@@ -65,7 +67,7 @@ export default function LiveEventScreen() {
               <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Teléfono</span>
               <input
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => updateLiveEventDraft({ phone: e.target.value })}
                 inputMode="numeric"
                 placeholder="8112345678"
                 className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
@@ -76,7 +78,7 @@ export default function LiveEventScreen() {
               <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Cantidad de invitados</span>
               <input
                 value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
+                onChange={(e) => updateLiveEventDraft({ guestCount: e.target.value })}
                 type="number"
                 inputMode="numeric"
                 placeholder="50"
@@ -88,7 +90,7 @@ export default function LiveEventScreen() {
               <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Fecha del evento</span>
               <input
                 value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
+                onChange={(e) => updateLiveEventDraft({ eventDate: e.target.value })}
                 type="date"
                 className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
               />

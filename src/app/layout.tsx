@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description: 'Pancakes & Art Studio — Monterrey',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'Nappan',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0C0806',
+  themeColor: '#FFF8EA',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -22,15 +22,17 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="h-full">
-      <body className="min-h-full antialiased" style={{ background: '#060402' }}>
-        <div style={{
-          maxWidth: '430px',
-          margin: '0 auto',
-          minHeight: '100dvh',
-          background: '#0C0806',
-          position: 'relative',
-          boxShadow: '0 0 80px rgba(0,0,0,0.8)',
-        }}>
+      <body className="min-h-full antialiased" style={{ background: '#FFF8EA' }}>
+        <div
+          style={{
+            minHeight: '100dvh',
+            background:
+              'radial-gradient(circle at 12% 0%, rgba(216,155,43,0.18), transparent 28%), radial-gradient(circle at 88% 4%, rgba(185,106,69,0.14), transparent 26%), linear-gradient(180deg, #FFF8EA 0%, #F7EEDC 54%, #FFFDF7 100%)',
+            color: '#2A1710',
+            position: 'relative',
+            overflowX: 'hidden',
+          }}
+        >
           {children}
         </div>
       </body>

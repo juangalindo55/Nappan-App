@@ -9,45 +9,62 @@ export function HomeTopBar() {
   )
 
   return (
-    <div
-      className="flex items-center justify-between px-5 anim-up"
+    <header
+      className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 sm:px-8 lg:px-10 anim-up"
       style={{
         paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
-        paddingBottom: '12px',
+        paddingBottom: '18px',
       }}
     >
-      <div className="flex items-baseline gap-1.5">
+      <Link href="/" className="flex items-center gap-3 transition active:scale-[0.98]">
         <span
+          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-2xl"
           style={{
+            background: '#2A1710',
+            color: '#FFF8EA',
+            boxShadow: '0 12px 28px rgba(62,35,19,0.16)',
             fontFamily: 'var(--font-cormorant)',
             fontStyle: 'italic',
             fontWeight: 700,
-            fontSize: '28px',
-            color: '#FFF6E5',
-            letterSpacing: '-0.01em',
           }}
         >
-          Nappan
+          N
         </span>
-        <span
-          style={{
-            fontSize: '11px',
-            color: '#A58B69',
-            fontFamily: 'var(--font-dm-sans)',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-          }}
-        >
-          Studio
+        <span className="flex items-baseline gap-1.5">
+          <span
+            style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontStyle: 'italic',
+              fontWeight: 700,
+              fontSize: '29px',
+              color: '#2A1710',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            Nappan
+          </span>
+          <span
+            style={{
+              fontSize: '10px',
+              color: '#9A7A61',
+              fontFamily: 'var(--font-dm-sans)',
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              fontWeight: 800,
+            }}
+          >
+            Studio
+          </span>
         </span>
-      </div>
+      </Link>
 
       <Link
         href="/cart"
         className="relative flex h-11 w-11 items-center justify-center rounded-full transition active:scale-95"
         style={{
-          background: 'rgba(26,18,9,0.92)',
-          border: '1px solid rgba(232,164,32,0.1)',
+          background: 'rgba(255,252,245,0.78)',
+          border: '1px solid rgba(88,55,34,0.14)',
+          boxShadow: '0 12px 30px rgba(62,35,19,0.10)',
         }}
         aria-label="Ver carrito"
       >
@@ -56,8 +73,8 @@ export function HomeTopBar() {
           height="19"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#F0E4CC"
-          strokeWidth="1.6"
+          stroke="#2A1710"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -66,17 +83,18 @@ export function HomeTopBar() {
           <path d="M16 10a4 4 0 01-8 0" />
         </svg>
         <span
-          className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full"
+          className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1"
           style={{
-            background: '#E8A420',
-            fontSize: '9px',
-            fontWeight: 700,
-            color: '#0C0806',
+            background: '#D89B2B',
+            fontSize: '10px',
+            fontWeight: 800,
+            color: '#2A1710',
+            border: '2px solid #FFF8EA',
           }}
         >
           {totalItems}
         </span>
       </Link>
-    </div>
+    </header>
   )
 }

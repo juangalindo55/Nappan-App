@@ -6,66 +6,46 @@ type HomeGreetingProps = {
 
 export function HomeGreeting({ greeting }: HomeGreetingProps) {
   return (
-    <div className="px-5 mb-8 anim-up d1">
-      {greeting ? (
+    <section className="mx-auto w-full max-w-6xl px-5 pb-8 pt-2 sm:px-8 md:pb-10 lg:px-10 anim-up d1">
+      <div className="max-w-3xl">
+        {greeting ? (
+          <p
+            className="mb-3 text-xs font-extrabold uppercase tracking-[0.22em]"
+            style={{ color: '#A87325', fontFamily: 'var(--font-dm-sans)' }}
+          >
+            {greeting} · Pancakes & Art Studio
+          </p>
+        ) : null}
+        <h1
+          className="max-w-3xl text-[clamp(3.25rem,9vw,6.8rem)] leading-[0.88] tracking-[-0.065em]"
+          style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500, color: '#2A1710' }}
+        >
+          Antojo bonito, pedido claro.
+        </h1>
         <p
-          style={{
-            fontSize: '12px',
-            color: '#A58B69',
-            fontFamily: 'var(--font-dm-sans)',
-            marginBottom: '6px',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          }}
+          className="mt-6 max-w-xl text-base leading-8 sm:text-lg"
+          style={{ color: '#765E4B', fontFamily: 'var(--font-dm-sans)' }}
         >
-          {greeting}
+          Cajas personalizadas, lunch boxes, barras fit y pancake art para eventos. Elige la ocasión y te llevamos directo al pedido correcto.
         </p>
-      ) : null}
-      <h1
-        style={{
-          fontFamily: 'var(--font-cormorant)',
-          fontStyle: 'italic',
-          fontWeight: 400,
-          fontSize: 'clamp(30px, 8vw, 38px)',
-          lineHeight: 1.08,
-          color: '#F0E4CC',
-          letterSpacing: '-0.03em',
-          maxWidth: '11ch',
-        }}
-      >
-        ¿Qué se te
-        <br />
-        antoja hoy?
-      </h1>
-      <p
-        style={{
-          marginTop: '12px',
-          maxWidth: '24ch',
-          fontSize: '14px',
-          lineHeight: 1.6,
-          color: 'rgba(240,228,204,0.62)',
-          fontFamily: 'var(--font-dm-sans)',
-        }}
-      >
-        Explora lo destacado y arma tu pedido en segundos.
-      </p>
 
-      <div className="mt-5 flex flex-wrap gap-3">
-        <Link
-          href="/explorar"
-          className="inline-flex items-center rounded-full border border-[#E8A420]/18 bg-[#181209] px-4 py-2 text-xs font-semibold text-[#F0E4CC] transition active:scale-95"
-          style={{ fontFamily: 'var(--font-dm-sans)' }}
-        >
-          Explorar
-        </Link>
-        <Link
-          href="/cart"
-          className="inline-flex items-center rounded-full border border-[#E8A420]/22 bg-[#E8A420]/12 px-4 py-2 text-xs font-semibold text-[#E8A420] transition active:scale-95"
-          style={{ fontFamily: 'var(--font-dm-sans)' }}
-        >
-          Ver carrito
-        </Link>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/order"
+            className="inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-extrabold shadow-[0_20px_42px_rgba(62,35,19,0.18)] transition active:scale-95 md:hover:-translate-y-0.5"
+            style={{ fontFamily: 'var(--font-dm-sans)', background: '#2A1710', color: '#FFF8EA' }}
+          >
+            Armar pedido
+          </Link>
+          <Link
+            href="/explorar"
+            className="inline-flex items-center justify-center rounded-full border px-6 py-3.5 text-sm font-extrabold shadow-[0_12px_30px_rgba(62,35,19,0.08)] transition active:scale-95 md:hover:-translate-y-0.5"
+            style={{ fontFamily: 'var(--font-dm-sans)', background: 'rgba(255,252,245,0.78)', borderColor: 'rgba(88,55,34,0.18)', color: '#2A1710' }}
+          >
+            Explorar productos
+          </Link>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

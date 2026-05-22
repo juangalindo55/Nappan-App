@@ -6,6 +6,12 @@ import { getSupabaseClient } from "@/lib/supabase"
 type CustomerData = {
     name: string
     phone: string
+    address?: string
+    notes?: string
+    deliveryDate?: string
+    deliveryTime?: string
+    receiverName?: string
+    paymentMethod?: string
 }
 
 export async function submitOrder(cart: Cart, customer: CustomerData): Promise<string> {

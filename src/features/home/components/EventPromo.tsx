@@ -1,70 +1,61 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { GoldShimmer } from './ProductChrome'
 
 export function EventPromo() {
   return (
-    <div className="px-4 mt-10 pb-2 anim-up d4">
+    <section className="mx-auto w-full max-w-6xl px-5 pb-10 pt-8 sm:px-8 md:pb-14 lg:px-10 anim-up d4">
       <div
-        className="rounded-2xl p-5 relative overflow-hidden"
+        className="relative overflow-hidden rounded-[2rem]"
         style={{
-          background: 'linear-gradient(135deg, #1A1209 0%, #0E0907 100%)',
-          border: '1px solid rgba(232,164,32,0.08)',
-          boxShadow: '0 18px 50px rgba(0,0,0,0.26)',
+          background: 'linear-gradient(135deg, #2A1710 0%, #5B3924 100%)',
+          border: '1px solid rgba(88,55,34,0.16)',
+          boxShadow: '0 28px 70px rgba(62,35,19,0.18)',
         }}
       >
-        <GoldShimmer />
-        <p
-          style={{
-            fontSize: '11px',
-            fontFamily: 'var(--font-dm-sans)',
-            color: '#A58B69',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            marginBottom: '6px',
-          }}
-        >
-          ¿Tienes un evento?
-        </p>
-        <p
-          style={{
-            fontFamily: 'var(--font-cormorant)',
-            fontStyle: 'italic',
-            fontSize: '24px',
-            color: '#F0E4CC',
-            marginBottom: '16px',
-            maxWidth: '18ch',
-          }}
-        >
-          Hacemos pancakes artísticos en tu celebración
-        </p>
-        <Link href="/products/eventos">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full"
-            style={{
-              padding: '9px 18px',
-              background: 'rgba(232,164,32,0.1)',
-              border: '1px solid rgba(232,164,32,0.2)',
-              fontSize: '12px',
-              fontFamily: 'var(--font-dm-sans)',
-              fontWeight: 600,
-              color: '#E8A420',
-            }}
-          >
-            Cotizar evento
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#E8A420"
-              strokeWidth="2.2"
-              strokeLinecap="round"
+        <div className="grid md:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="relative z-10 max-w-2xl p-6 sm:p-8 md:p-10">
+            <p
+              className="mb-4 text-xs font-extrabold uppercase tracking-[0.22em]"
+              style={{ color: '#F3C766', fontFamily: 'var(--font-dm-sans)' }}
             >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </span>
-        </Link>
+              ¿Tienes un evento?
+            </p>
+            <h2
+              className="max-w-xl text-4xl leading-[0.95] tracking-[-0.04em] text-[#FFF8EA] sm:text-5xl"
+              style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500 }}
+            >
+              Llevamos pancake art a tu celebración.
+            </h2>
+            <p
+              className="mt-5 max-w-lg text-sm leading-7 sm:text-base"
+              style={{ color: 'rgba(255,248,234,0.74)', fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Para marcas, cumpleaños, wellness days y momentos que necesitan una experiencia diferente.
+            </p>
+            <Link
+              href="/order/live-event"
+              className="mt-7 inline-flex items-center rounded-full px-5 py-3 text-sm font-extrabold transition active:scale-95 md:hover:-translate-y-0.5"
+              style={{ background: '#FFF8EA', color: '#2A1710', fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Cotizar evento →
+            </Link>
+          </div>
+
+          <div className="relative min-h-[230px] overflow-hidden md:min-h-full" style={{ background: '#3D2418' }}>
+            <Image
+              src="/images/nappan/wellness-event.webp"
+              alt="Evento wellness con mesa de alimentos y experiencia Nappan"
+              fill
+              sizes="(min-width: 768px) 360px, 100vw"
+              className="object-cover"
+            />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ background: 'linear-gradient(90deg, rgba(42,23,16,0.16) 0%, rgba(42,23,16,0) 52%), linear-gradient(180deg, rgba(42,23,16,0) 48%, rgba(42,23,16,0.35) 100%)' }}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

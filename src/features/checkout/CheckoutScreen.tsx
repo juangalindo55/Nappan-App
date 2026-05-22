@@ -28,6 +28,13 @@ export default function CheckoutScreen() {
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [receiverName, setReceiverName] = useState('')
+  const [deliveryDate, setDeliveryDate] = useState('')
+  const [deliveryTime, setDeliveryTime] = useState('')
+  const [notes, setNotes] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'transfer'>('transfer')
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [cartErrors, setCartErrors] = useState<string[]>([])
@@ -65,7 +72,18 @@ export default function CheckoutScreen() {
     try {
       const profileResult = await resolveCustomerProfile({ phone: digitsOnly, name: trimmedName })
 
-      const orderNumber = await submitOrder(cart, { name: trimmedName, phone: digitsOnly })
+      const formattedDate = deliveryDate ? deliveryDate.split('-').reverse().join('/') : ''
+
+      const orderNumber = await submitOrder(cart, {
+        name: trimmedName,
+        phone: digitsOnly,
+        address,
+        receiverName,
+        deliveryDate: formattedDate,
+        deliveryTime,
+        notes,
+        paymentMethod,
+      })
 
       saveCustomerProfileSession({
         name: profileResult.profile.name || trimmedName,
@@ -237,6 +255,86 @@ export default function CheckoutScreen() {
                 className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
               />
             </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Quién recibe</span>
+                <input
+                  value={receiverName}
+                  onChange={(e) => setReceiverName(e.target.value)}
+                  placeholder="Nombre"
+                  className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Dirección</span>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Calle, #, Col."
+                  className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Día de entrega</span>
+                <input
+                  type="date"
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                  className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition focus:border-[#E8A420]/60 [color-scheme:dark]"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Hora de entrega</span>
+                <input
+                  type="time"
+                  value={deliveryTime}
+                  onChange={(e) => setDeliveryTime(e.target.value)}
+                  className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition focus:border-[#E8A420]/60 [color-scheme:dark]"
+                />
+              </label>
+            </div>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Notas especiales</span>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Instrucciones adicionales..."
+                className="min-h-[60px] w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] p-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+              />
+            </label>
+
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold text-[#F0E4CC]/60">Método de pago</span>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('transfer')}
+                  className={`flex h-11 items-center justify-center rounded-md border text-sm font-semibold transition ${
+                    paymentMethod === 'transfer'
+                      ? 'border-[#E8A420] bg-[#E8A420]/10 text-[#E8A420]'
+                      : 'border-[#E8A420]/14 bg-[#100B07] text-[#F0E4CC]/60'
+                  }`}
+                >
+                  Transferencia SPEI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('cash')}
+                  className={`flex h-11 items-center justify-center rounded-md border text-sm font-semibold transition ${
+                    paymentMethod === 'cash'
+                      ? 'border-[#E8A420] bg-[#E8A420]/10 text-[#E8A420]'
+                      : 'border-[#E8A420]/14 bg-[#100B07] text-[#F0E4CC]/60'
+                  }`}
+                >
+                  Efectivo
+                </button>
+              </div>
+            </div>
             {error ? (
               <p className="rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-100">
                 {error}

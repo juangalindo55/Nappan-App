@@ -12,52 +12,46 @@ export default function HomeScreen() {
   const { featuredProduct, greeting, products, loading, error } = useHomeData()
 
   return (
-    <div
-      className="hide-scrollbar overflow-y-auto overflow-x-hidden"
-      style={{
-        minHeight: '100dvh',
-        paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
-      }}
-    >
+    <main className="hide-scrollbar min-h-dvh overflow-x-hidden pb-[calc(88px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <HomeTopBar />
       <HomeGreeting greeting={greeting} />
 
       {error ? (
-        <div className="mx-4 rounded-lg border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
-          {error}
+        <div className="mx-auto mb-6 max-w-6xl px-5 sm:px-8 lg:px-10">
+          <div className="rounded-2xl border border-red-300/50 bg-red-50/80 p-4 text-sm text-red-900">
+            {error}
+          </div>
         </div>
       ) : null}
 
       {loading ? (
-        <>
-          <div className="px-4 mb-6">
-            <div className="h-40 rounded-lg bg-[#181209] animate-pulse" />
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+          <div className="h-72 animate-pulse rounded-[2rem] bg-[#F7EEDC]" />
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-44 animate-pulse rounded-[1.6rem] bg-[#F7EEDC]" />
+            ))}
           </div>
-          <div className="px-4">
-            <div className="h-8 w-32 bg-[#181209] rounded mb-4 animate-pulse" />
-            <div className="grid grid-cols-1 gap-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-32 rounded-lg bg-[#181209] animate-pulse" />
-              ))}
-            </div>
-          </div>
-        </>
+        </div>
       ) : (
         <>
           {featuredProduct ? (
-            <div className="px-4 mb-6">
+            <section className="mx-auto w-full max-w-6xl px-5 pb-12 sm:px-8 md:pb-16 lg:px-10">
               <FeaturedProductCard
                 key={featuredProduct.id}
                 product={featuredProduct}
               />
-            </div>
+            </section>
           ) : null}
 
-          <HomeSectionHeader />
-          <ProductGrid products={products} />
+          <section className="pb-4 md:pb-8">
+            <HomeSectionHeader />
+            <ProductGrid products={products} />
+          </section>
+
           <EventPromo />
         </>
       )}
-    </div>
+    </main>
   )
 }

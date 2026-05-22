@@ -1,132 +1,113 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { Product } from '@/features/products/product.types'
-import { GoldShimmer, GrainLayer } from './ProductChrome'
+
+const productDescriptions: Record<string, string> = {
+  nappanbox: 'Regalos personalizados con pancake art, frutas, toppings y detalles listos para sorprender.',
+  lunchbox: 'Cajas coordinadas para grupos, juntas, cumpleaños y días especiales.',
+  fitbar: 'Pancakes proteicos para un antojo limpio, rápido y con buena presentación.',
+  eventos: 'Pancake art en vivo para marcas, cumpleaños, wellness days y celebraciones.',
+}
+
+const productImages: Record<string, { src: string; alt: string }> = {
+  nappanbox: {
+    src: '/images/nappan/gallery-mario-box.jpg',
+    alt: 'Nappan Box colorida con pancake art personalizado',
+  },
+  lunchbox: {
+    src: '/images/nappan/lunchbox.jpg',
+    alt: 'Lunch Box Nappan con pancakes y toppings para compartir',
+  },
+  fitbar: {
+    src: '/images/nappan/fitbar.jpg',
+    alt: 'Fit Bar con pancakes proteicos y presentación saludable',
+  },
+  eventos: {
+    src: '/images/nappan/wellness-event.webp',
+    alt: 'Mesa de evento Nappan con experiencia de pancake art',
+  },
+}
 
 type FeaturedProductCardProps = {
   product: Product
 }
 
 export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
+  const image = productImages[product.id] ?? productImages.nappanbox
+
   return (
-    <Link href={product.href}>
-      <div
-        className="relative rounded-2xl overflow-hidden anim-scale d1"
+    <Link href={product.href} className="block transition active:scale-[0.99] md:hover:-translate-y-1">
+      <article
+        className="relative overflow-hidden rounded-[2rem] anim-scale d1"
         style={{
-          minHeight: '280px',
-          background: product.visual.gradient,
-          border: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.30)',
+          minHeight: '330px',
+          background: 'linear-gradient(135deg, rgba(255,252,245,0.97) 0%, rgba(247,238,220,0.98) 100%)',
+          border: '1px solid rgba(88,55,34,0.13)',
+          boxShadow: '0 28px 70px rgba(62,35,19,0.12)',
         }}
       >
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 35% 50%, ${product.visual.glow} 0%, transparent 60%)`,
-          }}
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-2xl"
+          style={{ background: 'rgba(216,155,43,0.23)' }}
         />
-
-        <GrainLayer opacity={0.22} />
-        <GoldShimmer />
-
         <div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            height: '70%',
-            background:
-              'linear-gradient(to top, rgba(4,8,6,0.95) 0%, rgba(4,8,6,0.72) 60%, transparent 100%)',
-          }}
+          className="pointer-events-none absolute -bottom-20 left-8 h-52 w-52 rounded-full blur-3xl"
+          style={{ background: 'rgba(185,106,69,0.14)' }}
         />
 
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <span
-            className="inline-block mb-3 rounded-full px-2.5 py-1"
-            style={{
-              fontSize: '10px',
-              fontFamily: 'var(--font-dm-sans)',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              background: 'rgba(232,164,32,0.12)',
-              border: '1px solid rgba(232,164,32,0.22)',
-              color: '#E8A420',
-            }}
-          >
-            {product.tag}
-          </span>
+        <div className="relative z-10 grid gap-0 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.86fr)]">
+          <div className="flex min-h-[330px] flex-col justify-between p-6 sm:p-8 md:p-10">
+            <div>
+              <div className="mb-6 flex items-center gap-3">
+                <span
+                  className="rounded-full px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em]"
+                  style={{ background: '#F7EEDC', color: '#A87325', border: '1px solid rgba(88,55,34,0.10)', fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  Destacado · {product.tag}
+                </span>
+              </div>
 
-          <h2
-            style={{
-              fontFamily: 'var(--font-cormorant)',
-              fontStyle: 'italic',
-              fontWeight: 600,
-              fontSize: 'clamp(34px, 7vw, 42px)',
-              lineHeight: 1.02,
-              color: '#F0E4CC',
-              marginBottom: '8px',
-              maxWidth: '10ch',
-            }}
-          >
-            {product.name}
-          </h2>
+              <h2
+                className="max-w-xl text-[clamp(3rem,8vw,5.5rem)] leading-[0.88] tracking-[-0.06em]"
+                style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500, color: '#2A1710' }}
+              >
+                {product.name}
+              </h2>
+              <p
+                className="mt-5 max-w-md text-sm leading-7 sm:text-base"
+                style={{ color: '#765E4B', fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {productDescriptions[product.id] ?? product.subtitle}
+              </p>
+            </div>
 
-          <p
-            style={{
-              fontSize: '14px',
-              color: 'rgba(240,228,204,0.55)',
-              fontFamily: 'var(--font-dm-sans)',
-              marginBottom: '16px',
-              maxWidth: '22ch',
-            }}
-          >
-            {product.subtitle}
-          </p>
-
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E8A420]/18 bg-[#E8A420]/12 px-3 py-2">
             <span
-              style={{
-                fontSize: '12px',
-                color: '#E8A420',
-                fontFamily: 'var(--font-dm-sans)',
-                fontWeight: 500,
-              }}
+              className="mt-7 inline-flex w-fit items-center rounded-full px-5 py-3 text-sm font-extrabold"
+              style={{ background: '#2A1710', color: '#FFF8EA', fontFamily: 'var(--font-dm-sans)' }}
             >
-              Explorar
+              Personalizar ahora →
             </span>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#E8A420"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
+          </div>
+
+          <div
+            className="relative min-h-[250px] overflow-hidden md:min-h-[330px]"
+            style={{ background: '#EAD9B9' }}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              priority
+              sizes="(min-width: 768px) 42vw, 100vw"
+              className="object-cover"
+            />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ background: 'linear-gradient(90deg, rgba(255,252,245,0.22) 0%, rgba(255,252,245,0) 38%), linear-gradient(180deg, rgba(42,23,16,0) 55%, rgba(42,23,16,0.18) 100%)' }}
+            />
           </div>
         </div>
-
-        <div
-          className="absolute top-4 right-4 px-2.5 py-1 rounded-full"
-          style={{
-            background: 'rgba(14,10,6,0.65)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(232,164,32,0.15)',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '10px',
-              color: '#E8A420',
-              fontFamily: 'var(--font-dm-sans)',
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-            }}
-          >
-            DESTACADO
-          </span>
-        </div>
-      </div>
+      </article>
     </Link>
   )
 }

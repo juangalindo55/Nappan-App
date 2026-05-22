@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export type OrderType = 'catering' | 'event'
 
@@ -19,19 +20,26 @@ function getOrderType(category: OrderCategory): OrderType {
   return category === 'live-event' ? 'event' : 'catering'
 }
 
-export const useOrderFlowStore = create<OrderFlowState>((set) => ({
-  category: null,
-  orderType: null,
-
-  setOrderCategory: (category) =>
-    set({
-      category,
-      orderType: getOrderType(category),
-    }),
-
-  resetOrderFlow: () =>
-    set({
+export const useOrderFlowStore = create<OrderFlowState>()(
+  persist(
+    (set) => ({
       category: null,
       orderType: null,
+
+      setOrderCategory: (category) =>
+        set({
+          category,
+          orderType: getOrderType(category),
+        }),
+
+      resetOrderFlow: () =>
+        set({
+          category: null,
+          orderType: null,
+        }),
     }),
-}))
+    {
+      name: 'nappan-order-flow',
+    },
+  ),
+)
