@@ -17,8 +17,8 @@ export function HomeTopBar() {
         paddingBottom: '18px',
       }}
     >
-      <Link href="/" className="flex items-center gap-3 transition active:scale-[0.98]">
-        <div className="relative h-10 w-10">
+      <Link href="/" className="transition active:scale-[0.98]">
+        <div className="relative h-12 w-12">
           <Image
             src="/images/nappan/logo-dorado.svg"
             alt="Nappan Studio"
@@ -27,32 +27,6 @@ export function HomeTopBar() {
             priority
           />
         </div>
-        <span className="flex items-baseline gap-1.5">
-          <span
-            style={{
-              fontFamily: 'var(--font-cormorant)',
-              fontStyle: 'italic',
-              fontWeight: 700,
-              fontSize: '29px',
-              color: '#2A1710',
-              letterSpacing: '-0.03em',
-            }}
-          >
-            Nappan
-          </span>
-          <span
-            style={{
-              fontSize: '10px',
-              color: '#9A7A61',
-              fontFamily: 'var(--font-dm-sans)',
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              fontWeight: 800,
-            }}
-          >
-            Studio
-          </span>
-        </span>
       </Link>
 
       <Link
