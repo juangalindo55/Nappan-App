@@ -61,17 +61,21 @@ export default function CategorySelectionScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto bg-[#0C0806] px-4 pb-8 pt-6 text-[#F0E4CC]"
-      style={{ paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))' }}
+      className="hide-scrollbar min-h-dvh overflow-y-auto px-4 pb-8 pt-6"
+      style={{
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
+        paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))'
+      }}
     >
       <section className="mb-6 px-1">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#E8A420]">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--gold)' }}>
           Pedido rápido
         </p>
         <h1 className="max-w-xs text-4xl font-semibold leading-tight">
           Elige lo que necesitas.
         </h1>
-        <p className="mt-3 max-w-sm text-sm leading-6 text-[#F0E4CC]/65">
+        <p className="mt-3 max-w-sm text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
           Primero selecciona una categoría para mostrarte el flujo correcto.
         </p>
       </section>
@@ -82,27 +86,31 @@ export default function CategorySelectionScreen() {
             key={category.id}
             type="button"
             onClick={() => selectCategory(category)}
-            className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4 text-left transition active:scale-[0.99] active:border-[#E8A420]/35"
+            className="rounded-lg border p-4 text-left transition active:scale-[0.99]"
+            style={{
+              background: 'var(--surface-1)',
+              borderColor: 'var(--border)',
+            }}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#FFF6E5]">
+                <h2 className="text-xl font-semibold">
                   {category.title}
                 </h2>
-                <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/65">
+                <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                   {category.description}
                 </p>
               </div>
-              <span className="rounded-full bg-[#E8A420]/10 px-2.5 py-1 text-xs font-semibold text-[#E8A420]">
+              <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: 'var(--gold-dim)', color: 'var(--gold)' }}>
                 {category.id === 'live-event' ? 'Evento' : 'Catering'}
               </span>
             </div>
 
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#7A6A55]">
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--text-secondary)' }}>
               {category.constraints}
             </p>
 
-            <span className="mt-5 inline-flex items-center rounded-md bg-[#E8A420] px-4 py-2.5 text-sm font-bold text-[#0C0806]">
+            <span className="mt-5 inline-flex items-center rounded-md px-4 py-2.5 text-sm font-bold" style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}>
               {category.cta}
               <svg
                 className="ml-2"

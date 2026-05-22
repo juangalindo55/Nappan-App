@@ -186,22 +186,26 @@ export default function FitbarOrderScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto bg-[#0C0806] pb-8 text-[#F0E4CC]"
-      style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}
+      className="hide-scrollbar min-h-dvh overflow-y-auto pb-8"
+      style={{
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
+        paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))'
+      }}
     >
       <header className="px-4 pt-5">
-        <section className="overflow-hidden rounded-lg border border-[#E8A420]/12 bg-[#181209]">
-          <div className="relative min-h-[150px] bg-[radial-gradient(circle_at_20%_18%,#F6C45B_0%,#3A2210_36%,#181209_80%)] p-4">
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#181209] to-transparent" />
+        <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
+          <div className="relative min-h-[150px] bg-[radial-gradient(circle_at_20%_18%,#D89B2B_0%,#3A2210_36%,#FFF8EA_80%)] p-4">
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
             <div className="relative flex min-h-[118px] flex-col justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#FFE3A0]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-primary)' }}>
                 Barra bienestar
               </p>
               <div>
-                <h1 className="text-4xl font-semibold leading-none text-[#FFF6E5]">
+                <h1 className="text-4xl font-semibold leading-none">
                   Barra de proteína Fitbar
                 </h1>
-                <p className="mt-2 max-w-[300px] text-sm leading-5 text-[#F0E4CC]/72">
+                <p className="mt-2 max-w-[300px] text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                   Arma un pedido con varios productos, elige cantidades por artículo y llega al mínimo de compra en una sola selección.
                 </p>
               </div>
@@ -210,21 +214,21 @@ export default function FitbarOrderScreen() {
         </section>
       </header>
 
-      <section className="sticky top-0 z-20 mt-4 border-y border-[#E8A420]/10 bg-[#100B07]/95 px-4 py-3 backdrop-blur-xl">
+      <section className="sticky top-0 z-20 mt-4 border-y px-4 py-3 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.95)' }}>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
               Resumen
             </p>
-            <p className="mt-1 text-sm font-semibold text-[#FFF6E5]">
+            <p className="mt-1 text-sm font-semibold">
               {getSelectedCount(quantities)} productos seleccionados
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
               Total
             </p>
-            <p className="mt-1 text-2xl font-bold text-[#E8A420]">
+            <p className="mt-1 text-2xl font-bold" style={{ color: 'var(--gold)' }}>
               ${total.toLocaleString('es-MX')}
             </p>
           </div>
@@ -233,29 +237,30 @@ export default function FitbarOrderScreen() {
         <button
           type="button"
           onClick={addSelectionToCart}
-          className={`mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99] ${
-            canSubmit
-              ? 'bg-[#E8A420] text-[#0C0806]'
-              : 'bg-[#4A3420] text-[#F0E4CC]/55'
-          }`}
+          style={{
+            background: canSubmit ? 'var(--gold)' : 'var(--surface-2)',
+            color: canSubmit ? 'var(--bg-primary)' : 'var(--text-secondary)',
+          }}
+          className="mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
         >
           Agregar selección al carrito
         </button>
 
         {error ? (
-          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-100">
+          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
             {error}
           </p>
         ) : null}
 
         {feedback ? (
           <div className="mt-3 space-y-2">
-            <p className="rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
+            <p className="rounded-md border px-3 py-2 text-sm leading-5" style={{ borderColor: 'var(--gold-light)', background: 'var(--gold-dim)', color: 'var(--gold)' }}>
               {feedback}
             </p>
             <Link
               href="/cart"
-              className="inline-flex w-full items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+              className="inline-flex w-full items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold transition active:scale-[0.99]"
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
             >
               Ir al carrito
             </Link>
@@ -275,11 +280,11 @@ export default function FitbarOrderScreen() {
         {!loading && !error
           ? (Object.entries(groups) as Array<[FitbarCategory, FitbarGroups[FitbarCategory]]>).map(
               ([key, group]) => (
-                <section key={key} className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                <section key={key} className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
                     {group.title}
                   </p>
-                  <h2 className="mt-1 text-xl font-semibold text-[#FFF6E5]">
+                  <h2 className="mt-1 text-xl font-semibold">
                     {group.hint}
                   </h2>
 
@@ -291,18 +296,19 @@ export default function FitbarOrderScreen() {
                       return (
                         <div
                           key={product.sku}
-                          className="rounded-lg border border-[#E8A420]/10 bg-[#100B07] p-3"
+                          className="rounded-lg border p-3"
+                          style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-sm font-semibold text-[#FFF6E5]">
+                              <p className="text-sm font-semibold">
                                 {product.name}
                               </p>
-                              <p className="mt-1 text-xs text-[#F0E4CC]/54">
+                              <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                                 Código: {product.sku}
                               </p>
                             </div>
-                            <p className="text-sm font-bold text-[#E8A420]">
+                            <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>
                               ${product.base_price.toLocaleString('es-MX')}
                             </p>
                           </div>
@@ -311,7 +317,8 @@ export default function FitbarOrderScreen() {
                             <button
                               type="button"
                               onClick={() => updateQuantity(product.sku, quantity - 1)}
-                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#181209] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                               aria-label={`Restar ${product.name}`}
                             >
                               -
@@ -323,13 +330,15 @@ export default function FitbarOrderScreen() {
                               onChange={(event) =>
                                 updateQuantity(product.sku, Number(event.target.value))
                               }
-                              className="h-11 min-w-0 flex-1 rounded-md border border-[#E8A420]/14 bg-[#181209] px-4 text-center text-base font-bold text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
+                              className="h-11 min-w-0 flex-1 rounded-md border px-4 text-center text-base font-bold outline-none"
+                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                               aria-label={`Cantidad de ${product.name}`}
                             />
                             <button
                               type="button"
                               onClick={() => updateQuantity(product.sku, quantity + 1)}
-                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#181209] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                               aria-label={`Sumar ${product.name}`}
                             >
                               +
@@ -337,8 +346,8 @@ export default function FitbarOrderScreen() {
                           </div>
 
                           <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                            <span className="text-[#F0E4CC]/58">Subtotal</span>
-                            <span className="font-semibold text-[#FFF6E5]">
+                            <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
+                            <span className="font-semibold">
                               ${lineTotal.toLocaleString('es-MX')}
                             </span>
                           </div>
@@ -347,7 +356,7 @@ export default function FitbarOrderScreen() {
                     })}
 
                     {!group.items.length ? (
-                      <p className="text-sm leading-5 text-[#F0E4CC]/58">
+                      <p className="text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                         No hay productos en esta categoría.
                       </p>
                     ) : null}
@@ -357,8 +366,8 @@ export default function FitbarOrderScreen() {
             )
           : null}
 
-        <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+        <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
             Selección final
           </p>
           <dl className="mt-3 space-y-2 text-sm">
@@ -382,9 +391,9 @@ export default function FitbarOrderScreen() {
 
 function StateCard({ title, text }: { title: string; text: string }) {
   return (
-    <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-      <p className="text-sm font-semibold text-[#FFF6E5]">{title}</p>
-      <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/58">{text}</p>
+    <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+      <p className="text-sm font-semibold">{title}</p>
+      <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>{text}</p>
     </section>
   )
 }
@@ -400,11 +409,10 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-[#F0E4CC]/52">{label}</dt>
+      <dt style={{ color: 'var(--text-secondary)' }}>{label}</dt>
       <dd
-        className={`max-w-[210px] text-right font-semibold leading-5 ${
-          muted ? 'text-red-100' : 'text-[#FFF6E5]'
-        }`}
+        className="max-w-[210px] text-right font-semibold leading-5"
+        style={{ color: muted ? 'var(--error)' : 'var(--text-primary)' }}
       >
         {value}
       </dd>

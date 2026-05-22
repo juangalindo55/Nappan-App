@@ -36,63 +36,83 @@ export default function LiveEventScreen() {
   const isValid = name.trim() && phone.replace(/\D/g, '').length >= 10 && guestCount && eventDate
 
   return (
-    <main className="min-h-dvh bg-[#0C0806] px-4 pb-32 pt-5 text-[#F0E4CC]">
+    <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-        <header className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+        <header className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
             Servicio especial
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-[#FFF6E5]">Evento en Vivo</h1>
-          <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/60">
+          <h1 className="mt-1 text-3xl font-semibold">Evento en Vivo</h1>
+          <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
             Estación de pancake art preparada en vivo para tus invitados. Cuéntanos detalles de tu evento.
           </p>
         </header>
 
-        <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+        <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
             Detalles del evento
           </p>
           <div className="mt-4 space-y-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Nombre</span>
+              <span className="mb-1 block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Nombre</span>
               <input
                 value={name}
                 onChange={(e) => updateLiveEventDraft({ name: e.target.value })}
                 placeholder="Tu nombre"
-                className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="h-11 w-full rounded-md border px-4 text-sm outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Teléfono</span>
+              <span className="mb-1 block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Teléfono</span>
               <input
                 value={phone}
                 onChange={(e) => updateLiveEventDraft({ phone: e.target.value })}
                 inputMode="numeric"
                 placeholder="8112345678"
-                className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="h-11 w-full rounded-md border px-4 text-sm outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Cantidad de invitados</span>
+              <span className="mb-1 block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Cantidad de invitados</span>
               <input
                 value={guestCount}
                 onChange={(e) => updateLiveEventDraft({ guestCount: e.target.value })}
                 type="number"
                 inputMode="numeric"
                 placeholder="50"
-                className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="h-11 w-full rounded-md border px-4 text-sm outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">Fecha del evento</span>
+              <span className="mb-1 block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Fecha del evento</span>
               <input
                 value={eventDate}
                 onChange={(e) => updateLiveEventDraft({ eventDate: e.target.value })}
                 type="date"
-                className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="h-11 w-full rounded-md border px-4 text-sm outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
             </label>
 
@@ -100,7 +120,8 @@ export default function LiveEventScreen() {
               type="button"
               onClick={handleWhatsAppInquiry}
               disabled={!isValid}
-              className="inline-flex w-full items-center justify-center rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99] disabled:opacity-60"
+              style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+              className="inline-flex w-full items-center justify-center rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99] disabled:opacity-60"
             >
               Cotizar por WhatsApp
             </button>
@@ -110,7 +131,8 @@ export default function LiveEventScreen() {
         <div className="pb-4">
           <Link
             href="/order"
-            className="inline-flex w-full items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+            className="inline-flex w-full items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold transition active:scale-[0.99]"
+            style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
           >
             Volver a categorías
           </Link>

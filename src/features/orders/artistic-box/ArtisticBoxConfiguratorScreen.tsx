@@ -153,22 +153,26 @@ export default function ArtisticBoxConfiguratorScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto bg-[#0C0806] pb-8 text-[#F0E4CC]"
-      style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}
+      className="hide-scrollbar min-h-dvh overflow-y-auto pb-8"
+      style={{
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
+        paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))'
+      }}
     >
       <header className="px-4 pt-5">
-        <section className="overflow-hidden rounded-lg border border-[#E8A420]/12 bg-[#181209]">
-          <div className="relative min-h-[152px] bg-[radial-gradient(circle_at_20%_18%,#F3C35B_0%,#7A2440_38%,#181209_78%)] p-4">
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#181209] to-transparent" />
+        <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
+          <div className="relative min-h-[152px] bg-[radial-gradient(circle_at_20%_18%,#D89B2B_0%,#7A2440_38%,#FFF8EA_78%)] p-4">
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
             <div className="relative flex min-h-[120px] flex-col justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#FFE3A0]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-primary)' }}>
                 Caja artística
               </p>
               <div>
-                <h1 className="text-4xl font-semibold leading-none text-[#FFF6E5]">
+                <h1 className="text-4xl font-semibold leading-none">
                   Caja artística
                 </h1>
-                <p className="mt-2 max-w-[300px] text-sm leading-5 text-[#F0E4CC]/72">
+                <p className="mt-2 max-w-[300px] text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                   Configura una caja personalizada con una idea escrita o con un enlace de diseño.
                 </p>
               </div>
@@ -177,21 +181,21 @@ export default function ArtisticBoxConfiguratorScreen() {
         </section>
       </header>
 
-      <section className="sticky top-0 z-20 mt-4 border-y border-[#E8A420]/10 bg-[#100B07]/95 px-4 py-3 backdrop-blur-xl">
+      <section className="sticky top-0 z-20 mt-4 border-y px-4 py-3 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.95)' }}>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
               Resumen
             </p>
-            <p className="mt-1 text-sm font-semibold text-[#FFF6E5]">
+            <p className="mt-1 text-sm font-semibold">
               {draft.quantity} cajas · ${unitPrice} c/u
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
               Total
             </p>
-            <p className="mt-1 text-2xl font-bold text-[#E8A420]">
+            <p className="mt-1 text-2xl font-bold" style={{ color: 'var(--gold)' }}>
               ${orderTotal.toLocaleString('es-MX')}
             </p>
           </div>
@@ -200,25 +204,27 @@ export default function ArtisticBoxConfiguratorScreen() {
         <button
           type="button"
           onClick={addToCart}
-          className="mt-3 w-full rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99]"
+          style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+          className="mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
         >
           Agregar al carrito
         </button>
 
         {error ? (
-          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-100">
+          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
             {error}
           </p>
         ) : null}
 
         {addedMessage ? (
           <div className="mt-3 space-y-2">
-            <p className="rounded-md border border-[#E8A420]/25 bg-[#E8A420]/10 px-3 py-2 text-sm leading-5 text-[#FFE3A0]">
+            <p className="rounded-md border px-3 py-2 text-sm leading-5" style={{ borderColor: 'var(--gold-light)', background: 'var(--gold-dim)', color: 'var(--gold)' }}>
               {addedMessage}
             </p>
             <Link
               href="/cart"
-              className="inline-flex w-full items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+              className="inline-flex w-full items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold transition active:scale-[0.99]"
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
             >
               Ir al carrito
             </Link>
@@ -234,19 +240,19 @@ export default function ArtisticBoxConfiguratorScreen() {
                 key={variant}
                 type="button"
                 onClick={() => updateVariant(variant)}
-                className={`min-h-[124px] rounded-lg border p-3 text-left transition active:scale-[0.99] ${
-                  draft.variant === variant
-                    ? 'border-[#E8A420]/75 bg-[#E8A420]/12'
-                    : 'border-[#E8A420]/10 bg-[#100B07]'
-                }`}
+                className="min-h-[124px] rounded-lg border p-3 text-left transition active:scale-[0.99]"
+                style={{
+                  borderColor: draft.variant === variant ? 'var(--gold)' : 'var(--border)',
+                  background: draft.variant === variant ? 'var(--gold-dim)' : 'var(--surface-2)',
+                }}
               >
-                <span className="block text-lg font-semibold leading-5 text-[#FFF6E5]">
+                <span className="block text-lg font-semibold leading-5">
                   {variants[variant].label}
                 </span>
-                <span className="mt-2 block text-sm font-bold text-[#E8A420]">
+                <span className="mt-2 block text-sm font-bold" style={{ color: 'var(--gold)' }}>
                   ${variants[variant].price} MXN
                 </span>
-                <span className="mt-2 block text-xs leading-4 text-[#F0E4CC]/58">
+                <span className="mt-2 block text-xs leading-4" style={{ color: 'var(--text-secondary)' }}>
                   {variants[variant].note}
                 </span>
               </button>
@@ -257,7 +263,7 @@ export default function ArtisticBoxConfiguratorScreen() {
         <ConfigSection eyebrow="2" title="Idea del diseño">
           {draft.variant === 'nappan-box' ? (
             <>
-              <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+              <label className="block text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
                 Idea requerida
               </label>
               <textarea
@@ -268,15 +274,20 @@ export default function ArtisticBoxConfiguratorScreen() {
                   clearFeedback()
                 }}
                 placeholder="Ej: oso astronauta con colores pastel y nombre de la cumpleañera."
-                className="mt-2 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm leading-6 text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="mt-2 w-full rounded-md border px-4 py-3 text-sm leading-6 outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
-              <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/58">
+              <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                 Cuéntanos la idea en texto. Nosotros la convertimos en diseño.
               </p>
             </>
           ) : (
             <>
-              <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+              <label className="block text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
                 Enlace requerido
               </label>
               <input
@@ -287,9 +298,14 @@ export default function ArtisticBoxConfiguratorScreen() {
                   clearFeedback()
                 }}
                 placeholder="https://..."
-                className="mt-2 w-full rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-sm text-[#FFF6E5] outline-none transition placeholder:text-[#F0E4CC]/35 focus:border-[#E8A420]/60"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'var(--gold-light)',
+                }}
+                className="mt-2 w-full rounded-md border px-4 py-3 text-sm outline-none transition placeholder:opacity-50 focus:border-[var(--gold)]"
               />
-              <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/58">
+              <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                 Comparte un enlace de referencia o un diseño base para personalizar.
               </p>
             </>
@@ -306,26 +322,26 @@ export default function ArtisticBoxConfiguratorScreen() {
                   key={extra}
                   type="button"
                   onClick={() => toggleExtra(extra)}
-                  className={`flex min-h-[64px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition active:scale-[0.99] ${
-                    isSelected
-                      ? 'border-[#E8A420]/75 bg-[#E8A420]/12'
-                      : 'border-[#E8A420]/10 bg-[#100B07]'
-                  }`}
+                  className="flex min-h-[64px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition active:scale-[0.99]"
+                  style={{
+                    borderColor: isSelected ? 'var(--gold)' : 'var(--border)',
+                    background: isSelected ? 'var(--gold-dim)' : 'var(--surface-2)',
+                  }}
                 >
                   <span>
-                    <span className="block text-sm font-semibold leading-5 text-[#FFF6E5]">
+                    <span className="block text-sm font-semibold leading-5">
                       {extras[extra].label}
                     </span>
-                    <span className="mt-1 block text-xs text-[#F0E4CC]/54">
+                    <span className="mt-1 block text-xs" style={{ color: 'var(--text-secondary)' }}>
                       +${extras[extra].price} MXN por caja
                     </span>
                   </span>
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
-                      isSelected
-                        ? 'border-[#E8A420] bg-[#E8A420]'
-                        : 'border-[#7A6A55]'
-                    }`}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
+                    style={{
+                      borderColor: isSelected ? 'var(--gold)' : 'var(--text-secondary)',
+                      background: isSelected ? 'var(--gold)' : 'transparent',
+                    }}
                   >
                     {isSelected ? (
                       <svg
@@ -333,7 +349,7 @@ export default function ArtisticBoxConfiguratorScreen() {
                         height="12"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#0C0806"
+                        stroke="var(--bg-primary)"
                         strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -353,7 +369,8 @@ export default function ArtisticBoxConfiguratorScreen() {
             <button
               type="button"
               onClick={() => updateQuantity(Math.max(MIN_QUANTITY, draft.quantity - 1))}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
               aria-label="Restar una caja"
             >
               -
@@ -363,25 +380,27 @@ export default function ArtisticBoxConfiguratorScreen() {
               min={MIN_QUANTITY}
               value={draft.quantity}
               onChange={(event) => updateQuantity(Number(event.target.value))}
-              className="h-12 min-w-0 flex-1 rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-center text-lg font-bold text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
+              className="h-12 min-w-0 flex-1 rounded-md border px-4 text-center text-lg font-bold outline-none"
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
               aria-label="Cantidad de cajas"
             />
             <button
               type="button"
               onClick={() => updateQuantity(draft.quantity + 1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
               aria-label="Agregar una caja"
             >
               +
             </button>
           </div>
-          <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/58">
+          <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
             La cantidad mínima es {MIN_QUANTITY}. Los extras se calculan por unidad.
           </p>
         </ConfigSection>
 
-        <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+        <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
             Detalle final
           </p>
           <dl className="mt-3 space-y-2 text-sm">
@@ -425,11 +444,11 @@ function ConfigSection({
   title: string
 }) {
   return (
-    <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+    <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
         Paso {eyebrow}
       </p>
-      <h2 className="mt-1 text-xl font-semibold text-[#FFF6E5]">{title}</h2>
+      <h2 className="mt-1 text-xl font-semibold">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
   )
@@ -446,11 +465,10 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-[#F0E4CC]/52">{label}</dt>
+      <dt style={{ color: 'var(--text-secondary)' }}>{label}</dt>
       <dd
-        className={`max-w-[210px] text-right font-semibold leading-5 ${
-          muted ? 'text-red-100' : 'text-[#FFF6E5]'
-        }`}
+        className="max-w-[210px] text-right font-semibold leading-5"
+        style={{ color: muted ? 'var(--error)' : 'var(--text-primary)' }}
       >
         {value}
       </dd>

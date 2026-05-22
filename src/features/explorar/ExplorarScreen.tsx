@@ -44,22 +44,22 @@ export default function ExplorarScreen() {
 
   return (
     <>
-      <main className="min-h-dvh bg-[#0C0806] px-4 pb-32 pt-5 text-[#F0E4CC]">
+      <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="mx-auto w-full max-w-3xl">
           <header className="mb-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#E8A420]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--gold)' }}>
               Explora nuestros productos
             </p>
-            <h1 className="mt-2 text-4xl font-semibold leading-tight text-[#FFF6E5]">
+            <h1 className="mt-2 text-4xl font-semibold leading-tight">
               Todos los productos
             </h1>
-            <p className="mt-3 text-sm leading-6 text-[#F0E4CC]/65">
+            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
               Descubre todas nuestras opciones de pancake art para tu evento.
             </p>
           </header>
 
           {error ? (
-            <div className="rounded-lg border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
+            <div className="rounded-lg border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-700">
               {error}
             </div>
           ) : null}
@@ -67,7 +67,7 @@ export default function ExplorarScreen() {
           {loading ? (
             <div className="grid grid-cols-1 gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-40 rounded-lg bg-[#181209] animate-pulse" />
+                <div key={i} className="h-40 rounded-lg animate-pulse" style={{ background: 'var(--surface-2)' }} />
               ))}
             </div>
           ) : (
@@ -76,18 +76,28 @@ export default function ExplorarScreen() {
                 <Link
                   key={product.id}
                   href={product.href}
-                  className="block rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4 transition hover:border-[#E8A420]/30 active:scale-[0.99]"
+                  className="block rounded-lg border p-4 transition active:scale-[0.99]"
+                  style={{
+                    background: 'var(--surface-1)',
+                    borderColor: 'var(--border)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--gold)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)'
+                  }}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h2 className="text-lg font-semibold text-[#FFF6E5]">
+                      <h2 className="text-lg font-semibold">
                         {product.name}
                       </h2>
-                      <p className="mt-1 text-sm text-[#F0E4CC]/65">
+                      <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
                         {product.subtitle}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#E8A420]/10 px-2.5 py-1 text-xs font-semibold text-[#E8A420]">
+                    <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: 'var(--gold-dim)', color: 'var(--gold)' }}>
                       {product.tag}
                     </span>
                   </div>
