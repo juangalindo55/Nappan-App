@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className="h-full">
+    <html lang="es" className="h-full scroll-smooth">
       <body className="min-h-full antialiased" style={{ background: '#FFF8EA' }}>
         <div
           style={{

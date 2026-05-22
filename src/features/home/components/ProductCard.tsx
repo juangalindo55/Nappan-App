@@ -4,26 +4,26 @@ import type { Product } from '@/features/products/product.types'
 
 const productCopy: Record<string, { description: string; cta: string; image: string; alt: string }> = {
   nappanbox: {
-    description: 'Regalos personalizados y detalles listos para compartir.',
-    cta: 'Personalizar caja',
-    image: '/images/nappan/gallery-mario-box.jpg',
-    alt: 'Nappan Box colorida con pancake art personalizado',
+    description: 'Piezas personalizadas para regalo, cumpleaños o ese detalle que tiene que impresionar.',
+    cta: 'Ordenar ahora',
+    image: '/images/nappan/gallery-1.jpg',
+    alt: 'Nappan Box personalizada con arte de personaje',
   },
   lunchbox: {
-    description: 'Cajas para grupos, juntas y celebraciones coordinadas.',
-    cta: 'Ver opciones',
+    description: 'Cajas para grupos, brunchs y celebraciones donde todo debe verse bien desde el primer vistazo.',
+    cta: 'Ordenar ahora',
     image: '/images/nappan/lunchbox.jpg',
     alt: 'Lunch Box Nappan con pancakes y toppings para compartir',
   },
   fitbar: {
-    description: 'Pancakes proteicos para un antojo limpio y práctico.',
-    cta: 'Elegir Fit Bar',
-    image: '/images/nappan/fitbar.jpg',
-    alt: 'Fit Bar con pancakes proteicos y presentación saludable',
+    description: 'Pancakes proteicos para un antojo más limpio sin perder presentación.',
+    cta: 'Ordenar ahora',
+    image: '/images/nappan/protein-minipancakes.webp',
+    alt: 'Mini pancakes proteicos presentados como Fit Bar',
   },
   eventos: {
-    description: 'Pancake art en vivo para marcas y celebraciones.',
-    cta: 'Cotizar evento',
+    description: 'Pancake art en vivo para marcas, bodas y celebraciones con alma.',
+    cta: 'Ordenar ahora',
     image: '/images/nappan/wellness-event.webp',
     alt: 'Experiencia de evento Nappan con pancake art',
   },
@@ -40,7 +40,7 @@ export function ProductCard({ delay, product }: ProductCardProps) {
   return (
     <Link href={product.href} className="block transition active:scale-[0.99] md:hover:-translate-y-1">
       <article
-        className="relative flex min-h-[270px] flex-col overflow-hidden rounded-[1.6rem] anim-up"
+        className="relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[1.8rem] anim-up"
         style={{
           animationDelay: delay,
           background: 'rgba(255,252,245,0.86)',
@@ -48,7 +48,7 @@ export function ProductCard({ delay, product }: ProductCardProps) {
           boxShadow: '0 16px 42px rgba(62,35,19,0.08)',
         }}
       >
-        <div className="relative h-36 overflow-hidden" style={{ background: '#EAD9B9' }}>
+        <div className="relative h-40 overflow-hidden" style={{ background: '#EAD9B9' }}>
           {copy ? (
             <Image
               src={copy.image}
@@ -60,11 +60,16 @@ export function ProductCard({ delay, product }: ProductCardProps) {
           ) : null}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'linear-gradient(180deg, rgba(42,23,16,0.02) 0%, rgba(42,23,16,0.2) 100%)' }}
+            style={{ background: 'linear-gradient(180deg, rgba(42,23,16,0.04) 0%, rgba(42,23,16,0.22) 100%)' }}
           />
           <span
             className="absolute left-4 top-4 rounded-full px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em]"
-            style={{ color: '#FFF8EA', background: 'rgba(42,23,16,0.62)', fontFamily: 'var(--font-dm-sans)', backdropFilter: 'blur(10px)' }}
+            style={{
+              color: '#FFF8EA',
+              background: 'rgba(42,23,16,0.64)',
+              fontFamily: 'var(--font-dm-sans)',
+              backdropFilter: 'blur(10px)',
+            }}
           >
             {product.tag}
           </span>
@@ -87,8 +92,13 @@ export function ProductCard({ delay, product }: ProductCardProps) {
           </div>
 
           <span
-            className="mt-5 text-sm font-extrabold"
-            style={{ color: '#2A1710', fontFamily: 'var(--font-dm-sans)' }}
+            className="mt-5 inline-flex w-fit items-center rounded-full border px-4 py-2 text-sm font-extrabold"
+            style={{
+              color: '#2A1710',
+              fontFamily: 'var(--font-dm-sans)',
+              borderColor: 'rgba(88,55,34,0.16)',
+              background: 'rgba(255,252,245,0.72)',
+            }}
           >
             {copy?.cta ?? 'Ver experiencia'} →
           </span>

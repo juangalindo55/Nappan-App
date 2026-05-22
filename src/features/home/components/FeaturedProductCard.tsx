@@ -3,16 +3,16 @@ import Link from 'next/link'
 import type { Product } from '@/features/products/product.types'
 
 const productDescriptions: Record<string, string> = {
-  nappanbox: 'El regalo que todos van a ver, probar y recordar.',
-  lunchbox: 'Para compartir. Para celebrar. Para que nadie se quede sin su porción de magia.',
-  fitbar: 'Proteína que sabe a celebración. Rápido pero sin compromisos.',
-  eventos: 'La estación que todos van a rodear. Pancake art en vivo, conversación garantizada.',
+  nappanbox: 'Un lienzo comestible diseñado para sorprender con retratos, personajes o ideas totalmente personalizadas.',
+  lunchbox: 'Ideal para grupos, reuniones y celebraciones donde quieres que todo llegue bonito y ordenado.',
+  fitbar: 'La versión más limpia de Nappan: proteína, sabor y presentación sin perder lo especial.',
+  eventos: 'Pancake art en vivo para que tu celebración tenga algo único que todos quieran ver de cerca.',
 }
 
 const productImages: Record<string, { src: string; alt: string }> = {
   nappanbox: {
-    src: '/images/nappan/gallery-mario-box.jpg',
-    alt: 'Nappan Box colorida con pancake art personalizado',
+    src: '/images/nappan/nappanbox.jpg',
+    alt: 'Nappan Box personalizada con pancake art de retrato',
   },
   lunchbox: {
     src: '/images/nappan/lunchbox.jpg',
@@ -23,8 +23,8 @@ const productImages: Record<string, { src: string; alt: string }> = {
     alt: 'Fit Bar con pancakes proteicos y presentación saludable',
   },
   eventos: {
-    src: '/images/nappan/wellness-event.webp',
-    alt: 'Mesa de evento Nappan con experiencia de pancake art',
+    src: '/images/nappan/stand.webp',
+    alt: 'Estación de Nappan en vivo para eventos',
   },
 }
 
@@ -55,7 +55,7 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
           style={{ background: 'rgba(185,106,69,0.14)' }}
         />
 
-        <div className="relative z-10 grid gap-0 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.86fr)]">
+        <div className="relative z-10 grid gap-0 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)]">
           <div className="flex min-h-[330px] flex-col justify-between p-6 sm:p-8 md:p-10">
             <div>
               <div className="mb-6 flex items-center gap-3">
@@ -63,7 +63,7 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
                   className="rounded-full px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em]"
                   style={{ background: '#F7EEDC', color: '#A87325', border: '1px solid rgba(88,55,34,0.10)', fontFamily: 'var(--font-dm-sans)' }}
                 >
-                  Destacado · {product.tag}
+                  Experiencia de gifting
                 </span>
               </div>
 
@@ -79,13 +79,28 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
               >
                 {productDescriptions[product.id] ?? product.subtitle}
               </p>
+
+              <ul className="mt-6 space-y-3 text-sm leading-6" style={{ color: '#2A1710', fontFamily: 'var(--font-dm-sans)' }}>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#D89B2B]" />
+                  Personalización de mensaje, personaje o concepto.
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#D89B2B]" />
+                  Presentación premium lista para regalo o mesa principal.
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#D89B2B]" />
+                  Experiencia pensada para compartir y fotografiar.
+                </li>
+              </ul>
             </div>
 
             <span
               className="mt-7 inline-flex w-fit items-center rounded-full px-5 py-3 text-sm font-extrabold"
               style={{ background: '#2A1710', color: '#FFF8EA', fontFamily: 'var(--font-dm-sans)' }}
             >
-              Personalizar ahora →
+              Personaliza tu caja →
             </span>
           </div>
 
@@ -103,7 +118,7 @@ export function FeaturedProductCard({ product }: FeaturedProductCardProps) {
             />
             <div
               className="pointer-events-none absolute inset-0"
-              style={{ background: 'linear-gradient(90deg, rgba(255,252,245,0.22) 0%, rgba(255,252,245,0) 38%), linear-gradient(180deg, rgba(42,23,16,0) 55%, rgba(42,23,16,0.18) 100%)' }}
+              style={{ background: 'linear-gradient(90deg, rgba(255,252,245,0.20) 0%, rgba(255,252,245,0) 38%), linear-gradient(180deg, rgba(42,23,16,0) 55%, rgba(42,23,16,0.18) 100%)' }}
             />
           </div>
         </div>

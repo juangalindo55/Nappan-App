@@ -53,18 +53,20 @@ export function HomeTopBar() {
           <line x1="3" y1="6" x2="21" y2="6" />
           <path d="M16 10a4 4 0 01-8 0" />
         </svg>
-        <span
-          className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1"
-          style={{
-            background: '#D89B2B',
-            fontSize: '10px',
-            fontWeight: 800,
-            color: '#2A1710',
-            border: '2px solid #FFF8EA',
-          }}
-        >
-          {totalItems}
-        </span>
+        {totalItems > 0 ? (
+          <span
+            className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1"
+            style={{
+              background: '#D89B2B',
+              fontSize: '10px',
+              fontWeight: 800,
+              color: '#2A1710',
+              border: '2px solid #FFF8EA',
+            }}
+          >
+            {totalItems}
+          </span>
+        ) : null}
       </Link>
     </header>
   )
