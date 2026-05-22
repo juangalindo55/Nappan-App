@@ -119,31 +119,32 @@ export default function CartPage() {
 
     return (
         <>
-        <main className="min-h-dvh bg-[#0C0806] px-4 pb-32 pt-5 text-[#F0E4CC]">
+        <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-                <header className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                <header className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                         Pedido actual
                     </p>
-                    <h1 className="mt-1 text-3xl font-semibold text-[#FFF6E5]">
+                    <h1 className="mt-1 text-3xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                         Tu carrito
                     </h1>
-                    <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/60">
+                    <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                         Revisa tus productos, ajusta cantidades y edita tus extras antes de continuar.
                     </p>
                 </header>
 
                 {isEmpty ? (
-                    <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-5">
-                        <p className="text-lg font-semibold text-[#FFF6E5]">
+                    <section className="rounded-lg border p-5" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                             Tu carrito está vacío
                         </p>
-                        <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/60">
+                        <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                             Agrega un producto desde el menú de pedido para empezar.
                         </p>
                         <Link
                             href="/order"
-                            className="mt-4 inline-flex rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99]"
+                            className="mt-4 inline-flex rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
+                            style={{ background: 'var(--gold)', color: 'var(--text-primary)' }}
                         >
                             Ir a pedir
                         </Link>
@@ -151,13 +152,14 @@ export default function CartPage() {
                 ) : (
                     <>
                         {!hasTier ? (
-                            <div className="flex items-center justify-between gap-3 rounded-lg border border-[#E8A420]/10 bg-[#181209] px-4 py-3">
-                                <p className="text-sm text-[#F0E4CC]/70">
+                            <div className="flex items-center justify-between gap-3 rounded-lg border px-4 py-3" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                                     ¿Tienes descuento de membresía?
                                 </p>
                                 <Link
                                     href="/profile"
-                                    className="shrink-0 rounded-md border border-[#E8A420]/25 px-3 py-1.5 text-xs font-semibold text-[#E8A420] transition active:scale-[0.99]"
+                                    className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-semibold transition active:scale-[0.99]"
+                                    style={{ borderColor: 'rgba(216, 155, 43, 0.3)', color: 'var(--gold)' }}
                                 >
                                     Ver perfil →
                                 </Link>
@@ -188,8 +190,8 @@ export default function CartPage() {
                             })}
                         </section>
 
-                        <section className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                        <section className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                                 Resumen
                             </p>
 
@@ -209,19 +211,19 @@ export default function CartPage() {
                                 />
                             </dl>
 
-                            <p className="mt-3 text-sm leading-5 text-[#F0E4CC]/58">
+                            <p className="mt-3 text-sm leading-5" style={{ color: 'var(--text-tertiary)' }}>
                                 El envío se cotiza aparte con los tiers de Supabase.
                             </p>
 
-                            <div className="mt-4 rounded-lg border border-[#E8A420]/10 bg-[#100B07] p-4">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                            <div className="mt-4 rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-2)' }}>
+                                <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                                     Cotizar envío
                                 </p>
-                                <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/58">
+                                <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-tertiary)' }}>
                                     El origen es fijo y se toma desde la sucursal configurada en Vercel. Aquí solo capturas el código postal de destino.
                                 </p>
                                 <label className="mt-3 block">
-                                    <span className="mb-1 block text-xs font-semibold text-[#F0E4CC]/60">
+                                    <span className="mb-1 block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
                                         Código postal de destino
                                     </span>
                                     <input
@@ -229,7 +231,10 @@ export default function CartPage() {
                                         onChange={(event) => setDestinationPostalCode(event.target.value)}
                                         inputMode="numeric"
                                         placeholder="64000"
-                                        className="h-11 w-full rounded-md border border-[#E8A420]/14 bg-[#181209] px-4 text-sm text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
+                                        className="h-11 w-full rounded-md border px-4 text-sm outline-none"
+                                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)', color: 'var(--text-primary)' }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(216, 155, 43, 0.6)'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(216, 155, 43, 0.2)'}
                                     />
                                 </label>
 
@@ -237,34 +242,35 @@ export default function CartPage() {
                                     type="button"
                                     onClick={handleQuoteShipping}
                                     disabled={quoteLoading}
-                                    className="mt-3 w-full rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99] disabled:opacity-60"
+                                    className="mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99] disabled:opacity-60"
+                                    style={{ background: 'var(--gold)', color: 'var(--text-primary)' }}
                                 >
                                     {quoteLoading ? 'Cotizando...' : 'Calcular envío'}
                                 </button>
 
                                 {quoteError ? (
-                                    <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-100">
+                                    <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
                                         {quoteError}
                                     </p>
                                 ) : null}
 
                                 {quotePrice !== null ? (
-                                    <div className="mt-3 space-y-2 rounded-md border border-[#E8A420]/14 bg-[#181209] px-3 py-3 text-sm">
+                                    <div className="mt-3 space-y-2 rounded-md border px-3 py-3 text-sm" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
                                         <p className="flex items-center justify-between gap-3">
-                                            <span className="text-[#F0E4CC]/60">Distancia</span>
-                                            <span className="font-semibold text-[#FFF6E5]">
+                                            <span style={{ color: 'var(--text-secondary)' }}>Distancia</span>
+                                            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                                                 {quoteDistanceKm?.toFixed(1)} km
                                             </span>
                                         </p>
                                         <p className="flex items-center justify-between gap-3">
-                                            <span className="text-[#F0E4CC]/60">Envío</span>
-                                            <span className="font-semibold text-[#FFF6E5]">
+                                            <span style={{ color: 'var(--text-secondary)' }}>Envío</span>
+                                            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                                                 ${quotePrice.toLocaleString('es-MX')}
                                             </span>
                                         </p>
-                                        <p className="flex items-center justify-between gap-3 border-t border-[#E8A420]/10 pt-2">
-                                            <span className="text-[#F0E4CC]/60">Total con envío</span>
-                                            <span className="text-base font-bold text-[#E8A420]">
+                                        <p className="flex items-center justify-between gap-3 border-t pt-2" style={{ borderColor: 'rgba(216, 155, 43, 0.2)' }}>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Total con envío</span>
+                                            <span className="text-base font-bold" style={{ color: 'var(--gold)' }}>
                                                 ${(discountedTotal + quotePrice).toLocaleString('es-MX')}
                                             </span>
                                         </p>
@@ -275,14 +281,16 @@ export default function CartPage() {
                             <div className="mt-4 flex gap-3">
                                 <Link
                                     href="/order"
-                                    className="flex-1 rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 py-3 text-center text-sm font-semibold text-[#FFF6E5] transition active:scale-[0.99]"
+                                    className="flex-1 rounded-md border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.99]"
+                                    style={{ borderColor: 'rgba(216, 155, 43, 0.2)', color: 'var(--text-primary)', background: 'var(--surface-1)' }}
                                 >
                                     Seguir comprando
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => router.push('/checkout')}
-                                    className="flex-1 rounded-md bg-[#E8A420] px-4 py-3 text-sm font-bold text-[#0C0806] transition active:scale-[0.99] disabled:opacity-60"
+                                    className="flex-1 rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99] disabled:opacity-60"
+                                    style={{ background: 'var(--gold)', color: 'var(--text-primary)' }}
                                     disabled={loading || items.length === 0}
                                 >
                                     {loading ? "Cargando..." : `Continuar${quotePrice !== null ? ` · $${totalWithShipping.toLocaleString('es-MX')}` : ''}`}
@@ -333,25 +341,25 @@ function CartItemEditable({
     }
 
     return (
-        <article className="rounded-lg border border-[#E8A420]/10 bg-[#181209] p-4">
+        <article className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                         {item.sku}
                     </p>
-                    <h2 className="mt-1 text-lg font-semibold text-[#FFF6E5]">
+                    <h2 className="mt-1 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {item.name}
                     </h2>
-                    <p className="mt-2 text-sm leading-5 text-[#F0E4CC]/60">
+                    <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                         Base: ${item.base_price.toLocaleString("es-MX")} · Cantidad: {item.quantity}
                     </p>
                     {item.type === 'artistic' && (item.config as { ideaText?: string; designLink?: string }).ideaText && (
-                        <p className="mt-1 truncate text-xs text-[#F0E4CC]/50">
+                        <p className="mt-1 truncate text-xs" style={{ color: 'var(--text-tertiary)' }}>
                             Diseño: {((item.config as { ideaText?: string }).ideaText || '').substring(0, 40)}…
                         </p>
                     )}
                     {item.type === 'artistic' && (item.config as { ideaText?: string; designLink?: string }).designLink && (
-                        <p className="mt-1 truncate text-xs text-[#F0E4CC]/50">
+                        <p className="mt-1 truncate text-xs" style={{ color: 'var(--text-tertiary)' }}>
                             Ref: {((item.config as { designLink?: string }).designLink || '').substring(0, 40)}…
                         </p>
                     )}
@@ -360,7 +368,8 @@ function CartItemEditable({
                 <button
                     type="button"
                     onClick={onRemove}
-                    className="rounded-md border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-100 transition active:scale-[0.99]"
+                    className="rounded-md border px-3 py-2 text-sm font-semibold transition active:scale-[0.99]"
+                    style={{ borderColor: 'rgba(244, 63, 94, 0.3)', background: 'rgba(244, 63, 94, 0.1)', color: 'rgb(220, 38, 38)' }}
                 >
                     Eliminar
                 </button>
@@ -368,10 +377,10 @@ function CartItemEditable({
 
             {item.sku === 'fitbar-selection' ? (
                 <div className="mt-4 flex items-center justify-between gap-3">
-                    <p className="text-sm text-[#F0E4CC]/60">
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                         Selección de barra bienestar · cantidad fija
                     </p>
-                    <p className="text-lg font-bold text-[#E8A420]">
+                    <p className="text-lg font-bold" style={{ color: 'var(--gold)' }}>
                         ${itemTotal.toLocaleString("es-MX")}
                     </p>
                 </div>
@@ -380,7 +389,8 @@ function CartItemEditable({
                     <button
                         type="button"
                         onClick={() => onQuantityChange(Math.max(1, item.quantity - 1))}
-                        className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                        className="flex h-11 w-11 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
                         aria-label="Disminuir cantidad"
                     >
                         -
@@ -391,27 +401,29 @@ function CartItemEditable({
                         min={1}
                         value={item.quantity}
                         onChange={(event) => onQuantityChange(Math.max(1, Number(event.target.value) || 1))}
-                        className="h-11 min-w-0 flex-1 rounded-md border border-[#E8A420]/14 bg-[#100B07] px-4 text-center text-base font-bold text-[#FFF6E5] outline-none focus:border-[#E8A420]/60"
+                        className="h-11 min-w-0 flex-1 rounded-md border px-4 text-center text-base font-bold outline-none"
+                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
                         aria-label="Cantidad del producto"
                     />
 
                     <button
                         type="button"
                         onClick={() => onQuantityChange(item.quantity + 1)}
-                        className="flex h-11 w-11 items-center justify-center rounded-md border border-[#E8A420]/14 bg-[#100B07] text-2xl font-semibold text-[#FFF6E5] active:scale-[0.98]"
+                        className="flex h-11 w-11 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
                         aria-label="Aumentar cantidad"
                     >
                         +
                     </button>
 
-                    <p className="ml-auto text-lg font-bold text-[#E8A420]">
+                    <p className="ml-auto text-lg font-bold" style={{ color: 'var(--gold)' }}>
                         ${itemTotal.toLocaleString("es-MX")}
                     </p>
                 </div>
             )}
 
             <div className="mt-4">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6A55]">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                     Extras
                 </p>
 
@@ -422,14 +434,14 @@ function CartItemEditable({
                         onToggleExtra={toggleExtra}
                     />
                 ) : (
-                    <p className="text-sm leading-5 text-[#F0E4CC]/54">
+                    <p className="text-sm leading-5" style={{ color: 'var(--text-tertiary)' }}>
                         No hay extras configurados para este producto.
                     </p>
                 )}
             </div>
 
             {item.extras.length > 0 ? (
-                <ul className="mt-4 space-y-1 text-sm text-[#F0E4CC]/68">
+                <ul className="mt-4 space-y-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {item.extras.map((extra) => (
                         <li key={getExtraKey(item.sku, extra)} className="flex items-center justify-between gap-3">
                             <span>{extra.label}</span>
@@ -462,17 +474,17 @@ function ExtrasChips({
                         type="button"
                         onClick={() => onToggleExtra(extra.id)}
                         aria-pressed={isSelected}
-                        className={[
-                            "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold",
-                            "transition-all duration-200 ease-out",
-                            "active:scale-[0.98]",
-                            isSelected
-                                ? "scale-[1.02] border-black bg-black text-white shadow-md"
-                                : "border-gray-300 bg-white text-gray-700 hover:border-black hover:bg-[#FFF9F0]",
-                        ].join(" ")}
+                        className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ease-out active:scale-[0.98]"
+                        style={{
+                            borderColor: isSelected ? 'var(--text-primary)' : 'rgba(88, 55, 34, 0.2)',
+                            background: isSelected ? 'var(--text-primary)' : 'var(--surface-1)',
+                            color: isSelected ? 'white' : 'var(--text-primary)',
+                            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                            ...(isSelected ? { boxShadow: '0 8px 16px rgba(42, 23, 16, 0.15)' } : {})
+                        }}
                     >
                         <span>{extra.label}</span>
-                        <span className={isSelected ? "text-white/80" : "text-gray-500"}>
+                        <span style={{ opacity: isSelected ? 0.8 : 0.6 }}>
                             +${extra.price}
                         </span>
                     </button>
@@ -493,11 +505,12 @@ function SummaryRow({
 }) {
     return (
         <div className="flex items-center justify-between gap-4">
-            <dt className="text-[#F0E4CC]/52">{label}</dt>
+            <dt style={{ color: 'var(--text-tertiary)' }}>{label}</dt>
             <dd
                 className={`font-semibold ${
-                    highlight ? "text-[#E8A420] text-lg" : "text-[#FFF6E5]"
+                    highlight ? "text-lg" : ""
                 }`}
+                style={{ color: highlight ? 'var(--gold)' : 'var(--text-primary)' }}
             >
                 ${value.toLocaleString("es-MX")}
             </dd>

@@ -3,14 +3,30 @@
 :root {
   --font-cormorant: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --font-dm-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --bg: #0C0806;
-  --surface-1: #161009;
-  --surface-2: #1E150C;
-  --surface-3: #261B10;
-  --gold: #E8A420;
-  --gold-dim: rgba(232, 164, 32, 0.12);
-  --cream: #F0E4CC;
-  --muted: #7A6A55;
+
+  /* Light Warm Theme (Unified Across All Pages) */
+  --bg-primary: #FFF8EA;
+  --bg-secondary: #F5EFDE;
+  --surface-1: rgba(255, 252, 245, 0.86);
+  --surface-2: rgba(245, 239, 222, 0.6);
+  --surface-3: rgba(232, 220, 200, 0.4);
+
+  --text-primary: #2A1710;
+  --text-secondary: #765E4B;
+  --text-tertiary: #9A7A61;
+
+  --border: rgba(88, 55, 34, 0.13);
+
+  --gold: #D89B2B;
+  --gold-dim: rgba(216, 155, 43, 0.12);
+  --gold-light: rgba(216, 155, 43, 0.08);
+
+  --success: #4ADE80;
+  --error: #F87171;
+  --warning: #FBBF24;
+
+  --cream: #FFF8EA;
+  --muted: #9A7A61;
   --nav-height: 72px;
 }
 
@@ -26,8 +42,8 @@ html {
 }
 
 body {
-  background: var(--bg);
-  color: var(--cream);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100%;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
