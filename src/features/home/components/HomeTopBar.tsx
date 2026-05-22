@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart.store'
 
@@ -17,19 +18,15 @@ export function HomeTopBar() {
       }}
     >
       <Link href="/" className="flex items-center gap-3 transition active:scale-[0.98]">
-        <span
-          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-2xl"
-          style={{
-            background: '#2A1710',
-            color: '#FFF8EA',
-            boxShadow: '0 12px 28px rgba(62,35,19,0.16)',
-            fontFamily: 'var(--font-cormorant)',
-            fontStyle: 'italic',
-            fontWeight: 700,
-          }}
-        >
-          N
-        </span>
+        <div className="relative h-10 w-10">
+          <Image
+            src="/images/nappan/logo-dorado.svg"
+            alt="Nappan Studio"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <span className="flex items-baseline gap-1.5">
           <span
             style={{

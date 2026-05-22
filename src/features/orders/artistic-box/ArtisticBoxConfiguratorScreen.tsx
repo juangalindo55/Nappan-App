@@ -161,6 +161,17 @@ export default function ArtisticBoxConfiguratorScreen() {
       }}
     >
       <header className="px-4 pt-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex-1" />
+          <Link
+            href="/order"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg border px-3 py-2 text-sm font-semibold transition active:scale-[0.98]"
+            style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+            title="Regresar a categorías"
+          >
+            ← Volver
+          </Link>
+        </div>
         <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
           <div className="relative min-h-[152px] bg-[radial-gradient(circle_at_20%_18%,#D89B2B_0%,#7A2440_38%,#FFF8EA_78%)] p-4">
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
