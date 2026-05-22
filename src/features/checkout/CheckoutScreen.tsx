@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cart.store'
@@ -26,8 +26,8 @@ export default function CheckoutScreen() {
   const validate = useCartStore((s) => s.validate)
   const reset = useCartStore((s) => s.reset)
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+  const [name, setName] = useState(() => loadCustomerProfileSession()?.name ?? '')
+  const [phone, setPhone] = useState(() => loadCustomerProfileSession()?.phone ?? '')
   const [address, setAddress] = useState('')
   const [receiverName, setReceiverName] = useState('')
   const [deliveryDate, setDeliveryDate] = useState('')
@@ -37,18 +37,8 @@ export default function CheckoutScreen() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [cartErrors, setCartErrors] = useState<string[]>([])
   const [confirmedOrderNumber, setConfirmedOrderNumber] = useState<string | null>(null)
-
-  useEffect(() => {
-    const session = loadCustomerProfileSession()
-    if (session) {
-      if (session.name) setName(session.name)
-      if (session.phone) setPhone(session.phone)
-    }
-    const { errors } = validate()
-    setCartErrors(errors)
-  }, [validate])
+  const cartErrors = validate().errors
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

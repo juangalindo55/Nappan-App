@@ -11,6 +11,7 @@ import {
 } from "@/services/customer.service"
 import {
   clearCustomerProfileSession,
+  loadCustomerProfileSession,
   saveCustomerProfileSession,
 } from "@/lib/customer-profile-session"
 
@@ -108,14 +109,30 @@ function OrdersList({ orders }: { orders: CustomerOrder[] }) {
   )
 }
 
+function getInitialCustomerProfile(): CustomerProfile | null {
+  const storedProfile = loadCustomerProfileSession()
+
+  if (!storedProfile) return null
+
+  return {
+    id: null,
+    name: storedProfile.name,
+    phone: storedProfile.phone,
+    tierName: storedProfile.tierName,
+    tierSlug: storedProfile.tierSlug,
+    discountPercent: storedProfile.discountPercent,
+    benefits: [],
+  }
+}
+
 export default function ProfileScreen() {
-  const [phone, setPhone] = useState("")
-  const [draftName, setDraftName] = useState("")
+  const [profile, setProfile] = useState<CustomerProfile | null>(() => getInitialCustomerProfile())
+  const [phone, setPhone] = useState(() => profile?.phone ?? "")
+  const [draftName, setDraftName] = useState(() => profile?.name ?? "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [lookupDone, setLookupDone] = useState(false)
   const [foundExisting, setFoundExisting] = useState<boolean | null>(null)
-  const [profile, setProfile] = useState<CustomerProfile | null>(null)
   const [orders, setOrders] = useState<CustomerOrder[]>([])
 
   const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || "")
@@ -124,13 +141,6 @@ export default function ProfileScreen() {
     .filter(Boolean)
   const isAdmin = profile?.phone && adminPhones.includes(profile.phone.replace(/\D/g, ""))
 
-  // Debug logging
-  console.log("ProfileScreen render:", {
-    envVar: process.env.NEXT_PUBLIC_ADMIN_PHONES,
-    adminPhones,
-    profilePhone: profile?.phone,
-    isAdmin,
-  })
 
   async function handleLookup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

@@ -4,9 +4,9 @@ import Link from "next/link"
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useCartStore } from "@/store/cart.store"
+import { useUserStore } from "@/store/user.store"
 import { useConfig } from "@/hooks/useConfig"
 import type { CartExtra, CartItem } from "@/domain/cart.domain"
-import { loadCustomerProfileSession } from "@/lib/customer-profile-session"
 import BottomNav from "@/components/BottomNav"
 
 type ConfigExtra = {
@@ -64,23 +64,17 @@ export default function CartPage() {
     const removeItem = useCartStore((state) => state.removeItem)
     const updateQuantity = useCartStore((state) => state.updateQuantity)
     const updateItemExtras = useCartStore((state) => state.updateItemExtras)
+    const profile = useUserStore((state) => state.profile)
     const { config, loading } = useConfig()
     const [destinationPostalCode, setDestinationPostalCode] = useState('')
     const [quotePrice, setQuotePrice] = useState<number | null>(null)
     const [quoteDistanceKm, setQuoteDistanceKm] = useState<number | null>(null)
     const [quoteError, setQuoteError] = useState('')
     const [quoteLoading, setQuoteLoading] = useState(false)
-    const [discountPercent] = useState<number>(() => {
-        const stored = loadCustomerProfileSession()
-        const pct = stored?.discountPercent ?? 0
-        return pct > 0 ? pct : 0
-    })
-    const [hasTier] = useState<boolean>(() => {
-        const stored = loadCustomerProfileSession()
-        return stored?.tierName != null
-    })
 
     const extrasBySku = useMemo(() => config?.extras ?? {}, [config])
+    const discountPercent = Math.max(0, profile?.discountPercent ?? 0)
+    const hasTier = profile?.tierName != null
     const discountAmount = Math.round(summary.total * (discountPercent / 100))
     const discountedTotal = Math.max(0, summary.total - discountAmount)
     const totalWithShipping = discountedTotal + (quotePrice ?? 0)
