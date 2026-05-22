@@ -8,13 +8,13 @@ export function HomeSectionHeader() {
           className="mb-2 text-xs font-extrabold uppercase tracking-[0.22em]"
           style={{ color: '#A87325', fontFamily: 'var(--font-dm-sans)' }}
         >
-          Escoge tu camino
+          ¿Cuál es tu Nappan?
         </p>
         <h2
           className="text-4xl leading-none tracking-[-0.04em] sm:text-5xl"
           style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500, color: '#2A1710' }}
         >
-          Nuestros productos
+          Elige tu pancake
         </h2>
       </div>
       <Link

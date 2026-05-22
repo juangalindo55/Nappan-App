@@ -3,10 +3,10 @@ import Link from 'next/link'
 import type { Product } from '@/features/products/product.types'
 
 const productDescriptions: Record<string, string> = {
-  nappanbox: 'Regalos personalizados con pancake art, frutas, toppings y detalles listos para sorprender.',
-  lunchbox: 'Cajas coordinadas para grupos, juntas, cumpleaños y días especiales.',
-  fitbar: 'Pancakes proteicos para un antojo limpio, rápido y con buena presentación.',
-  eventos: 'Pancake art en vivo para marcas, cumpleaños, wellness days y celebraciones.',
+  nappanbox: 'El regalo que todos van a ver, probar y recordar.',
+  lunchbox: 'Para compartir. Para celebrar. Para que nadie se quede sin su porción de magia.',
+  fitbar: 'Proteína que sabe a celebración. Rápido pero sin compromisos.',
+  eventos: 'La estación que todos van a rodear. Pancake art en vivo, conversación garantizada.',
 }
 
 const productImages: Record<string, { src: string; alt: string }> = {

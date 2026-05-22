@@ -30,7 +30,7 @@ export function EventPromo() {
               className="mt-5 max-w-lg text-sm leading-7 sm:text-base"
               style={{ color: 'rgba(255,248,234,0.74)', fontFamily: 'var(--font-dm-sans)' }}
             >
-              Para marcas, cumpleaños, wellness days y momentos que necesitan una experiencia diferente.
+              Para ese cumpleaños que quieres que sea legendario. Para la junta que necesita rompehielos. Para el evento que quieres que todos recuerden.
             </p>
             <Link
               href="/order/live-event"

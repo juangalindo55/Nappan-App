@@ -26,7 +26,7 @@ export function HomeGreeting({ greeting }: HomeGreetingProps) {
           className="mt-6 max-w-xl text-base leading-8 sm:text-lg"
           style={{ color: '#765E4B', fontFamily: 'var(--font-dm-sans)' }}
         >
-          Cajas personalizadas, lunch boxes, barras fit y pancake art para eventos. Elige la ocasión y te llevamos directo al pedido correcto.
+          Desde regalos con pancake art personalizado hasta barras fit proteicas. Para juntas, cumpleaños, eventos en vivo o ese antojo de viernes. Encontramos el pancake perfecto para ti.
         </p>
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
