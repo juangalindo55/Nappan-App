@@ -61,7 +61,7 @@ export default function CategorySelectionScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto px-4 pb-8 pt-6 md:pt-[100px]"
+      className="desktop-nav-offset hide-scrollbar min-h-dvh overflow-y-auto px-4 pb-8 pt-6"
       style={{
         background: 'var(--bg-primary)',
         color: 'var(--text-primary)',

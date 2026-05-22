@@ -248,7 +248,7 @@ export default function ProfileScreen() {
 
   return (
     <>
-      <main className="min-h-screen px-4 pb-28 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      <main className="desktop-nav-offset min-h-screen px-4 pb-28 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
           <header className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>

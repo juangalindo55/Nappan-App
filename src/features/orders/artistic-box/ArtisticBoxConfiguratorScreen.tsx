@@ -153,7 +153,7 @@ export default function ArtisticBoxConfiguratorScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto pb-8 md:pt-[80px]"
+      className="desktop-nav-offset hide-scrollbar min-h-dvh overflow-y-auto pb-8"
       style={{
         background: 'var(--bg-primary)',
         color: 'var(--text-primary)',

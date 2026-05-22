@@ -27,7 +27,8 @@
 
   --cream: #FFF8EA;
   --muted: #9A7A61;
-  --nav-height: 72px;
+  --nav-height: 92px;
+  --nav-clearance: 112px;
 }
 
 * {
@@ -126,3 +127,9 @@ a {
 .d4 { animation-delay: 0.24s; }
 .d5 { animation-delay: 0.30s; }
 .d6 { animation-delay: 0.36s; }
+
+@media (min-width: 768px) {
+  .desktop-nav-offset {
+    padding-top: var(--nav-clearance);
+  }
+}

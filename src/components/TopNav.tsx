@@ -22,14 +22,15 @@ export default function TopNav() {
     <nav
       className="hidden md:block fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        background: 'var(--bg-primary)',
+        background: 'rgba(255, 248, 234, 0.92)',
+        backdropFilter: 'blur(18px)',
         borderColor: 'var(--border)',
       }}
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10" style={{ height: '80px' }}>
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-[240px_1fr_240px] items-center px-6 sm:px-10 lg:px-12" style={{ height: 'var(--nav-height)' }}>
         {/* Logo */}
-        <Link href="/" className="transition active:scale-[0.98] shrink-0">
-          <div className="relative h-16 w-16">
+        <Link href="/" className="inline-flex w-fit items-center transition active:scale-[0.98]">
+          <div className="relative h-[56px] w-[200px]">
             <Image
               src="/images/nappan/logo-dorado.svg"
               alt="Nappan Studio"
@@ -41,7 +42,7 @@ export default function TopNav() {
         </Link>
 
         {/* Center Navigation */}
-        <div className="flex items-center gap-8 flex-1 justify-center">
+        <div className="flex items-center justify-center gap-8">
           {navItems.map(({ label, href }) => {
             const active = pathname === href || (href !== '/' && pathname.startsWith(href))
             return (
@@ -64,7 +65,7 @@ export default function TopNav() {
         {/* Cart Icon */}
         <Link
           href="/cart"
-          className="relative flex h-11 w-11 items-center justify-center rounded-full transition active:scale-95 shrink-0"
+          className="relative ml-auto flex h-12 w-12 items-center justify-center rounded-full transition active:scale-95"
           style={{
             background: 'rgba(255,252,245,0.78)',
             border: '1px solid rgba(88,55,34,0.14)',
