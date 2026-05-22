@@ -12,8 +12,10 @@ export default function HomeScreen() {
   const { featuredProduct, greeting, products, loading, error } = useHomeData()
 
   return (
-    <main className="hide-scrollbar min-h-dvh overflow-x-hidden pb-[calc(88px+env(safe-area-inset-bottom,0px))] md:pb-0">
-      <HomeTopBar />
+    <main className="hide-scrollbar min-h-dvh overflow-x-hidden pb-[calc(88px+env(safe-area-inset-bottom,0px))] md:pb-0 md:pt-[80px]">
+      <div className="md:hidden">
+        <HomeTopBar />
+      </div>
       <HomeGreeting greeting={greeting} />
 
       {error ? (
