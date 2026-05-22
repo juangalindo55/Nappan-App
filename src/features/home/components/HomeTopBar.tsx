@@ -18,7 +18,7 @@ export function HomeTopBar() {
       }}
     >
       <Link href="/" className="transition active:scale-[0.98]">
-        <div className="relative h-12 w-12">
+        <div className="relative h-20 w-20">
           <Image
             src="/images/nappan/logo-dorado.svg"
             alt="Nappan Studio"
