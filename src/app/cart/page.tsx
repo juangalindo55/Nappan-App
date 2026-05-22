@@ -122,15 +122,38 @@ export default function CartPage() {
         <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
                 <header className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
-                        Pedido actual
-                    </p>
-                    <h1 className="mt-1 text-3xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        Tu carrito
-                    </h1>
-                    <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-                        Revisa tus productos, ajusta cantidades y edita tus extras antes de continuar.
-                    </p>
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
+                                Pedido actual
+                            </p>
+                            <h1 className="mt-1 text-3xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                Tu carrito
+                            </h1>
+                            <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
+                                Revisa tus productos, ajusta cantidades y edita tus extras antes de continuar.
+                            </p>
+                        </div>
+                        {profile && (
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="flex items-center gap-2">
+                                    <div
+                                        className="h-3 w-3 rounded-full animate-pulse"
+                                        style={{
+                                            background: profile.isActive ? 'var(--success)' : 'var(--error)',
+                                            boxShadow: `0 0 8px ${profile.isActive ? '#4ADE80' : '#F87171'}`,
+                                        }}
+                                    />
+                                    <span className="text-xs font-semibold" style={{ color: profile.isActive ? 'var(--success)' : 'var(--error)' }}>
+                                        {profile.isActive ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                </div>
+                                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                                    {profile.name}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </header>
 
                 {isEmpty ? (
