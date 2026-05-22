@@ -27,7 +27,7 @@ export default function TopNav() {
         borderColor: 'var(--border)',
       }}
     >
-      <div className="mx-auto grid w-full max-w-7xl grid-cols-[240px_1fr_240px] items-center px-6 sm:px-10 lg:px-12" style={{ height: 'var(--nav-height)' }}>
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[240px_1fr_240px] items-center px-5 sm:px-8 lg:px-10" style={{ height: 'var(--nav-height)' }}>
         {/* Logo */}
         <Link href="/" className="inline-flex w-fit items-center transition active:scale-[0.98]">
           <div className="relative h-[56px] w-[200px]">
