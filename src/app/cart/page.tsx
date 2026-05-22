@@ -140,12 +140,12 @@ export default function CartPage() {
                                     <div
                                         className="h-3 w-3 rounded-full animate-pulse"
                                         style={{
-                                            background: profile.isActive ? 'var(--success)' : 'var(--error)',
-                                            boxShadow: `0 0 8px ${profile.isActive ? '#4ADE80' : '#F87171'}`,
+                                            background: hasTier ? 'var(--success)' : 'var(--error)',
+                                            boxShadow: `0 0 8px ${hasTier ? '#4ADE80' : '#F87171'}`,
                                         }}
                                     />
-                                    <span className="text-xs font-semibold" style={{ color: profile.isActive ? 'var(--success)' : 'var(--error)' }}>
-                                        {profile.isActive ? 'Activo' : 'Inactivo'}
+                                    <span className="text-xs font-semibold" style={{ color: hasTier ? 'var(--success)' : 'var(--error)' }}>
+                                        {hasTier ? 'Activo' : 'Inactivo'}
                                     </span>
                                 </div>
                                 <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
