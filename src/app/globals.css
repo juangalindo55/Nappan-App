@@ -1,8 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Quicksand:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
-  --font-cormorant: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-dm-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-cormorant: "Fraunces", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-dm-sans: "Quicksand", Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* Light Warm Theme (Unified Across All Pages) */
   --bg-primary: #FFF8EA;

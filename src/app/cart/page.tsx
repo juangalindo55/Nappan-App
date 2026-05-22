@@ -79,6 +79,22 @@ export default function CartPage() {
     const discountedTotal = Math.max(0, summary.total - discountAmount)
     const totalWithShipping = discountedTotal + (quotePrice ?? 0)
 
+    const checkoutCardStyle = {
+        borderColor: 'rgba(88, 55, 34, 0.12)',
+        background: 'linear-gradient(180deg, rgba(255, 252, 245, 0.96) 0%, rgba(255, 241, 232, 0.94) 100%)',
+        borderRadius: '24px',
+        boxShadow: '0 18px 45px rgba(61, 44, 42, 0.08)',
+    }
+
+    const checkoutHeadingStyle = {
+        fontFamily: 'var(--font-cormorant)',
+        color: 'var(--text-primary)',
+    }
+
+    const checkoutBodyStyle = {
+        fontFamily: 'var(--font-dm-sans)',
+    }
+
     const isEmpty = items.length === 0
 
     async function handleQuoteShipping() {
@@ -119,18 +135,18 @@ export default function CartPage() {
 
     return (
         <>
-        <main className="desktop-nav-offset min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+        <main className="desktop-nav-offset min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-dm-sans)' }}>
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-                <header className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                <header className="rounded-lg border p-4" style={checkoutCardStyle}>
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                             <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                                 Pedido actual
                             </p>
-                            <h1 className="mt-1 text-3xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            <h1 className="mt-1 text-3xl font-semibold" style={checkoutHeadingStyle}>
                                 Tu carrito
                             </h1>
-                            <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
+                            <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)', ...checkoutBodyStyle }}>
                                 Revisa tus productos, ajusta cantidades y edita tus extras antes de continuar.
                             </p>
                         </div>
@@ -213,10 +229,23 @@ export default function CartPage() {
                             })}
                         </section>
 
-                        <section className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
-                                Resumen
-                            </p>
+                        <section className="overflow-hidden rounded-lg border p-5" style={checkoutCardStyle}>
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
+                                        Checkout
+                                    </p>
+                                    <h2 className="mt-1 text-2xl font-semibold" style={checkoutHeadingStyle}>
+                                        Tu pedido
+                                    </h2>
+                                </div>
+                                <span
+                                    className="rounded-full px-3 py-1 text-xs font-semibold"
+                                    style={{ background: 'rgba(248, 220, 217, 0.55)', color: 'var(--text-primary)' }}
+                                >
+                                    Listo para confirmar
+                                </span>
+                            </div>
 
                             <dl className="mt-3 space-y-2 text-sm">
                                 <SummaryRow label="Subtotal" value={summary.subtotal} />
@@ -234,15 +263,15 @@ export default function CartPage() {
                                 />
                             </dl>
 
-                            <p className="mt-3 text-sm leading-5" style={{ color: 'var(--text-tertiary)' }}>
+                            <p className="mt-3 text-sm leading-5" style={{ color: 'var(--text-tertiary)', ...checkoutBodyStyle }}>
                                 El envío se cotiza aparte con los tiers de Supabase.
                             </p>
 
-                            <div className="mt-4 rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-2)' }}>
+                            <div className="mt-4 rounded-[20px] border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.18)', background: 'rgba(255, 248, 245, 0.8)' }}>
                                 <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-tertiary)' }}>
                                     Cotizar envío
                                 </p>
-                                <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-tertiary)' }}>
+                                <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-tertiary)', ...checkoutBodyStyle }}>
                                     El origen es fijo y se toma desde la sucursal configurada en Vercel. Aquí solo capturas el código postal de destino.
                                 </p>
                                 <label className="mt-3 block">
@@ -255,7 +284,7 @@ export default function CartPage() {
                                         inputMode="numeric"
                                         placeholder="64000"
                                         className="h-11 w-full rounded-md border px-4 text-sm outline-none"
-                                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)', color: 'var(--text-primary)' }}
+                                        style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)', color: 'var(--text-primary)', ...checkoutBodyStyle }}
                                         onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(216, 155, 43, 0.6)'}
                                         onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(216, 155, 43, 0.2)'}
                                     />
@@ -272,13 +301,13 @@ export default function CartPage() {
                                 </button>
 
                                 {quoteError ? (
-                                    <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
+                                    <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700" style={checkoutBodyStyle}>
                                         {quoteError}
                                     </p>
                                 ) : null}
 
                                 {quotePrice !== null ? (
-                                    <div className="mt-3 space-y-2 rounded-md border px-3 py-3 text-sm" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
+                                    <div className="mt-3 space-y-2 rounded-md border px-3 py-3 text-sm" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)', ...checkoutBodyStyle }}>
                                         <p className="flex items-center justify-between gap-3">
                                             <span style={{ color: 'var(--text-secondary)' }}>Distancia</span>
                                             <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -305,7 +334,7 @@ export default function CartPage() {
                                 <Link
                                     href="/order"
                                     className="flex-1 rounded-md border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.99]"
-                                    style={{ borderColor: 'rgba(216, 155, 43, 0.2)', color: 'var(--text-primary)', background: 'var(--surface-1)' }}
+                                    style={{ borderColor: 'rgba(216, 155, 43, 0.2)', color: 'var(--text-primary)', background: 'var(--surface-1)', ...checkoutBodyStyle }}
                                 >
                                     Seguir comprando
                                 </Link>
@@ -316,7 +345,7 @@ export default function CartPage() {
                                     style={{ background: 'var(--gold)', color: 'var(--text-primary)' }}
                                     disabled={loading || items.length === 0}
                                 >
-                                    {loading ? "Cargando..." : `Continuar${quotePrice !== null ? ` · $${totalWithShipping.toLocaleString('es-MX')}` : ''}`}
+                                    {loading ? 'Cargando...' : `Continuar${quotePrice !== null ? ` · $${totalWithShipping.toLocaleString('es-MX')}` : ''}`}
                                 </button>
                             </div>
                         </section>
