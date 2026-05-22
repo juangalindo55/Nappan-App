@@ -36,7 +36,7 @@ export default function LiveEventScreen() {
   const isValid = name.trim() && phone.replace(/\D/g, '').length >= 10 && guestCount && eventDate
 
   return (
-    <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <main className="min-h-dvh px-4 pb-32 pt-5 md:pt-[100px]" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <header className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>

@@ -119,7 +119,7 @@ export default function CartPage() {
 
     return (
         <>
-        <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+        <main className="min-h-dvh px-4 pb-32 pt-5 md:pt-[100px]" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
                 <header className="rounded-lg border p-4" style={{ borderColor: 'rgba(216, 155, 43, 0.2)', background: 'var(--surface-1)' }}>
                     <div className="flex items-start justify-between gap-4">

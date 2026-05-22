@@ -44,7 +44,7 @@ export default function ExplorarScreen() {
 
   return (
     <>
-      <main className="min-h-dvh px-4 pb-32 pt-5" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      <main className="min-h-dvh px-4 pb-32 pt-5 md:pt-[100px]" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="mx-auto w-full max-w-3xl">
           <div className="mb-6 flex items-start justify-between gap-4">
             <header className="flex-1">

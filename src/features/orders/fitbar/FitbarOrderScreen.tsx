@@ -186,7 +186,7 @@ export default function FitbarOrderScreen() {
 
   return (
     <main
-      className="hide-scrollbar min-h-dvh overflow-y-auto pb-8"
+      className="hide-scrollbar min-h-dvh overflow-y-auto pb-8 md:pt-[80px]"
       style={{
         background: 'var(--bg-primary)',
         color: 'var(--text-primary)',
