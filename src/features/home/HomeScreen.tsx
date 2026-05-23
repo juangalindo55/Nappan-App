@@ -2,7 +2,7 @@
 
 import Footer from '@/components/Footer'
 import { useHomeData } from '@/features/home/hooks/useHomeData'
-import { HomeTopBar } from '@/features/home/components/HomeTopBar'
+
 import { HomeGreeting } from '@/features/home/components/HomeGreeting'
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader'
 import { FeaturedProductCard } from '@/features/home/components/FeaturedProductCard'
@@ -15,8 +15,8 @@ export default function HomeScreen() {
   const { featuredProduct, greeting, products, loading, error } = useHomeData()
 
   return (
-    <main className="desktop-nav-offset mx-auto min-h-dvh w-full overflow-x-hidden pb-[calc(120px+env(safe-area-inset-bottom,0px))] pt-16 md:pt-24">
-      <HomeTopBar />
+    <main className="desktop-nav-offset mx-auto min-h-dvh w-full overflow-x-hidden pt-16 md:pt-24">
+
       <HomeGreeting greeting={greeting} />
 
       {error ? (
