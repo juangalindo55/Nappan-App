@@ -571,6 +571,7 @@ async function loadOrders(phone: string) {
     .limit(5)
 
   if (error) {
+    console.error('loadOrders error:', error)
     if (isMissingTableError(error)) {
       return []
     }
