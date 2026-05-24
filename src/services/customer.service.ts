@@ -560,31 +560,47 @@ async function loadTier(row: AnyRecord | null) {
   return withConfigDiscount(directTier)
 }
 
+const ORDER_PHONE_COLUMN_CANDIDATES = [
+  'customer_phone',
+  'phone',
+  'client_phone',
+  'buyer_phone',
+] as const
+
 async function loadOrders(phone: string) {
   const supabase = getSupabaseClient()
   const phoneCandidates = buildPhoneCandidates(phone)
-  const { data, error } = await supabase
-    .from('orders')
-    .select('order_number, total, status, created_at')
-    .in('customer_phone', phoneCandidates)
-    .order('created_at', { ascending: false })
-    .limit(5)
 
-  if (error) {
-    console.error('loadOrders error:', error)
-    if (isMissingTableError(error)) {
+  for (const phoneColumn of ORDER_PHONE_COLUMN_CANDIDATES) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('order_number, total, status, created_at')
+      .in(phoneColumn, phoneCandidates)
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    if (error) {
+      if (isMissingTableError(error)) {
+        return []
+      }
+
+      if (isMissingColumnError(error)) {
+        continue
+      }
+
+      console.error('loadOrders error:', error)
       return []
     }
 
-    return []
+    return (data ?? []).map((order) => ({
+      order_number: typeof order.order_number === 'string' ? order.order_number : null,
+      total: toNumber(order.total),
+      status: typeof order.status === 'string' ? order.status : null,
+      created_at: typeof order.created_at === 'string' ? order.created_at : null,
+    }))
   }
 
-  return (data ?? []).map((order) => ({
-    order_number: typeof order.order_number === 'string' ? order.order_number : null,
-    total: toNumber(order.total),
-    status: typeof order.status === 'string' ? order.status : null,
-    created_at: typeof order.created_at === 'string' ? order.created_at : null,
-  }))
+  return []
 }
 
 export async function resolveCustomerProfile(input: {
