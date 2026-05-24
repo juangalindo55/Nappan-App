@@ -14,6 +14,14 @@
   let chartSectionsInst = null, chartRevenueInst = null, chartStatusInst = null, chartHourlyInst = null;
   let statsCache = { orders: [], date: null };
 
+  // Parse a date-only string (YYYY-MM-DD) as local midnight so it doesn't
+  // roll back one day in timezones behind UTC (e.g. Mexico City UTC-6).
+  function parseLocalDate(str) {
+    if (!str) return new Date(NaN);
+    const [y, m, d] = str.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
   window.NappanAdminState = {
     get allOrders() { return allOrders; },
     get currentPage() { return currentPage; },
@@ -298,7 +306,7 @@
 
       // Detail row
       if (isExpanded) {
-        const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
+        const deliveryDate = order.delivery_date ? parseLocalDate(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
         const deliveryTime = order.delivery_time || order.deliveryTime || 'No especificada';
         const phone = order.customer_phone || 'No proporcionado';
         const notes = order.notes || 'Sin notas';
@@ -1940,8 +1948,8 @@
       return { start: startDate.toISOString().split('T')[0], end: endDate.toISOString().split('T')[0] };
     }
 
-    const start = new Date(startStr || '2000-01-01');
-    const end = new Date(endStr || new Date());
+    const start = startStr ? parseLocalDate(startStr) : new Date('2000-01-01');
+    const end = endStr ? parseLocalDate(endStr) : new Date();
     const duration = end - start;
     const prevEnd = new Date(start - 1);
     const prevStart = new Date(prevEnd - duration);
