@@ -5,84 +5,363 @@ import { useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cart.store'
 import { listFitbarProducts, type FitbarProductRow } from './fitbar.service'
 
-type FitbarCategory = 'coffee' | 'shots' | 'food'
-
-type FitbarQuantityMap = Record<string, number>
-
-type FitbarGroups = Record<
-  FitbarCategory,
-  {
-    title: string
-    hint: string
-    items: FitbarProductRow[]
-  }
->
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const MIN_TOTAL = 1000
 
+type FitbarCategory = 'coffee' | 'shots' | 'food'
+
+const CATEGORY_META: Record<FitbarCategory, { label: string; emoji: string }> = {
+  coffee: { label: 'Café',   emoji: '☕' },
+  shots:  { label: 'Shots',  emoji: '⚡' },
+  food:   { label: 'Comida', emoji: '🥞' },
+}
+
+const FITBAR_DESCRIPTIONS: Record<string, string> = {
+  'FITBAR-BLACK-COFFEE':   'Americano concentrado',
+  'FITBAR-COLD-BREW':      'Frío · extracción lenta 12h',
+  'FITBAR-COLD-LATTE':     'Con proteína · sin azúcar',
+  'FITBAR-DETOX-GLOW':     'Jengibre · limón · cúrcuma',
+  'FITBAR-ENERGY-BOOST':   'Cafeína + vitamina B',
+  'FITBAR-GOLDEN-POWER':   'Cúrcuma · pimienta · miel',
+  'FITBAR-COMBO-SHOTS':    '3 shots a elegir',
+  'FITBAR-COMBO-FIT':      'Bebida + snack proteico',
+  'FITBAR-POWER-PANCAKES': 'Mini pancakes de avena',
+  'FITBAR-PROTEIN-MINIS':  'Bocados proteicos sin azúcar',
+}
+
+const FITBAR_GRADIENTS: Record<string, string> = {
+  'FITBAR-BLACK-COFFEE':   'linear-gradient(160deg,#1A0D08,#3A1A0E)',
+  'FITBAR-COLD-BREW':      'linear-gradient(160deg,#6B3A2A,#D89B2B)',
+  'FITBAR-COLD-LATTE':     'linear-gradient(160deg,#D89B2B,#FFF3CC)',
+  'FITBAR-DETOX-GLOW':     'linear-gradient(160deg,#2D6A4F,#74C69D)',
+  'FITBAR-ENERGY-BOOST':   'linear-gradient(160deg,#E63946,#F4A261)',
+  'FITBAR-GOLDEN-POWER':   'linear-gradient(160deg,#D89B2B,#F9C74F)',
+  'FITBAR-COMBO-SHOTS':    'linear-gradient(160deg,#4A2218,#9B4DCA)',
+  'FITBAR-COMBO-FIT':      'linear-gradient(160deg,#2A1710,#D89B2B)',
+  'FITBAR-POWER-PANCAKES': 'linear-gradient(160deg,#8B4513,#DEB887)',
+  'FITBAR-PROTEIN-MINIS':  'linear-gradient(160deg,#3A5A40,#A3B18A)',
+}
+
 function getCategory(product: FitbarProductRow): FitbarCategory {
   const token = `${product.sku} ${product.name}`.toLowerCase()
-
-  if (
-    token.includes('coffee') ||
-    token.includes('latte') ||
-    token.includes('brew') ||
-    token.includes('cafe') ||
-    token.includes('cold')
-  ) {
+  if (token.includes('coffee') || token.includes('latte') || token.includes('brew') || token.includes('cafe') || token.includes('cold'))
     return 'coffee'
-  }
-
-  if (
-    token.includes('shot') ||
-    token.includes('boost') ||
-    token.includes('energy') ||
-    token.includes('detox')
-  ) {
+  if (token.includes('shot') || token.includes('boost') || token.includes('energy') || token.includes('detox') || token.includes('golden') || token.includes('power') || token.includes('combo-shots'))
     return 'shots'
-  }
-
   return 'food'
 }
 
-function buildGroups(products: FitbarProductRow[]): FitbarGroups {
-  return products.reduce<FitbarGroups>(
-    (groups, product) => {
-      const category = getCategory(product)
-      groups[category].items.push(product)
-      return groups
-    },
-    {
-      coffee: {
-        title: 'Café',
-        hint: 'Bebidas frías y calientes para abrir el pedido.',
-        items: [],
-      },
-      shots: {
-        title: 'Impulsos',
-        hint: 'Apoyos funcionales y porciones concentradas.',
-        items: [],
-      },
-      food: {
-        title: 'Comida',
-        hint: 'Opciones sólidas para completar el total.',
-        items: [],
-      },
-    },
+type FitbarQuantityMap = Record<string, number>
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function FitbarHeader({ total }: { total: number }) {
+  const progress = Math.min((total / MIN_TOTAL) * 100, 100)
+  const remaining = Math.max(MIN_TOTAL - total, 0)
+
+  return (
+    <header
+      className="px-4 pt-5 pb-4"
+      style={{
+        background: 'linear-gradient(135deg,#2A1710 0%,#4A2218 60%,#6B3A2A 100%)',
+      }}
+    >
+      <div className="mb-4 flex items-center justify-end">
+        <Link
+          href="/order"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg border px-3 py-2 text-sm font-semibold transition active:scale-[0.98]"
+          style={{ background: 'rgba(255,248,234,0.1)', borderColor: 'rgba(255,248,234,0.2)', color: '#FFF8EA' }}
+        >
+          ← Volver
+        </Link>
+      </div>
+
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: 'rgba(255,248,234,0.5)' }}>
+        Barra bienestar
+      </p>
+      <h1 className="mt-1 text-3xl font-semibold" style={{ color: '#FFF8EA' }}>
+        Barra Fitbar
+      </h1>
+      <p className="mt-1 text-sm" style={{ color: 'rgba(255,248,234,0.6)' }}>
+        Arma tu selección — mínimo ${MIN_TOTAL.toLocaleString('es-MX')} MXN
+      </p>
+
+      <div className="mt-4">
+        <div className="mb-1 flex items-center justify-between text-xs">
+          <span className="font-bold" style={{ color: '#D89B2B' }}>
+            ${total.toLocaleString('es-MX')} seleccionado
+          </span>
+          {remaining > 0 && (
+            <span style={{ color: 'rgba(255,248,234,0.5)' }}>
+              ${remaining.toLocaleString('es-MX')} para completar
+            </span>
+          )}
+          {remaining === 0 && (
+            <span style={{ color: '#D89B2B' }}>✓ Mínimo alcanzado</span>
+          )}
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}>
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg,#D89B2B,#F0C060)',
+            }}
+          />
+        </div>
+      </div>
+    </header>
   )
 }
 
-function getItemTotal(product: FitbarProductRow, quantity: number) {
-  return product.base_price * quantity
+function CategoryTabs({
+  active,
+  onChange,
+}: {
+  active: FitbarCategory
+  onChange: (cat: FitbarCategory) => void
+}) {
+  return (
+    <div
+      className="sticky top-0 z-20 flex border-b"
+      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)' }}
+    >
+      {(Object.keys(CATEGORY_META) as FitbarCategory[]).map((cat) => {
+        const { label, emoji } = CATEGORY_META[cat]
+        const isActive = cat === active
+        return (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => onChange(cat)}
+            className="flex-1 py-3 text-xs font-bold transition"
+            style={{
+              color: isActive ? 'var(--gold)' : 'var(--text-tertiary)',
+              border: 'none',
+              borderBottom: isActive ? '2px solid var(--gold)' : '2px solid transparent',
+              marginBottom: '-1px',
+              background: 'none',
+            }}
+          >
+            {emoji} {label}
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
-function getSelectedCount(quantities: FitbarQuantityMap) {
-  return Object.values(quantities).reduce((sum, quantity) => sum + quantity, 0)
+function ProductCardMobile({
+  product,
+  quantity,
+  onIncrease,
+  onDecrease,
+}: {
+  product: FitbarProductRow
+  quantity: number
+  onIncrease: () => void
+  onDecrease: () => void
+}) {
+  const description = product.description ?? FITBAR_DESCRIPTIONS[product.sku]
+  const gradient = FITBAR_GRADIENTS[product.sku] ?? 'linear-gradient(160deg,#2A1710,#D89B2B)'
+
+  return (
+    <div
+      className="flex overflow-hidden rounded-xl"
+      style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}
+    >
+      {/* Image block */}
+      <div
+        className="w-24 shrink-0"
+        style={{ background: gradient, minHeight: '88px' }}
+      />
+
+      {/* Info */}
+      <div className="flex flex-1 items-center gap-2 px-3 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+            {product.name}
+          </p>
+          {description && (
+            <p className="mt-0.5 text-[11px] leading-tight" style={{ color: 'var(--text-tertiary)' }}>
+              {description}
+            </p>
+          )}
+          <p className="mt-1.5 text-xs font-bold" style={{ color: 'var(--gold)' }}>
+            ${product.base_price.toLocaleString('es-MX')}
+          </p>
+        </div>
+
+        {/* Stacked stepper */}
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <button
+            type="button"
+            onClick={onIncrease}
+            aria-label={`Agregar ${product.name}`}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition active:scale-[0.95]"
+            style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+          >
+            +
+          </button>
+          <span
+            className="text-sm font-bold leading-none"
+            style={{ color: quantity > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: '16px', textAlign: 'center' }}
+          >
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={onDecrease}
+            aria-label={`Quitar ${product.name}`}
+            disabled={quantity === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition active:scale-[0.95] disabled:opacity-30"
+            style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}
+          >
+            −
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
+
+function ProductCardDesktop({
+  product,
+  quantity,
+  onIncrease,
+  onDecrease,
+}: {
+  product: FitbarProductRow
+  quantity: number
+  onIncrease: () => void
+  onDecrease: () => void
+}) {
+  const gradient = FITBAR_GRADIENTS[product.sku] ?? 'linear-gradient(160deg,#2A1710,#D89B2B)'
+
+  return (
+    <div
+      className="relative flex flex-col overflow-hidden rounded-xl"
+      style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}
+    >
+      {/* Image */}
+      <div className="h-24 w-full" style={{ background: gradient }} />
+
+      {/* Quantity badge */}
+      {quantity > 0 && (
+        <div
+          className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold"
+          style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+        >
+          {quantity}
+        </div>
+      )}
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col gap-1 px-3 pb-2 pt-2">
+        <p className="text-xs font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+          {product.name}
+        </p>
+        <p className="text-xs font-bold" style={{ color: 'var(--gold)' }}>
+          ${product.base_price.toLocaleString('es-MX')}
+        </p>
+      </div>
+
+      {/* Inline stepper */}
+      <div
+        className="mx-3 mb-3 flex items-center justify-between rounded-lg px-3 py-1.5"
+        style={{ background: 'var(--surface-2)' }}
+      >
+        <button
+          type="button"
+          onClick={onDecrease}
+          disabled={quantity === 0}
+          aria-label={`Quitar ${product.name}`}
+          className="text-base font-bold transition disabled:opacity-30"
+          style={{ color: 'var(--text-secondary)', background: 'none', border: 'none' }}
+        >
+          −
+        </button>
+        <span className="text-sm font-bold" style={{ color: quantity > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+          {quantity}
+        </span>
+        <button
+          type="button"
+          onClick={onIncrease}
+          aria-label={`Agregar ${product.name}`}
+          className="text-base font-bold transition"
+          style={{ color: 'var(--gold)', background: 'none', border: 'none' }}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function StickyCtaBar({
+  total,
+  canSubmit,
+  feedback,
+  onAdd,
+}: {
+  total: number
+  canSubmit: boolean
+  feedback: string
+  onAdd: () => void
+}) {
+  const remaining = Math.max(MIN_TOTAL - total, 0)
+
+  return (
+    <div
+      className="sticky bottom-0 z-20 border-t px-4 py-3"
+      style={{
+        background: 'var(--bg-primary)',
+        borderColor: 'var(--border)',
+        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+      }}
+    >
+      {feedback ? (
+        <div className="space-y-2">
+          <p
+            className="rounded-lg border px-3 py-2 text-sm leading-5"
+            style={{ borderColor: 'rgba(216,155,43,0.2)', background: 'rgba(216,155,43,0.08)', color: 'var(--gold)' }}
+          >
+            {feedback}
+          </p>
+          <Link
+            href="/cart"
+            className="inline-flex w-full items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition active:scale-[0.99]"
+            style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+          >
+            Ir al carrito →
+          </Link>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="w-full rounded-xl px-4 py-3.5 text-sm font-bold transition active:scale-[0.99]"
+          style={{
+            background: canSubmit ? 'var(--gold)' : 'var(--surface-2)',
+            color: canSubmit ? 'var(--bg-primary)' : 'var(--text-tertiary)',
+          }}
+        >
+          {canSubmit
+            ? `Agregar al carrito · $${total.toLocaleString('es-MX')} MXN`
+            : `Faltan $${remaining.toLocaleString('es-MX')} MXN para el mínimo`}
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function FitbarOrderScreen() {
   const [products, setProducts] = useState<FitbarProductRow[]>([])
   const [quantities, setQuantities] = useState<FitbarQuantityMap>({})
+  const [activeCategory, setActiveCategory] = useState<FitbarCategory>('coffee')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
@@ -94,76 +373,54 @@ export default function FitbarOrderScreen() {
     async function loadProducts() {
       try {
         const nextProducts = await listFitbarProducts()
-
-        if (cancelled) {
-          return
-        }
-
+        if (cancelled) return
         setProducts(nextProducts)
         setQuantities(
-          nextProducts.reduce<FitbarQuantityMap>((acc, product) => {
-            acc[product.sku] = 0
+          nextProducts.reduce<FitbarQuantityMap>((acc, p) => {
+            acc[p.sku] = 0
             return acc
           }, {}),
         )
       } catch (loadError) {
-        if (!cancelled) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : 'No se pudieron cargar los productos de bienestar.',
-          )
-        }
+        if (!cancelled)
+          setError(loadError instanceof Error ? loadError.message : 'No se pudieron cargar los productos.')
       } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
+        if (!cancelled) setLoading(false)
       }
     }
 
     loadProducts()
-
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
 
-  const groups = useMemo(() => buildGroups(products), [products])
-
   const total = useMemo(
-    () =>
-      products.reduce(
-        (sum, product) => sum + getItemTotal(product, quantities[product.sku] ?? 0),
-        0,
-      ),
+    () => products.reduce((sum, p) => sum + p.base_price * (quantities[p.sku] ?? 0), 0),
     [products, quantities],
   )
 
   const canSubmit = total >= MIN_TOTAL
 
-  function updateQuantity(sku: string, nextQuantity: number) {
-    setQuantities((current) => ({
-      ...current,
-      [sku]: Math.max(0, Number.isFinite(nextQuantity) ? nextQuantity : 0),
-    }))
+  const visibleProducts = useMemo(
+    () => products.filter((p) => getCategory(p) === activeCategory),
+    [products, activeCategory],
+  )
+
+  function updateQuantity(sku: string, next: number) {
+    setQuantities((cur) => ({ ...cur, [sku]: Math.max(0, Number.isFinite(next) ? next : 0) }))
     setFeedback('')
     setError('')
   }
 
   function addSelectionToCart() {
-    if (!canSubmit) {
-      setError(`El pedido mínimo es de $${MIN_TOTAL.toLocaleString('es-MX')} MXN.`)
-      setFeedback('')
-      return
-    }
+    if (!canSubmit) return
 
     const selectedItems = products
-      .filter((product) => (quantities[product.sku] ?? 0) > 0)
-      .map((product) => ({
-        sku: product.sku,
-        name: product.name,
-        quantity: quantities[product.sku] ?? 0,
-        base_price: product.base_price,
+      .filter((p) => (quantities[p.sku] ?? 0) > 0)
+      .map((p) => ({
+        sku: p.sku,
+        name: p.name,
+        quantity: quantities[p.sku] ?? 0,
+        base_price: p.base_price,
       }))
 
     addItem({
@@ -172,261 +429,83 @@ export default function FitbarOrderScreen() {
       name: 'Barra bienestar',
       quantity: 1,
       base_price: total,
-      config: {
-        items: selectedItems,
-      },
+      config: { items: selectedItems },
       includes: [],
       extras: [],
     })
 
-    setError('')
-    setFeedback('La selección completa se agregó como un solo artículo al carrito.')
-    setQuantities({})
+    setFeedback('Selección agregada al carrito.')
+    setQuantities(products.reduce<FitbarQuantityMap>((acc, p) => { acc[p.sku] = 0; return acc }, {}))
   }
 
   return (
-    <main
-      className="desktop-nav-offset hide-scrollbar min-h-dvh overflow-y-auto pb-8"
+    <div
+      className="desktop-nav-offset hide-scrollbar min-h-dvh overflow-y-auto"
       style={{
         background: 'var(--bg-primary)',
         color: 'var(--text-primary)',
-        paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))'
+        paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <header className="px-4 pt-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex-1" />
-          <Link
-            href="/order"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg border px-3 py-2 text-sm font-semibold transition active:scale-[0.98]"
-            style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-            title="Regresar a categorías"
-          >
-            ← Volver
-          </Link>
-        </div>
-        <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
-          <div className="relative min-h-[150px] bg-[radial-gradient(circle_at_20%_18%,#D89B2B_0%,#3A2210_36%,#FFF8EA_80%)] p-4">
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
-            <div className="relative flex min-h-[118px] flex-col justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-primary)' }}>
-                Barra bienestar
-              </p>
-              <div>
-                <h1 className="text-4xl font-semibold leading-none">
-                  Barra de proteína Fitbar
-                </h1>
-                <p className="mt-2 max-w-[300px] text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-                  Arma un pedido con varios productos, elige cantidades por artículo y llega al mínimo de compra en una sola selección.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </header>
+      <FitbarHeader total={total} />
+      <CategoryTabs active={activeCategory} onChange={setActiveCategory} />
 
-      <section className="sticky top-0 z-20 mt-4 border-y px-4 py-3 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.95)' }}>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-              Resumen
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              {getSelectedCount(quantities)} productos seleccionados
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-              Total
-            </p>
-            <p className="mt-1 text-2xl font-bold" style={{ color: 'var(--gold)' }}>
-              ${total.toLocaleString('es-MX')}
-            </p>
-          </div>
-        </div>
+      <section className="px-4 pb-4 pt-4">
+        {loading && (
+          <p className="py-8 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            Cargando productos…
+          </p>
+        )}
 
-        <button
-          type="button"
-          onClick={addSelectionToCart}
-          style={{
-            background: canSubmit ? 'var(--gold)' : 'var(--surface-2)',
-            color: canSubmit ? 'var(--bg-primary)' : 'var(--text-secondary)',
-          }}
-          className="mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
-        >
-          Agregar selección al carrito
-        </button>
-
-        {error ? (
-          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
+        {!loading && error && (
+          <p className="rounded-lg border border-red-400/25 bg-red-500/10 px-3 py-3 text-sm text-red-700">
             {error}
           </p>
-        ) : null}
+        )}
 
-        {feedback ? (
-          <div className="mt-3 space-y-2">
-            <p className="rounded-md border px-3 py-2 text-sm leading-5" style={{ borderColor: 'var(--gold-light)', background: 'var(--gold-dim)', color: 'var(--gold)' }}>
-              {feedback}
-            </p>
-            <Link
-              href="/cart"
-              className="inline-flex w-full items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold transition active:scale-[0.99]"
-              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-            >
-              Ir al carrito
-            </Link>
-          </div>
-        ) : null}
+        {!loading && !error && (
+          <>
+            {/* Mobile list */}
+            <div className="flex flex-col gap-3 md:hidden">
+              {visibleProducts.map((product) => (
+                <ProductCardMobile
+                  key={product.sku}
+                  product={product}
+                  quantity={quantities[product.sku] ?? 0}
+                  onIncrease={() => updateQuantity(product.sku, (quantities[product.sku] ?? 0) + 1)}
+                  onDecrease={() => updateQuantity(product.sku, (quantities[product.sku] ?? 0) - 1)}
+                />
+              ))}
+            </div>
+
+            {/* Desktop grid */}
+            <div className="hidden md:grid md:grid-cols-2 md:gap-4">
+              {visibleProducts.map((product) => (
+                <ProductCardDesktop
+                  key={product.sku}
+                  product={product}
+                  quantity={quantities[product.sku] ?? 0}
+                  onIncrease={() => updateQuantity(product.sku, (quantities[product.sku] ?? 0) + 1)}
+                  onDecrease={() => updateQuantity(product.sku, (quantities[product.sku] ?? 0) - 1)}
+                />
+              ))}
+            </div>
+
+            {visibleProducts.length === 0 && (
+              <p className="py-8 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                No hay productos en esta categoría.
+              </p>
+            )}
+          </>
+        )}
       </section>
 
-      <section className="space-y-3 px-4 pt-4">
-        {loading ? (
-          <StateCard title="Cargando productos" text="Estamos trayendo la lista desde Supabase." />
-        ) : null}
-
-        {!loading && error ? (
-          <StateCard title="No se pudo cargar" text={error} />
-        ) : null}
-
-        {!loading && !error
-          ? (Object.entries(groups) as Array<[FitbarCategory, FitbarGroups[FitbarCategory]]>).map(
-              ([key, group]) => (
-                <section key={key} className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-                    {group.title}
-                  </p>
-                  <h2 className="mt-1 text-xl font-semibold">
-                    {group.hint}
-                  </h2>
-
-                  <div className="mt-4 space-y-3">
-                    {group.items.map((product) => {
-                      const quantity = quantities[product.sku] ?? 0
-                      const lineTotal = getItemTotal(product, quantity)
-
-                      return (
-                        <div
-                          key={product.sku}
-                          className="rounded-lg border p-3"
-                          style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-semibold">
-                                {product.name}
-                              </p>
-                              <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                                Código: {product.sku}
-                              </p>
-                            </div>
-                            <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>
-                              ${product.base_price.toLocaleString('es-MX')}
-                            </p>
-                          </div>
-
-                          <div className="mt-3 flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => updateQuantity(product.sku, quantity - 1)}
-                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
-                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                              aria-label={`Restar ${product.name}`}
-                            >
-                              -
-                            </button>
-                            <input
-                              type="number"
-                              min={0}
-                              value={quantity}
-                              onChange={(event) =>
-                                updateQuantity(product.sku, Number(event.target.value))
-                              }
-                              className="h-11 min-w-0 flex-1 rounded-md border px-4 text-center text-base font-bold outline-none"
-                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                              aria-label={`Cantidad de ${product.name}`}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => updateQuantity(product.sku, quantity + 1)}
-                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
-                              style={{ background: 'var(--surface-1)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                              aria-label={`Sumar ${product.name}`}
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                            <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
-                            <span className="font-semibold">
-                              ${lineTotal.toLocaleString('es-MX')}
-                            </span>
-                          </div>
-                        </div>
-                      )
-                    })}
-
-                    {!group.items.length ? (
-                      <p className="text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-                        No hay productos en esta categoría.
-                      </p>
-                    ) : null}
-                  </div>
-                </section>
-              ),
-            )
-          : null}
-
-        <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-            Selección final
-          </p>
-          <dl className="mt-3 space-y-2 text-sm">
-            <SummaryRow label="Categorías" value="Café, impulsos y comida" />
-            <SummaryRow
-              label="Productos"
-              value={`${getSelectedCount(quantities)} artículos`}
-            />
-            <SummaryRow label="Total" value={`$${total.toLocaleString('es-MX')} MXN`} />
-            <SummaryRow
-              label="Estado"
-              value={canSubmit ? 'Cumple mínimo de compra' : `Faltan $${(MIN_TOTAL - total).toLocaleString('es-MX')} MXN`}
-              muted={!canSubmit}
-            />
-          </dl>
-        </section>
-      </section>
-    </main>
-  )
-}
-
-function StateCard({ title, text }: { title: string; text: string }) {
-  return (
-    <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
-      <p className="text-sm font-semibold">{title}</p>
-      <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>{text}</p>
-    </section>
-  )
-}
-
-function SummaryRow({
-  label,
-  muted = false,
-  value,
-}: {
-  label: string
-  muted?: boolean
-  value: string
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <dt style={{ color: 'var(--text-secondary)' }}>{label}</dt>
-      <dd
-        className="max-w-[210px] text-right font-semibold leading-5"
-        style={{ color: muted ? 'var(--error)' : 'var(--text-primary)' }}
-      >
-        {value}
-      </dd>
+      <StickyCtaBar
+        total={total}
+        canSubmit={canSubmit}
+        feedback={feedback}
+        onAdd={addSelectionToCart}
+      />
     </div>
   )
 }
