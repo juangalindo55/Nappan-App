@@ -1919,7 +1919,7 @@
         custMap[key].count++;
         custMap[key].total += (parseFloat(o.total) || 0);
       });
-      const sortedCusts = Object.entries(custMap).sort((a,b) => b[1].total - a[1].total).slice(0,5);
+      const sortedCusts = Object.entries(custMap).sort((a,b) => b[1].total - a[1].total);
       const custTbody = document.querySelector('#topCustomersTable tbody');
       custTbody.innerHTML = sortedCusts.map(([ key, d ], i) =>
         `<tr><td><span class="rank-badge">${i+1}</span></td><td>${d.label}</td><td>${d.count}</td><td>$${d.total.toLocaleString('es-MX')}</td></tr>`
