@@ -76,3 +76,84 @@ Known keys:
 - `public.products` — anon `SELECT`
 - `public.customers` — anon `SELECT` and `INSERT`
 - `public.app_config` — anon `SELECT`
+- `public.orders` — anon `INSERT` (existing), anon `SELECT` (added 2026-05-24, see below)
+
+---
+
+## Applied Migrations
+
+### 2026-05-24 — `orders_select_by_phone_public`
+
+**Change:** Added RLS SELECT policy for the `anon` role on `public.orders`.
+
+**Reason:** The profile page reads order history using the anon Supabase client. The existing policy only allowed SELECT for `authenticated` users, so all order history queries silently returned empty.
+
+**SQL:**
+```sql
+CREATE POLICY "orders_select_by_phone_public"
+  ON public.orders
+  FOR SELECT
+  TO anon
+  USING (true);
+```
+
+**Impacted screens:** Profile page — Historial de pedidos section.
+
+**Rollback:** `DROP POLICY "orders_select_by_phone_public" ON public.orders;`
+
+---
+
+### 2026-05-24 — `recreate_generate_order_number_trigger`
+
+**Change:** Recreated the `BEFORE INSERT` trigger that calls `generate_order_number()` to assign `NAP-YYYYMMDD-XXXX` order numbers automatically.
+
+**Reason:** The `generate_order_number()` function existed in the database but the trigger calling it had been dropped. New orders were being saved with `order_number = null`, showing as N/A in the admin panel.
+
+**SQL:**
+```sql
+CREATE TRIGGER trigger_generate_order_number
+  BEFORE INSERT ON public.orders
+  FOR EACH ROW
+  WHEN (NEW.order_number IS NULL)
+  EXECUTE FUNCTION generate_order_number();
+```
+
+**Notes:** The `WHEN (NEW.order_number IS NULL)` condition means manually supplied order numbers are preserved and not overwritten.
+
+**Impacted screens:** Admin panel — Pedidos section. Checkout confirmation number.
+
+**Rollback:** `DROP TRIGGER trigger_generate_order_number ON public.orders;`
+
+---
+
+### 2026-05-24 — `backfill_null_order_numbers`
+
+**Change:** Backfilled `order_number` for all 25 orders that had `null` due to the missing trigger.
+
+**Reason:** Orders created between 2026-04-20 and 2026-05-21 had no order number. Backfill assigns `NAP-YYYYMMDD-XXXX` in chronological order within each day, continuing after any existing numbered orders on the same day to avoid collisions.
+
+**SQL:**
+```sql
+WITH ranked AS (
+  SELECT
+    id,
+    created_at,
+    COUNT(*) FILTER (WHERE order_number IS NOT NULL)
+      OVER (PARTITION BY DATE(created_at)) AS existing_count,
+    ROW_NUMBER()
+      OVER (PARTITION BY DATE(created_at) ORDER BY created_at) AS rn
+  FROM orders
+  WHERE order_number IS NULL
+)
+UPDATE orders
+SET order_number = 'NAP-'
+  || TO_CHAR(ranked.created_at, 'YYYYMMDD')
+  || '-'
+  || LPAD((ranked.existing_count + ranked.rn)::TEXT, 4, '0')
+FROM ranked
+WHERE orders.id = ranked.id;
+```
+
+**Result:** 25 orders updated, 0 nulls remaining. No existing `NAP-` numbers were modified.
+
+**Rollback:** Not applicable — original values were `null`. If needed, reset with `UPDATE orders SET order_number = null WHERE order_number LIKE 'NAP-202604%' OR order_number LIKE 'NAP-202605%'` (scoped to the affected date range).
