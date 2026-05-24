@@ -562,10 +562,11 @@ async function loadTier(row: AnyRecord | null) {
 
 async function loadOrders(phone: string) {
   const supabase = getSupabaseClient()
+  const phoneCandidates = buildPhoneCandidates(phone)
   const { data, error } = await supabase
     .from('orders')
     .select('order_number, total, status, created_at')
-    .eq('customer_phone', phone)
+    .in('customer_phone', phoneCandidates)
     .order('created_at', { ascending: false })
     .limit(5)
 
