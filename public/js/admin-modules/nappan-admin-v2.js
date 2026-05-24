@@ -1539,9 +1539,6 @@
         case 'toggle-order-detail':
           toggleOrderDetail(actionEl.dataset.orderId);
           break;
-        case 'change-order-status':
-          changeOrderStatus(actionEl.dataset.orderId, actionEl.value);
-          break;
         case 'recover-deleted-order':
           recoverDeletedOrder(actionEl.dataset.orderId);
           break;
