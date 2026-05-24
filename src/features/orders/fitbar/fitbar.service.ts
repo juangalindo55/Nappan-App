@@ -3,6 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase'
 export type FitbarProductRow = {
   sku: string
   name: string
+  description: string | null
   base_price: number
   section: string
 }
@@ -12,7 +13,7 @@ export async function listFitbarProducts() {
 
   const { data, error } = await supabase
     .from('products')
-    .select('sku,name,base_price,section')
+    .select('sku,name,description,base_price,section')
     .eq('section', 'fitbar')
     .order('name', { ascending: true })
 
