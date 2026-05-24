@@ -37,12 +37,12 @@ export function HomeFaq() {
       className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8 md:py-14 lg:px-10 anim-up d6"
       style={{ paddingBottom: '3.5rem' }}
     >
-      <div className="text-center mb-10 md:mb-12">
+      <div className="text-center mb-12 md:mb-16">
         <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.24em]" style={{ color: '#A87325', fontFamily: 'var(--font-dm-sans)' }}>
           Preguntas frecuentes
         </p>
         <h2
-          className="text-4xl leading-none tracking-[-0.04em] sm:text-5xl"
+          className="text-4xl leading-tight tracking-[-0.04em] sm:text-5xl"
           style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500, color: '#2A1710' }}
         >
           Resolvemos lo básico antes de que hagas tu pedido
