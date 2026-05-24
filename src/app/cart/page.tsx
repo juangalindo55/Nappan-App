@@ -157,7 +157,7 @@ export default function CartPage() {
 
     return (
         <>
-        <main className="desktop-nav-offset min-h-dvh px-4 pb-[calc(160px+env(safe-area-inset-bottom,0px))] pt-5 md:px-8 md:pb-24 lg:px-10" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-dm-sans)' }}>
+        <main className="desktop-nav-offset min-h-dvh px-4 pb-40 pt-5 md:px-8 md:pb-24 lg:px-10" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-dm-sans)' }}>
             <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6">
                 <header className="rounded-[24px] border p-5 md:p-6" style={checkoutCardStyle}>
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
