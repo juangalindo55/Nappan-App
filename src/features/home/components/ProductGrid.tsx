@@ -1,20 +1,21 @@
 import type { Product } from '@/features/products/product.types'
-import { ProductCard } from './ProductCard'
+import { TwoColumnProductSection } from './TwoColumnProductSection'
+import { CompactProductCard } from './CompactProductCard'
 
 type ProductGridProps = {
   products: Product[]
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
+  const lunchBox = products.find((p) => p.categoryId === 'lunch-box')
+  const fitBar = products.find((p) => p.categoryId === 'fit-bar')
+
   return (
-    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 px-5 sm:px-8 md:grid-cols-2 lg:px-10 anim-up d3">
-      {products.map((product, index) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          delay={`${0.18 + index * 0.06}s`}
-        />
-      ))}
+    <div className="mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {lunchBox && <TwoColumnProductSection product={lunchBox} />}
+        {fitBar && <CompactProductCard product={fitBar} delay="0.06s" />}
+      </div>
     </div>
   )
 }

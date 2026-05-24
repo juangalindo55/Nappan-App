@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
@@ -13,16 +14,14 @@ export default function Footer() {
       <div className="mx-auto w-full max-w-6xl px-5 pt-12 pb-36 md:pt-8 md:pb-6 sm:px-8 lg:px-10">
         <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.24em]" style={{ color: '#E8A345', fontFamily: 'var(--font-dm-sans)' }}>
-              Nappan
-            </p>
-            <h3
-              className="mt-2 text-4xl leading-none tracking-[-0.04em]"
-              style={{ fontFamily: 'var(--font-cormorant)', fontStyle: 'italic', fontWeight: 500, color: '#FFFCF5' }}
-            >
-              Pancakes & Art Studio
-            </h3>
-
+            <div className="relative h-[56px] w-[200px]">
+              <Image
+                src="/images/nappan/logo-dorado.svg"
+                alt="Nappan Studio"
+                fill
+                className="object-contain object-left"
+              />
+            </div>
           </div>
 
           <div>

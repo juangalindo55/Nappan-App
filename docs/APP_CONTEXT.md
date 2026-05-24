@@ -1,104 +1,57 @@
-# 📱 App Context — Nappan
+# App Context — Nappan
 
 ## What this app is
 
-Nappan is an interactive product + experience platform:
+Nappan is an ordering and experience platform for:
 
-- Artistic pancakes (products)
-- Event-based experiences
+- Artistic pancakes and food products
+- Event-based experiences (live events, catering)
 - Fitness / community integrations
 
----
+## Current State
 
-## Current State (IMPORTANT)
+The rewrite is a production-ready Next.js application with:
 
-The current rewrite:
-- Focuses heavily on UI/visual experience
-- Uses hardcoded product data
-- Has logic embedded in UI components
-- Does not yet use backend (Supabase)
+- Real data layer backed by Supabase
+- Centralized state management via Zustand (cart, user, booking, order flow)
+- Clean architecture separating UI, hooks, services, and domain logic
+- Customer profile lookup by phone with membership tier discounts
+- Shipping quote via Google Maps APIs
+- Persistent cart, user profile, and booking draft across navigation
 
-👉 It behaves like a **design prototype**, not a real system.
+## Architecture
 
----
+See `ARCHITECTURE.md` for the full layer breakdown.
 
-## Target State
+Data flows:
 
-The app should evolve into:
+```
+Supabase / external API → service layer → hook or store → component
+```
 
-- Product browsing system
-- Event booking platform
-- Future commerce flow (cart + purchase)
+State persists via Zustand with localStorage:
 
----
+- `nappan-cart` — cart items, extras, pricing summary
+- `nappan-user` — active customer profile
+- `nappan-booking` — live-event inquiry draft
+- `nappan-order-flow` — selected order category and type
 
-## Core Flows (to be implemented)
+## Core Flows
 
-1. Browse products
-2. Filter by category
-3. View product detail
-4. Add to cart
-5. Book event / request quote
+1. Browse products by category
+2. Add items to cart with extras
+3. Identify customer by phone (lookup or create)
+4. Apply membership tier discount
+5. Estimate shipping by postal code
+6. Complete or save a live-event inquiry draft
 
----
-
-## Current Problems
-
-- No data layer
-- No state architecture
-- Logic tied to UI
-- No real user flow persistence
-
----
-
-## Rewrite Goal
-
-Transform UI demo into:
-
-- Scalable app
-- Clean architecture
-- Logic separated from UI
-- Ready for backend integration
-
-## 🧠 State Management Reality
-
-The app currently has:
-
-- No centralized state
-- No persistence across screens
-- No shared data (cart, user, booking)
-
-👉 Each component manages its own local state only.
-
----
-
-## ⚠️ Problem
-
-This prevents the app from behaving like a real product:
-
-- Cart cannot persist
-- User context does not exist
-- Booking flow cannot be maintained
-- Data is lost between interactions
-
----
-
-## 🎯 Requirement
-
-The app must introduce:
-
-- A single source of truth for shared state
-- Persistent state across navigation
-- Clear separation between UI state and app state
-
-## ✅ Success Criteria
+## Success Criteria
 
 The app is considered correct when:
 
-- Users can browse products with real data
-- Cart persists across navigation
-- User context exists globally
-- Booking flow can be completed without losing state
-- UI reflects real backend data
-
-👉 If these are not met, the app is incomplete
+- Product catalog renders from Supabase
+- Cart persists across navigation and refresh
+- Customer lookup works from phone input
+- Discount logic matches `app_config` values
+- Shipping quote returns a bounded result or a clear failure state
+- Booking draft survives navigation and refresh
