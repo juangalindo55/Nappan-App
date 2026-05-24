@@ -576,6 +576,7 @@ async function loadOrders(phone: string) {
       .from('orders')
       .select('order_number, total, status, created_at')
       .in(phoneColumn, phoneCandidates)
+      .neq('status', 'deleted')
       .order('created_at', { ascending: false })
       .limit(5)
 
