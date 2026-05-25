@@ -236,7 +236,7 @@ export default function LunchboxConfiguratorScreen() {
         </section>
       </header>
 
-      <section className="sticky top-0 z-20 mt-6 border-y px-4 py-4 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.97)' }}>
+      <section className="sticky top-0 z-20 mt-6 border-y px-4 py-4 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--bg-primary) 97%, transparent)' }}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
@@ -266,7 +266,10 @@ export default function LunchboxConfiguratorScreen() {
         </button>
 
         {error ? (
-          <p className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5 text-red-700">
+          <p
+            className="mt-3 rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm leading-5"
+            style={{ color: 'var(--error)' }}
+          >
             {error}
           </p>
         ) : null}
