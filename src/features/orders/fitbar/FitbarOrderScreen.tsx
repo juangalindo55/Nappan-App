@@ -183,70 +183,73 @@ function ProductCardMobile({
 
   return (
     <div
-      className="flex overflow-hidden rounded-xl"
+      className="relative flex flex-col overflow-hidden rounded-xl"
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}
     >
-      {/* Image block */}
-      <div
-        className="relative w-24 shrink-0 overflow-hidden"
-        style={{ minHeight: '88px' }}
-      >
-        {imageSrc ? (
+      {/* Image */}
+      <div className="relative w-full overflow-hidden" style={{ background: gradient, aspectRatio: '1 / 1' }}>
+        {imageSrc && (
           <Image
             src={imageSrc}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-contain"
           />
-        ) : (
-          <div style={{ background: gradient, width: '100%', height: '100%' }} />
         )}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-1 items-center gap-2 px-3 py-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
-            {product.name}
-          </p>
-          {description && (
-            <p className="mt-0.5 text-[11px] leading-tight" style={{ color: 'var(--text-tertiary)' }}>
-              {description}
-            </p>
-          )}
-          <p className="mt-1.5 text-xs font-bold" style={{ color: 'var(--gold)' }}>
-            ${product.base_price.toLocaleString('es-MX')}
-          </p>
+      {/* Quantity badge */}
+      {quantity > 0 && (
+        <div
+          className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold"
+          style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+        >
+          {quantity}
         </div>
+      )}
 
-        {/* Stacked stepper */}
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <button
-            type="button"
-            onClick={onIncrease}
-            aria-label={`Agregar ${product.name}`}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition active:scale-[0.95]"
-            style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
-          >
-            +
-          </button>
-          <span
-            className="text-sm font-bold leading-none"
-            style={{ color: quantity > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: '16px', textAlign: 'center' }}
-          >
-            {quantity}
-          </span>
-          <button
-            type="button"
-            onClick={onDecrease}
-            aria-label={`Quitar ${product.name}`}
-            disabled={quantity === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition active:scale-[0.95] disabled:opacity-30"
-            style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}
-          >
-            −
-          </button>
-        </div>
+      {/* Info */}
+      <div className="flex flex-1 flex-col gap-1 px-3 pb-2 pt-2">
+        <p className="text-xs font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+          {product.name}
+        </p>
+        {description && (
+          <p className="text-[10px] leading-tight" style={{ color: 'var(--text-tertiary)' }}>
+            {description}
+          </p>
+        )}
+        <p className="text-xs font-bold" style={{ color: 'var(--gold)' }}>
+          ${product.base_price.toLocaleString('es-MX')}
+        </p>
+      </div>
+
+      {/* Inline stepper */}
+      <div
+        className="mx-3 mb-3 flex items-center justify-between rounded-lg px-3 py-1.5"
+        style={{ background: 'var(--surface-2)' }}
+      >
+        <button
+          type="button"
+          onClick={onDecrease}
+          disabled={quantity === 0}
+          aria-label={`Quitar ${product.name}`}
+          className="text-base font-bold transition disabled:opacity-30"
+          style={{ color: 'var(--text-secondary)', background: 'none', border: 'none' }}
+        >
+          −
+        </button>
+        <span className="text-sm font-bold" style={{ color: quantity > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+          {quantity}
+        </span>
+        <button
+          type="button"
+          onClick={onIncrease}
+          aria-label={`Agregar ${product.name}`}
+          className="text-base font-bold transition"
+          style={{ color: 'var(--gold)', background: 'none', border: 'none' }}
+        >
+          +
+        </button>
       </div>
     </div>
   )
@@ -272,13 +275,13 @@ function ProductCardDesktop({
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}
     >
       {/* Image */}
-      <div className="relative h-24 w-full overflow-hidden" style={{ background: gradient }}>
+      <div className="relative w-full overflow-hidden" style={{ background: gradient, aspectRatio: '1 / 1' }}>
         {imageSrc && (
           <Image
             src={imageSrc}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-contain"
           />
         )}
       </div>
@@ -501,8 +504,8 @@ export default function FitbarOrderScreen() {
 
         {!loading && !error && (
           <>
-            {/* Mobile list */}
-            <div className="flex flex-col gap-3 md:hidden">
+            {/* Mobile grid */}
+            <div className="grid grid-cols-2 gap-3 md:hidden">
               {visibleProducts.map((product) => (
                 <ProductCardMobile
                   key={product.sku}
