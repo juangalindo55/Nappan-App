@@ -438,67 +438,74 @@ export default function LunchboxConfiguratorScreen() {
           </div>
         </section>
 
-        <ConfigSection eyebrow="5" title="Cantidad">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => updateQuantity(Math.max(MIN_QUANTITY, draft.quantity - 1))}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
-              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-              aria-label="Restar una caja"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              min={MIN_QUANTITY}
-              value={draft.quantity}
-              onChange={(event) => updateQuantity(Number(event.target.value))}
-              className="h-12 min-w-0 flex-1 rounded-md border px-4 text-center text-lg font-bold outline-none"
-              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-              aria-label="Cantidad de cajas"
-            />
-            <button
-              type="button"
-              onClick={() => updateQuantity(draft.quantity + 1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
-              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-              aria-label="Agregar una caja"
-            >
-              +
-            </button>
-          </div>
-          <p className="mt-2 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-            El mínimo para Lunchbox es de {MIN_QUANTITY} piezas.
-          </p>
-        </ConfigSection>
+  <section className="rounded-lg border p-6" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+    <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-secondary)' }}>
+      Paso 3
+    </p>
+    <h2 className="mt-2 text-lg font-semibold">Cantidad</h2>
 
-        <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-            Detalle final
-          </p>
-          <dl className="mt-3 space-y-2 text-sm">
-            <SummaryRow label="Caja" value={variants[draft.variant].label} />
-            <SummaryRow label="Diseño" value={designs[draft.design]} />
-            <SummaryRow
-              label="Complemento"
-              value={
-                draft.complement === 'fruta'
-                  ? `Fruta (${complements.fruta.description})`
-                  : complements.gelatina.label
-              }
-            />
-            <SummaryRow
-              label="Extras"
-              value={
-                draft.extras.length
-                  ? draft.extras.map((extra) => extras[extra].label).join(', ')
-                  : 'Sin extras'
-              }
-            />
-            <SummaryRow label="Cantidad" value={`${draft.quantity} piezas`} />
-          </dl>
-        </section>
+    <div className="mt-4 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={() => updateQuantity(Math.max(MIN_QUANTITY, draft.quantity - 1))}
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+        style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+        aria-label="Restar una caja"
+      >
+        −
+      </button>
+      <input
+        type="number"
+        min={MIN_QUANTITY}
+        value={draft.quantity}
+        onChange={(event) => updateQuantity(Number(event.target.value))}
+        className="h-12 min-w-0 flex-1 rounded-md border px-4 text-center text-lg font-bold outline-none"
+        style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+        aria-label="Cantidad de cajas"
+      />
+      <button
+        type="button"
+        onClick={() => updateQuantity(draft.quantity + 1)}
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+        style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+        aria-label="Agregar una caja"
+      >
+        +
+      </button>
+    </div>
+    <p className="mt-3 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
+      Mínimo de {MIN_QUANTITY} piezas para procesar tu pedido.
+    </p>
+  </section>
+
+  <section className="rounded-lg border p-6" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+    <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-secondary)' }}>
+      Resumen final
+    </p>
+    <dl className="mt-4 space-y-3 text-sm">
+      <SummaryRow label="Caja" value={variants[draft.variant].label} />
+      <SummaryRow label="Diseño" value={designs[draft.design]} />
+      <SummaryRow
+        label="Complemento"
+        value={
+          draft.complement === 'fruta'
+            ? `Fruta (${complements.fruta.description})`
+            : complements.gelatina.label
+        }
+      />
+      <SummaryRow
+        label="Extras"
+        value={
+          draft.extras.length
+            ? draft.extras.map((extra) => extras[extra].label).join(', ')
+            : 'Sin extras'
+        }
+      />
+      <div className="border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+        <SummaryRow label="Cantidad" value={`${draft.quantity} piezas`} />
+      </div>
+    </dl>
+  </section>
       </section>
     </main>
   )
