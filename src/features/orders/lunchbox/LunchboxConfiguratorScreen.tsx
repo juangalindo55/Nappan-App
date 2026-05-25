@@ -346,79 +346,97 @@ export default function LunchboxConfiguratorScreen() {
           </div>
         </section>
 
-        <ConfigSection eyebrow="3" title="Complemento">
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(complements) as LunchboxComplement[]).map((complement) => (
-              <ChoiceButton
-                key={complement}
-                label={complements[complement].label}
-                description={complements[complement].description}
-                selected={draft.complement === complement}
-                onClick={() => updateComplement(complement)}
-              />
-            ))}
-          </div>
-        </ConfigSection>
+        <section className="rounded-lg border p-6" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-secondary)' }}>
+            Paso 2
+          </p>
+          <h2 className="mt-2 text-lg font-semibold">
+            Personaliza
+            <span className="ml-2 text-xs font-normal opacity-60">(opcional)</span>
+          </h2>
 
-        <ConfigSection eyebrow="4" title="Extras">
-          <div className="space-y-2">
-            {(Object.keys(extras) as LunchboxExtra[]).map((extra) => {
-              const isAllowed = isExtraAllowed(extra, draft.variant)
-              const isSelected = draft.extras.includes(extra)
-              const unavailableText =
-                extras[extra].allowedVariant === 'both'
-                  ? ''
-                  : `Solo para ${variants[extras[extra].allowedVariant].label}`
+          <div className="mt-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                Complemento
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(Object.keys(complements) as LunchboxComplement[]).map((complement) => (
+                  <ChoiceButton
+                    key={complement}
+                    label={complements[complement].label}
+                    description={complements[complement].description}
+                    selected={draft.complement === complement}
+                    onClick={() => updateComplement(complement)}
+                  />
+                ))}
+              </div>
+            </div>
 
-              return (
-                <button
-                  key={extra}
-                  type="button"
-                  disabled={!isAllowed}
-                  onClick={() => toggleExtra(extra)}
-                  className="flex min-h-[68px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition"
-                  style={{
-                    borderColor: isSelected ? 'var(--gold)' : 'var(--border)',
-                    background: isSelected ? 'var(--gold-dim)' : 'var(--surface-2)',
-                    opacity: isAllowed ? 1 : 0.45,
-                    cursor: isAllowed ? 'pointer' : 'not-allowed',
-                  }}
-                >
-                  <span>
-                    <span className="block text-sm font-semibold leading-5">
-                      {extras[extra].label}
-                    </span>
-                    <span className="mt-1 block text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {isAllowed ? `+$${extras[extra].price} MXN por caja` : unavailableText}
-                    </span>
-                  </span>
-                  <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
-                    style={{
-                      borderColor: isSelected ? 'var(--gold)' : 'var(--text-secondary)',
-                      background: isSelected ? 'var(--gold)' : 'transparent',
-                    }}
-                  >
-                    {isSelected ? (
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="var(--bg-primary)"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+            <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                Extras
+              </p>
+              <div className="mt-3 space-y-2">
+                {(Object.keys(extras) as LunchboxExtra[]).map((extra) => {
+                  const isAllowed = isExtraAllowed(extra, draft.variant)
+                  const isSelected = draft.extras.includes(extra)
+                  const unavailableText =
+                    extras[extra].allowedVariant === 'both'
+                      ? ''
+                      : `Solo para ${variants[extras[extra].allowedVariant].label}`
+
+                  return (
+                    <button
+                      key={extra}
+                      type="button"
+                      disabled={!isAllowed}
+                      onClick={() => toggleExtra(extra)}
+                      className="flex min-h-[60px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition"
+                      style={{
+                        borderColor: isSelected ? 'var(--gold)' : 'var(--border)',
+                        background: isSelected ? 'var(--gold-dim)' : 'var(--surface-2)',
+                        opacity: isAllowed ? 1 : 0.5,
+                        cursor: isAllowed ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      <span>
+                        <span className="block text-sm font-semibold leading-5">
+                          {extras[extra].label}
+                        </span>
+                        <span className="mt-1 block text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          {isAllowed ? `+$${extras[extra].price} MXN` : unavailableText}
+                        </span>
+                      </span>
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
+                        style={{
+                          borderColor: isSelected ? 'var(--gold)' : 'var(--text-secondary)',
+                          background: isSelected ? 'var(--gold)' : 'transparent',
+                        }}
                       >
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    ) : null}
-                  </span>
-                </button>
-              )
-            })}
+                        {isSelected ? (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="var(--bg-primary)"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                        ) : null}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
-        </ConfigSection>
+        </section>
 
         <ConfigSection eyebrow="5" title="Cantidad">
           <div className="flex items-center gap-2">
