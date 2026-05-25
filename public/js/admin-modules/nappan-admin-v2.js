@@ -1026,6 +1026,7 @@
 
       // Load extras
       await loadExtrasForConfig();
+      await loadLunchboxOptions();
     } catch (error) {
       console.error('Error loading config:', error);
       showToast('Error cargando configuración', 'error');
@@ -1099,8 +1100,97 @@
       invalidateCache('config');
       await loadExtrasForConfig();
     } catch (error) {
-      console.error('Error:', error);
-      showToast('Error: ' + error.message, 'error');
+      console.error('Error saving extras:', error);
+      showToast('Error guardando extras', 'error');
+    }
+  }
+
+  async function loadLunchboxOptions() {
+    try {
+      const appConfig = await window.NappanDB.loadAppConfig();
+
+      const minQty = appConfig['lunchbox_min_quantity'];
+      if (minQty) {
+        document.getElementById('lunchboxMinQty').value = minQty;
+      }
+
+      // Designs
+      let designsHtml = '';
+      for (let i = 1; i <= 10; i++) {
+        const labelKey = 'lunchbox_design_' + i + '_label';
+        const label = appConfig[labelKey];
+        if (!label && i > 1 && !appConfig['lunchbox_design_' + (i - 1) + '_label']) break; // allow one empty slot for new
+        designsHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+        designsHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px; text-transform: uppercase;">Diseño ' + i + '</label>';
+        designsHtml += '<input type="text" class="design-label" data-config-key="' + labelKey + '" value="' + escapeHtml(label || '') + '" placeholder="Ej: Osito" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
+        designsHtml += '</div>';
+      }
+      if (!designsHtml.includes('Diseño 1')) {
+         designsHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+         designsHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px; text-transform: uppercase;">Diseño 1</label>';
+         designsHtml += '<input type="text" class="design-label" data-config-key="lunchbox_design_1_label" value="" placeholder="Ej: Osito" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
+         designsHtml += '</div>';
+      }
+      document.getElementById('designsContainer').innerHTML = designsHtml;
+
+      // Complements
+      let compHtml = '';
+      for (let i = 1; i <= 10; i++) {
+        const labelKey = 'lunchbox_complement_' + i + '_label';
+        const descKey  = 'lunchbox_complement_' + i + '_description';
+        const label = appConfig[labelKey];
+        if (!label && i > 1 && !appConfig['lunchbox_complement_' + (i - 1) + '_label']) break;
+        const desc = appConfig[descKey] || '';
+        compHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+        compHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px; text-transform: uppercase;">Complemento ' + i + '</label>';
+        compHtml += '<input type="text" class="complement-label" data-config-key="' + labelKey + '" value="' + escapeHtml(label || '') + '" placeholder="Ej: Fruta" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 8px;">';
+        compHtml += '<input type="text" class="complement-desc"  data-config-key="' + descKey  + '" value="' + escapeHtml(desc)  + '" placeholder="Descripción breve" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
+        compHtml += '</div>';
+      }
+      if (!compHtml.includes('Complemento 1')) {
+         compHtml += '<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">';
+         compHtml += '<label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px; text-transform: uppercase;">Complemento 1</label>';
+         compHtml += '<input type="text" class="complement-label" data-config-key="lunchbox_complement_1_label" value="" placeholder="Ej: Fruta" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 8px;">';
+         compHtml += '<input type="text" class="complement-desc"  data-config-key="lunchbox_complement_1_description" value="" placeholder="Descripción breve" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">';
+         compHtml += '</div>';
+      }
+      document.getElementById('complementsContainer').innerHTML = compHtml;
+    } catch (error) {
+      console.error('Error loading lunchbox options:', error);
+      document.getElementById('designsContainer').innerHTML = '<div class="loading">Error cargando diseños</div>';
+      document.getElementById('complementsContainer').innerHTML = '<div class="loading">Error cargando complementos</div>';
+    }
+  }
+
+  async function saveLunchboxOptions(type) {
+    try {
+      let inputs = [];
+      if (type === 'designs') {
+        inputs = Array.from(document.querySelectorAll('.design-label'));
+      } else {
+        inputs = [
+          ...Array.from(document.querySelectorAll('.complement-label')),
+          ...Array.from(document.querySelectorAll('.complement-desc'))
+        ];
+      }
+
+      if (inputs.length === 0) {
+        showToast('No hay datos para guardar', 'error');
+        return;
+      }
+
+      for (const input of inputs) {
+        const val = input.value.trim();
+        const { error } = await window.NappanDB.updateConfigValue(input.dataset.configKey, val);
+        if (error) console.error('Error saving lunchbox option:', error);
+      }
+
+      showToast(`✓ ${type === 'designs' ? 'Diseños' : 'Complementos'} guardados`, 'success');
+      invalidateCache('config');
+      await loadLunchboxOptions();
+    } catch (error) {
+      console.error('saveLunchboxOptions failed:', error);
+      showToast('Error guardando opciones', 'error');
     }
   }
 
@@ -1503,10 +1593,19 @@
           saveWhatsapp();
           break;
         case 'save-shipping':
-          saveShipping();
+          await saveShipping();
           break;
         case 'save-extras':
-          saveExtras();
+          await saveExtras();
+          break;
+        case 'save-designs':
+          await saveLunchboxOptions('designs');
+          break;
+        case 'save-complements':
+          await saveLunchboxOptions('complements');
+          break;
+        case 'save-lunchbox-general':
+          await saveLunchboxGeneral();
           break;
         case 'save-tier-discounts':
           saveTierDiscounts();
@@ -1661,7 +1760,25 @@
   setupAdminInteractions();
   checkAuth();
 
-  // ---- PHASE 6: ESTADÍSTICAS (mejorado) ----
+  async function saveLunchboxGeneral() {
+    try {
+      const input = document.getElementById('lunchboxMinQty');
+      const val = input.value.trim();
+      if (!val) {
+        showToast('Debes ingresar una cantidad mínima', 'error');
+        return;
+      }
+      const { error } = await window.NappanDB.updateConfigValue(input.dataset.configKey, val);
+      if (error) throw error;
+      showToast('✓ Configuración general guardada', 'success');
+      invalidateCache('config');
+    } catch (error) {
+      console.error('saveLunchboxGeneral failed:', error);
+      showToast('Error guardando configuración', 'error');
+    }
+  }
+
+  // --- TAB: ESTADÍSTICAS ---(mejorado) ----
 
   // Helpers para fechas
   function getDateRange(type) {

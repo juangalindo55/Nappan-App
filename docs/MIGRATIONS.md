@@ -157,3 +157,32 @@ WHERE orders.id = ranked.id;
 **Result:** 25 orders updated, 0 nulls remaining. No existing `NAP-` numbers were modified.
 
 **Rollback:** Not applicable — original values were `null`. If needed, reset with `UPDATE orders SET order_number = null WHERE order_number LIKE 'NAP-202604%' OR order_number LIKE 'NAP-202605%'` (scoped to the affected date range).
+
+---
+
+### 2026-05-25 — `lunchbox_designs_and_complements`
+
+**Change:** Added lunchbox design and complement configuration keys to `app_config`.
+
+**Reason:** Designs (Osito, Capibara) and complements (Fruta, Gelatina) were hardcoded
+in `LunchboxConfiguratorScreen.tsx`. This migration makes both dynamically loaded and 
+editable from the Admin Configuración tab.
+
+**SQL:**
+```sql
+INSERT INTO public.app_config (key, value, updated_at) VALUES
+  ('lunchbox_design_1_label',           'Osito',                    now()),
+  ('lunchbox_design_2_label',           'Capibara',                 now()),
+  ('lunchbox_complement_1_label',       'Fruta',                    now()),
+  ('lunchbox_complement_1_description', 'Uva, durazno y fresa frescos', now()),
+  ('lunchbox_complement_2_label',       'Gelatina',                 now()),
+  ('lunchbox_complement_2_description', 'Arco iris de sabores',     now())
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now();
+```
+
+**Impacted screens:** `/order/lunchbox` (LunchboxConfiguratorScreen), Admin ⚙️ Configuración tab.
+
+**Rollback:**
+```sql
+DELETE FROM public.app_config WHERE key LIKE 'lunchbox_design_%' OR key LIKE 'lunchbox_complement_%';
+```

@@ -19,6 +19,23 @@ export type LunchboxCatalog = {
   extras: Record<LunchboxVariant, LunchboxExtraOption[]>
 }
 
+export type LunchboxDesignOption = {
+  id: string
+  label: string
+}
+
+export type LunchboxComplementOption = {
+  id: string
+  label: string
+  description: string
+}
+
+export type LunchboxDesignsAndComplements = {
+  designs: LunchboxDesignOption[]
+  complements: LunchboxComplementOption[]
+  minQuantity: number
+}
+
 type ProductRow = {
   id: string
   sku: string
@@ -83,6 +100,16 @@ export const FALLBACK_LUNCHBOX_EXTRAS: Record<LunchboxVariant, LunchboxExtraOpti
     },
   ],
 }
+
+export const FALLBACK_LUNCHBOX_DESIGNS: LunchboxDesignOption[] = [
+  { id: 'lunchbox_design_1', label: 'Osito' },
+  { id: 'lunchbox_design_2', label: 'Capibara' },
+]
+
+export const FALLBACK_LUNCHBOX_COMPLEMENTS: LunchboxComplementOption[] = [
+  { id: 'lunchbox_complement_1', label: 'Fruta',    description: 'Uva, durazno y fresa frescos' },
+  { id: 'lunchbox_complement_2', label: 'Gelatina', description: 'Arco iris de sabores' },
+]
 
 const VALID_VARIANTS = new Set<LunchboxVariant>(['lunchbox1', 'lunchbox2'])
 
@@ -208,5 +235,49 @@ export async function loadLunchboxCatalog(): Promise<LunchboxCatalog> {
   return {
     variants,
     extras: extrasByVariant,
+  }
+}
+
+export async function loadLunchboxDesignsAndComplements(): Promise<LunchboxDesignsAndComplements> {
+  const supabase = getSupabaseClient()
+
+  const { data: configData, error } = await supabase
+    .from('app_config')
+    .select('key, value')
+    .like('key', 'lunchbox_%')
+
+  if (error || !configData) {
+    if (error) console.error('LUNCHBOX OPTIONS ERROR:', error)
+    return {
+      designs: FALLBACK_LUNCHBOX_DESIGNS,
+      complements: FALLBACK_LUNCHBOX_COMPLEMENTS,
+      minQuantity: 20,
+    }
+  }
+
+  const configMap = new Map(configData.map(({ key, value }) => [key, value]))
+  
+  const designs: LunchboxDesignOption[] = []
+  for (let i = 1; i <= 10; i++) {
+    const label = configMap.get(`lunchbox_design_${i}_label`)
+    if (!label) break
+    designs.push({ id: `lunchbox_design_${i}`, label })
+  }
+
+  const complements: LunchboxComplementOption[] = []
+  for (let i = 1; i <= 10; i++) {
+    const label = configMap.get(`lunchbox_complement_${i}_label`)
+    const description = configMap.get(`lunchbox_complement_${i}_description`) ?? ''
+    if (!label) break
+    complements.push({ id: `lunchbox_complement_${i}`, label, description })
+  }
+
+  const minQuantityStr = configMap.get('lunchbox_min_quantity')
+  const minQuantity = minQuantityStr ? parseInt(minQuantityStr, 10) : 20
+
+  return { 
+    designs: designs.length > 0 ? designs : FALLBACK_LUNCHBOX_DESIGNS, 
+    complements: complements.length > 0 ? complements : FALLBACK_LUNCHBOX_COMPLEMENTS,
+    minQuantity: isNaN(minQuantity) ? 20 : minQuantity,
   }
 }

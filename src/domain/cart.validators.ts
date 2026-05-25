@@ -11,8 +11,11 @@ export function validateCart(cart: Cart): ValidationResult {
     const errors: string[] = []
 
     cart.items.forEach(item => {
-        if (item.type === "lunchbox" && item.quantity < 20) {
-            errors.push("Lunchbox mínimo 20 piezas")
+        if (item.type === "lunchbox") {
+            const minQty = typeof item.config?.minQuantity === 'number' ? item.config.minQuantity : 20
+            if (item.quantity < minQty) {
+                errors.push(`Lunchbox mínimo ${minQty} piezas`)
+            }
         }
     })
 

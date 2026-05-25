@@ -8,47 +8,33 @@ import type { CartExtra } from '@/domain/cart.domain'
 import {
   FALLBACK_LUNCHBOX_EXTRAS,
   FALLBACK_LUNCHBOX_VARIANTS,
+  FALLBACK_LUNCHBOX_DESIGNS,
+  FALLBACK_LUNCHBOX_COMPLEMENTS,
   loadLunchboxCatalog,
+  loadLunchboxDesignsAndComplements,
   type LunchboxCatalog,
   type LunchboxExtraOption,
   type LunchboxVariant,
+  type LunchboxDesignsAndComplements,
 } from './lunchbox.service'
 
-type LunchboxDesign = 'osito' | 'capibara'
-type LunchboxComplement = 'fruta' | 'gelatina'
+type LunchboxDesignId = string
+type LunchboxComplementId = string
 
 type LunchboxDraft = {
   variant: LunchboxVariant
-  design: LunchboxDesign
-  complement: LunchboxComplement
+  designId: LunchboxDesignId
+  complementId: LunchboxComplementId
   extras: string[]
   quantity: number
 }
 
-const MIN_QUANTITY = 20
-
-const designs: Record<LunchboxDesign, string> = {
-  osito: 'Osito',
-  capibara: 'Capibara',
-}
-
-const complements: Record<LunchboxComplement, { label: string; description: string }> = {
-  fruta: {
-    label: 'Fruta',
-    description: 'Uva, durazno y fresa frescos',
-  },
-  gelatina: {
-    label: 'Gelatina',
-    description: 'Arco iris de sabores',
-  },
-}
-
 const initialDraft: LunchboxDraft = {
   variant: 'lunchbox1',
-  design: 'osito',
-  complement: 'fruta',
+  designId: FALLBACK_LUNCHBOX_DESIGNS[0].id,
+  complementId: FALLBACK_LUNCHBOX_COMPLEMENTS[0].id,
   extras: [],
-  quantity: MIN_QUANTITY,
+  quantity: 20,
 }
 
 function getVariantConfig(catalog: LunchboxCatalog | null, variant: LunchboxVariant) {
@@ -59,9 +45,9 @@ function getAvailableExtras(catalog: LunchboxCatalog | null, variant: LunchboxVa
   return catalog?.extras[variant] ?? FALLBACK_LUNCHBOX_EXTRAS[variant]
 }
 
-function getValidationError(catalog: LunchboxCatalog | null, draft: LunchboxDraft) {
-  if (draft.quantity < MIN_QUANTITY) {
-    return `El pedido mínimo es de ${MIN_QUANTITY} lunchboxes.`
+function getValidationError(catalog: LunchboxCatalog | null, draft: LunchboxDraft, minQuantity: number) {
+  if (draft.quantity < minQuantity) {
+    return `El pedido mínimo es de ${minQuantity} lunchboxes.`
   }
 
   const availableExtraLabels = new Map(
@@ -80,16 +66,23 @@ export default function LunchboxConfiguratorScreen() {
   const [error, setError] = useState('')
   const [addedMessage, setAddedMessage] = useState('')
   const [catalog, setCatalog] = useState<LunchboxCatalog | null>(null)
+  const [designsAndComplements, setDesignsAndComplements] = useState<LunchboxDesignsAndComplements>({
+    designs: FALLBACK_LUNCHBOX_DESIGNS,
+    complements: FALLBACK_LUNCHBOX_COMPLEMENTS,
+    minQuantity: 20,
+  })
   const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
 
   useEffect(() => {
     let cancelled = false
 
-    loadLunchboxCatalog()
-      .then((nextCatalog) => {
+    Promise.all([loadLunchboxCatalog(), loadLunchboxDesignsAndComplements()])
+      .then(([nextCatalog, nextDesignsAndComplements]) => {
         if (!cancelled) {
           setCatalog(nextCatalog)
+          setDesignsAndComplements(nextDesignsAndComplements)
+          setDraft(d => d.quantity < nextDesignsAndComplements.minQuantity ? { ...d, quantity: nextDesignsAndComplements.minQuantity } : d)
         }
       })
       .catch((loadError) => {
@@ -140,10 +133,10 @@ export default function LunchboxConfiguratorScreen() {
     clearFeedback()
   }
 
-  function updateComplement(complement: LunchboxComplement) {
+  function updateComplement(complementId: LunchboxComplementId) {
     setDraft((current) => ({
       ...current,
-      complement,
+      complementId,
     }))
     clearFeedback()
   }
@@ -162,16 +155,8 @@ export default function LunchboxConfiguratorScreen() {
     clearFeedback()
   }
 
-  function updateQuantity(nextQuantity: number) {
-    setDraft((current) => ({
-      ...current,
-      quantity: Number.isFinite(nextQuantity) ? nextQuantity : MIN_QUANTITY,
-    }))
-    clearFeedback()
-  }
-
   function addToCart() {
-    const validationError = getValidationError(catalog, draft)
+    const validationError = getValidationError(catalog, draft, designsAndComplements.minQuantity)
 
     if (validationError) {
       setError(validationError)
@@ -190,8 +175,9 @@ export default function LunchboxConfiguratorScreen() {
       base_price: currentVariant.price,
       config: {
         variant: draft.variant,
-        design: draft.design,
-        complement: draft.complement,
+        design: draft.designId,
+        complement: draft.complementId,
+        minQuantity: designsAndComplements.minQuantity,
         availableExtras,
       },
       includes: [],
@@ -332,9 +318,7 @@ export default function LunchboxConfiguratorScreen() {
                   ${activeCatalog.variants[variant].price} MXN
                 </span>
                 <span className="mt-2 block text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-                  {variant === 'lunchbox1'
-                    ? 'La clásica. Perfecta para eventos. Agrega tus extras favoritos.'
-                    : 'La completa. Más antojo. Incluye opciones premium.'}
+                  {activeCatalog.variants[variant].note}
                 </span>
               </button>
             ))}
@@ -347,13 +331,13 @@ export default function LunchboxConfiguratorScreen() {
             <h3 className="mt-2 text-lg font-semibold">Elige un diseño</h3>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              {(Object.keys(designs) as LunchboxDesign[]).map((design) => (
+              {designsAndComplements.designs.map((design) => (
                 <ChoiceButton
-                  key={design}
-                  label={designs[design]}
-                  selected={draft.design === design}
+                  key={design.id}
+                  label={design.label}
+                  selected={draft.designId === design.id}
                   onClick={() => {
-                    setDraft((current) => ({ ...current, design }))
+                    setDraft((current) => ({ ...current, designId: design.id }))
                     clearFeedback()
                   }}
                 />
@@ -377,13 +361,13 @@ export default function LunchboxConfiguratorScreen() {
                 Complemento
               </p>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                {(Object.keys(complements) as LunchboxComplement[]).map((complement) => (
+                {designsAndComplements.complements.map((complement) => (
                   <ChoiceButton
-                    key={complement}
-                    label={complements[complement].label}
-                    description={complements[complement].description}
-                    selected={draft.complement === complement}
-                    onClick={() => updateComplement(complement)}
+                    key={complement.id}
+                    label={complement.label}
+                    description={complement.description}
+                    selected={draft.complementId === complement.id}
+                    onClick={() => updateComplement(complement.id)}
                   />
                 ))}
               </div>
@@ -456,8 +440,9 @@ export default function LunchboxConfiguratorScreen() {
     <div className="mt-4 flex items-center gap-3">
       <button
         type="button"
-        onClick={() => updateQuantity(Math.max(MIN_QUANTITY, draft.quantity - 1))}
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
+        disabled={draft.quantity <= designsAndComplements.minQuantity}
+        onClick={() => setDraft((c) => ({ ...c, quantity: Math.max(designsAndComplements.minQuantity, c.quantity - 1) }))}
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98] disabled:opacity-50"
         style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
         aria-label="Restar una caja"
       >
@@ -465,16 +450,16 @@ export default function LunchboxConfiguratorScreen() {
       </button>
       <input
         type="number"
-        min={MIN_QUANTITY}
+        min={designsAndComplements.minQuantity}
         value={draft.quantity}
-        onChange={(event) => updateQuantity(Number(event.target.value))}
+        onChange={(event) => setDraft((c) => ({ ...c, quantity: Math.max(designsAndComplements.minQuantity, Number(event.target.value) || designsAndComplements.minQuantity) }))}
         className="h-12 min-w-0 flex-1 rounded-md border px-4 text-center text-lg font-bold outline-none"
         style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
         aria-label="Cantidad de cajas"
       />
       <button
         type="button"
-        onClick={() => updateQuantity(draft.quantity + 1)}
+        onClick={() => setDraft((c) => ({ ...c, quantity: c.quantity + 1 }))}
         className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border text-2xl font-semibold active:scale-[0.98]"
         style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
         aria-label="Agregar una caja"
@@ -482,8 +467,8 @@ export default function LunchboxConfiguratorScreen() {
         +
       </button>
     </div>
-    <p className="mt-3 text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-      Mínimo de {MIN_QUANTITY} piezas para procesar tu pedido.
+    <p className="mt-3 text-center text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
+      Mínimo {designsAndComplements.minQuantity} piezas
     </p>
   </section>
 
@@ -493,13 +478,13 @@ export default function LunchboxConfiguratorScreen() {
     </p>
     <dl className="mt-4 space-y-3 text-sm">
       <SummaryRow label="Caja" value={currentVariant.label} />
-      <SummaryRow label="Diseño" value={designs[draft.design]} />
+      <SummaryRow label="Diseño" value={
+        designsAndComplements.designs.find(d => d.id === draft.designId)?.label ?? draft.designId
+      } />
       <SummaryRow
         label="Complemento"
         value={
-          draft.complement === 'fruta'
-            ? `Fruta (${complements.fruta.description})`
-            : complements.gelatina.label
+          designsAndComplements.complements.find(c => c.id === draft.complementId)?.label ?? draft.complementId
         }
       />
       <SummaryRow

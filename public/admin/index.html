@@ -168,6 +168,39 @@
         <button type="button" data-action="save-extras" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Extras</button>
       </div>
 
+      <!-- Configuración General Lunchbox -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 5px;">Configuración General Lunchbox</h3>
+        <p style="font-size: 13px; color: #999; margin-bottom: 15px;">
+          Reglas generales para los pedidos de Lunchbox.
+        </p>
+        <div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #999; margin-bottom: 5px; text-transform: uppercase;">Cantidad Mínima</label>
+          <input type="number" id="lunchboxMinQty" data-config-key="lunchbox_min_quantity" placeholder="20" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+        </div>
+        <button type="button" data-action="save-lunchbox-general" class="btn" style="width: auto; padding: 10px 20px;">Guardar Configuración</button>
+      </div>
+
+      <!-- Diseños Lunchbox -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 5px;">Diseños Lunchbox</h3>
+        <p style="font-size: 13px; color: #999; margin-bottom: 15px;">
+          Opciones que el cliente ve en el paso "Diseño del pancake" al armar su lunchbox.
+        </p>
+        <div id="designsContainer"></div>
+        <button type="button" data-action="save-designs" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Diseños</button>
+      </div>
+
+      <!-- Complementos Lunchbox -->
+      <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="font-size: 16px; margin-bottom: 5px;">Complementos Lunchbox</h3>
+        <p style="font-size: 13px; color: #999; margin-bottom: 15px;">
+          Opciones que el cliente ve en el paso "Complemento" al armar su lunchbox.
+        </p>
+        <div id="complementsContainer"></div>
+        <button type="button" data-action="save-complements" class="btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Guardar Complementos</button>
+      </div>
+
       <!-- Descuentos por Membresía -->
       <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
         <h3 style="font-size: 16px; margin-bottom: 5px;">Descuentos por Membresía</h3>
