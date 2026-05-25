@@ -236,7 +236,7 @@ export default function LunchboxConfiguratorScreen() {
         </section>
       </header>
 
-      <section className="sticky top-0 z-20 mt-4 border-y px-4 py-3 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.95)' }}>
+      <section className="sticky top-0 z-20 mt-6 border-y px-4 py-4 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(255, 248, 234, 0.97)' }}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
@@ -260,7 +260,7 @@ export default function LunchboxConfiguratorScreen() {
           type="button"
           onClick={addToCart}
           style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
-          className="mt-3 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
+          className="mt-4 w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
         >
           Agregar al carrito
         </button>
