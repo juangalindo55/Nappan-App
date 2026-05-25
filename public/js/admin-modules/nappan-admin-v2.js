@@ -1559,7 +1559,7 @@
       }
     });
 
-    document.addEventListener('click', event => {
+    document.addEventListener('click', async event => {
       const actionEl = event.target.closest('[data-action]');
       if (!actionEl) return;
 
