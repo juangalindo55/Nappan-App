@@ -1,5 +1,5 @@
-import ExplorarScreen from '@/features/explorar/ExplorarScreen'
+import MenuScreen from '@/features/explorar/MenuScreen'
 
 export default function ExplorarPage() {
-  return <ExplorarScreen />
+  return <MenuScreen />
 }

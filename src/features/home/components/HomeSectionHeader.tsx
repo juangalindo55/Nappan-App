@@ -27,7 +27,7 @@ export function HomeSectionHeader() {
           color: '#2A1710',
         }}
       >
-        Ver todos →
+        Ver galería →
       </Link>
     </div>
   )

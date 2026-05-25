@@ -48,7 +48,7 @@ function IconProfile({ active }: { active: boolean }) {
 
 const tabs = [
   { label: 'Inicio',   href: '/',         Icon: IconHome },
-  { label: 'Explorar', href: '/explorar', Icon: IconMenu },
+  { label: 'Galería', href: '/explorar', Icon: IconMenu },
   { label: 'Carrito',  href: '/cart',     Icon: IconCart },
   { label: 'Perfil',   href: '/profile',  Icon: IconProfile },
 ]
