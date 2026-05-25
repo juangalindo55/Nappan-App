@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -335,6 +336,8 @@ export default function LunchboxConfiguratorScreen() {
                 <ChoiceButton
                   key={design.id}
                   label={design.label}
+                  imageSrc={design.imageSrc}
+                  imageAlt={design.imageAlt}
                   selected={draft.designId === design.id}
                   onClick={() => {
                     setDraft((current) => ({ ...current, designId: design.id }))
@@ -521,11 +524,15 @@ export default function LunchboxConfiguratorScreen() {
 function ChoiceButton({
   label,
   description,
+  imageSrc,
+  imageAlt,
   onClick,
   selected,
 }: {
   label: string
   description?: string
+  imageSrc?: string
+  imageAlt?: string
   onClick: () => void
   selected: boolean
 }) {
@@ -533,13 +540,24 @@ function ChoiceButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-[56px] flex-col items-center justify-center rounded-md border px-3 py-2 text-center transition active:scale-[0.99]"
+      className="flex min-h-[56px] flex-col overflow-hidden rounded-md border px-3 py-3 text-center transition active:scale-[0.99]"
       style={{
         borderColor: selected ? 'var(--gold)' : 'var(--border)',
         background: selected ? 'var(--gold-dim)' : 'var(--surface-2)',
         color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
       }}
     >
+      {imageSrc ? (
+        <span className="relative mb-2 flex h-28 w-full items-center justify-center overflow-hidden rounded-md border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
+          <Image
+            src={imageSrc}
+            alt={imageAlt ?? label}
+            fill
+            className="object-contain p-2"
+            sizes="(max-width: 768px) 50vw, 220px"
+          />
+        </span>
+      ) : null}
       <span className="text-sm font-semibold leading-tight">{label}</span>
       {description ? (
         <span className="mt-1 text-[10px] leading-tight opacity-60">

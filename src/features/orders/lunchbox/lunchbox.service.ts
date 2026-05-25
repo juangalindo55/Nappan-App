@@ -22,6 +22,8 @@ export type LunchboxCatalog = {
 export type LunchboxDesignOption = {
   id: string
   label: string
+  imageSrc: string
+  imageAlt: string
 }
 
 export type LunchboxComplementOption = {
@@ -102,8 +104,18 @@ export const FALLBACK_LUNCHBOX_EXTRAS: Record<LunchboxVariant, LunchboxExtraOpti
 }
 
 export const FALLBACK_LUNCHBOX_DESIGNS: LunchboxDesignOption[] = [
-  { id: 'lunchbox_design_1', label: 'Osito' },
-  { id: 'lunchbox_design_2', label: 'Capibara' },
+  {
+    id: 'lunchbox_design_1',
+    label: 'Osito',
+    imageSrc: '/images/nappan/box-croissant.jpg',
+    imageAlt: 'Lunchbox Osito',
+  },
+  {
+    id: 'lunchbox_design_2',
+    label: 'Capibara',
+    imageSrc: '/images/nappan/capibara.png',
+    imageAlt: 'Lunchbox Capibara',
+  },
 ]
 
 export const FALLBACK_LUNCHBOX_COMPLEMENTS: LunchboxComplementOption[] = [
@@ -261,7 +273,13 @@ export async function loadLunchboxDesignsAndComplements(): Promise<LunchboxDesig
   for (let i = 1; i <= 10; i++) {
     const label = configMap.get(`lunchbox_design_${i}_label`)
     if (!label) break
-    designs.push({ id: `lunchbox_design_${i}`, label })
+    const fallbackDesign = FALLBACK_LUNCHBOX_DESIGNS[i - 1] ?? FALLBACK_LUNCHBOX_DESIGNS[0]
+    designs.push({
+      id: `lunchbox_design_${i}`,
+      label,
+      imageSrc: fallbackDesign.imageSrc,
+      imageAlt: fallbackDesign.imageAlt,
+    })
   }
 
   const complements: LunchboxComplementOption[] = []
