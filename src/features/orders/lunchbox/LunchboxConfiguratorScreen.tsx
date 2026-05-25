@@ -24,12 +24,12 @@ const variants: Record<LunchboxVariant, { label: string; price: number; note: st
   lunchbox1: {
     label: 'Lunchbox 1',
     price: 125,
-    note: 'Caja base para eventos. Permite agregar salchipulpos.',
+    note: 'La clásica. Perfecta para eventos. Agrega tus extras favoritos.',
   },
   lunchbox2: {
     label: 'Lunchbox 2',
     price: 130,
-    note: 'Caja con más antojo. Permite cambio a croissant.',
+    note: 'La completa. Más antojo. Incluye opciones premium.',
   },
 }
 
@@ -41,11 +41,11 @@ const designs: Record<LunchboxDesign, string> = {
 const complements: Record<LunchboxComplement, { label: string; description: string }> = {
   fruta: {
     label: 'Fruta',
-    description: 'Uva, Durazno y Fresa',
+    description: 'Uva, durazno y fresa frescos',
   },
   gelatina: {
     label: 'Gelatina',
-    description: 'Mosaico de colores',
+    description: 'Arco iris de sabores',
   },
 }
 
@@ -56,12 +56,12 @@ const extras: Record<LunchboxExtra, { label: string; price: number; allowedVaria
     allowedVariant: 'lunchbox1',
   },
   nucolato: {
-    label: 'Cambio a Nucolato',
+    label: 'Upgrade a Nucolato',
     price: 5,
     allowedVariant: 'both',
   },
   croissant: {
-    label: 'Croissant completo',
+    label: 'Agrega un croissant delicioso',
     price: 20,
     allowedVariant: 'lunchbox2',
   },
