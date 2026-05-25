@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cart.store'
@@ -28,6 +29,19 @@ const FITBAR_DESCRIPTIONS: Record<string, string> = {
   'FITBAR-COMBO-FIT':      'Bebida + snack proteico',
   'FITBAR-POWER-PANCAKES': 'Mini pancakes de avena',
   'FITBAR-PROTEIN-MINIS':  'Bocados proteicos sin azúcar',
+}
+
+const FITBAR_IMAGES: Record<string, string> = {
+  'FITBAR-BLACK-COFFEE':   '/images/nappan/black-coffee.webp',
+  'FITBAR-COLD-BREW':      '/images/nappan/cold-brew.webp',
+  'FITBAR-COLD-LATTE':     '/images/nappan/cold-protein-latte.webp',
+  'FITBAR-DETOX-GLOW':     '/images/nappan/detox-glow.webp',
+  'FITBAR-ENERGY-BOOST':   '/images/nappan/energy-boost.webp',
+  'FITBAR-GOLDEN-POWER':   '/images/nappan/golden-power.webp',
+  'FITBAR-COMBO-SHOTS':    '/images/nappan/mario.webp',
+  'FITBAR-COMBO-FIT':      '/images/nappan/protein-minipancakes.webp',
+  'FITBAR-POWER-PANCAKES': '/images/nappan/protein-minipancakes.webp',
+  'FITBAR-PROTEIN-MINIS':  '/images/nappan/pancakeart-capibara.png',
 }
 
 const FITBAR_GRADIENTS: Record<string, string> = {
@@ -164,6 +178,7 @@ function ProductCardMobile({
   onDecrease: () => void
 }) {
   const description = product.description ?? FITBAR_DESCRIPTIONS[product.sku]
+  const imageSrc = FITBAR_IMAGES[product.sku]
   const gradient = FITBAR_GRADIENTS[product.sku] ?? 'linear-gradient(160deg,#2A1710,#D89B2B)'
 
   return (
@@ -173,9 +188,20 @@ function ProductCardMobile({
     >
       {/* Image block */}
       <div
-        className="w-24 shrink-0"
-        style={{ background: gradient, minHeight: '88px' }}
-      />
+        className="relative w-24 shrink-0 overflow-hidden"
+        style={{ minHeight: '88px' }}
+      >
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div style={{ background: gradient, width: '100%', height: '100%' }} />
+        )}
+      </div>
 
       {/* Info */}
       <div className="flex flex-1 items-center gap-2 px-3 py-3">
@@ -237,6 +263,7 @@ function ProductCardDesktop({
   onIncrease: () => void
   onDecrease: () => void
 }) {
+  const imageSrc = FITBAR_IMAGES[product.sku]
   const gradient = FITBAR_GRADIENTS[product.sku] ?? 'linear-gradient(160deg,#2A1710,#D89B2B)'
 
   return (
@@ -245,7 +272,16 @@ function ProductCardDesktop({
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}
     >
       {/* Image */}
-      <div className="h-24 w-full" style={{ background: gradient }} />
+      <div className="relative h-24 w-full overflow-hidden" style={{ background: gradient }}>
+        {imageSrc && (
+          <Image
+            src={imageSrc}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        )}
+      </div>
 
       {/* Quantity badge */}
       {quantity > 0 && (
