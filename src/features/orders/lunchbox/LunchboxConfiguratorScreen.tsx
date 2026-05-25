@@ -197,7 +197,7 @@ export default function LunchboxConfiguratorScreen() {
 
   return (
     <main
-      className="desktop-nav-offset hide-scrollbar min-h-dvh overflow-y-auto pb-8"
+      className="desktop-nav-offset hide-scrollbar overflow-y-auto"
       style={{
         background: 'var(--bg-primary)',
         color: 'var(--text-primary)',
@@ -220,14 +220,14 @@ export default function LunchboxConfiguratorScreen() {
           <div className="relative min-h-[180px] bg-[radial-gradient(circle_at_24%_18%,#D89B2B_0%,#8E2C20_36%,#FFF8EA_76%)] p-6">
             <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
             <div className="relative flex h-full min-h-[148px] flex-col justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: '#FFF8EA' }}>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--bg-primary)' }}>
                 Pedido para eventos
               </p>
               <div>
                 <h1 className="text-4xl font-semibold leading-none">
                   Cajas Lunchbox
                 </h1>
-                <p className="mt-3 max-w-[380px] text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
+                <p className="mt-3 max-w-[380px] text-sm leading-6" style={{ color: 'rgba(255, 248, 234, 0.85)' }}>
                   Personaliza cajas para cumpleaños, colegios y cualquier celebración. Diseños únicos, extras deliciosos. Mínimo 20 piezas.
                 </p>
               </div>
@@ -508,26 +508,6 @@ export default function LunchboxConfiguratorScreen() {
   </section>
       </section>
     </main>
-  )
-}
-
-function ConfigSection({
-  children,
-  eyebrow,
-  title,
-}: {
-  children: React.ReactNode
-  eyebrow: string
-  title: string
-}) {
-  return (
-    <section className="rounded-lg border p-4" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
-      <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--text-secondary)' }}>
-        Paso {eyebrow}
-      </p>
-      <h2 className="mt-1 text-xl font-semibold">{title}</h2>
-      <div className="mt-3">{children}</div>
-    </section>
   )
 }
 
