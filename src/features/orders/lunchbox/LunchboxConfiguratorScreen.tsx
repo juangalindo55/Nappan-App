@@ -2,37 +2,30 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cart.store'
 import type { CartExtra } from '@/domain/cart.domain'
+import {
+  FALLBACK_LUNCHBOX_EXTRAS,
+  FALLBACK_LUNCHBOX_VARIANTS,
+  loadLunchboxCatalog,
+  type LunchboxCatalog,
+  type LunchboxExtraOption,
+  type LunchboxVariant,
+} from './lunchbox.service'
 
-type LunchboxVariant = 'lunchbox1' | 'lunchbox2'
 type LunchboxDesign = 'osito' | 'capibara'
 type LunchboxComplement = 'fruta' | 'gelatina'
-type LunchboxExtra = 'salchipulpos' | 'nucolato' | 'croissant'
 
 type LunchboxDraft = {
   variant: LunchboxVariant
   design: LunchboxDesign
   complement: LunchboxComplement
-  extras: LunchboxExtra[]
+  extras: string[]
   quantity: number
 }
 
 const MIN_QUANTITY = 20
-
-const variants: Record<LunchboxVariant, { label: string; price: number; note: string }> = {
-  lunchbox1: {
-    label: 'Lunchbox 1',
-    price: 125,
-    note: 'La clásica. Perfecta para eventos. Agrega tus extras favoritos.',
-  },
-  lunchbox2: {
-    label: 'Lunchbox 2',
-    price: 130,
-    note: 'La completa. Más antojo. Incluye opciones premium.',
-  },
-}
 
 const designs: Record<LunchboxDesign, string> = {
   osito: 'Osito',
@@ -50,24 +43,6 @@ const complements: Record<LunchboxComplement, { label: string; description: stri
   },
 }
 
-const extras: Record<LunchboxExtra, { label: string; price: number; allowedVariant: LunchboxVariant | 'both' }> = {
-  salchipulpos: {
-    label: 'Salchipulpos + catsup',
-    price: 25,
-    allowedVariant: 'lunchbox1',
-  },
-  nucolato: {
-    label: 'Upgrade a Nucolato',
-    price: 5,
-    allowedVariant: 'both',
-  },
-  croissant: {
-    label: 'Agrega un croissant delicioso',
-    price: 20,
-    allowedVariant: 'lunchbox2',
-  },
-}
-
 const initialDraft: LunchboxDraft = {
   variant: 'lunchbox1',
   design: 'osito',
@@ -76,29 +51,25 @@ const initialDraft: LunchboxDraft = {
   quantity: MIN_QUANTITY,
 }
 
-function isExtraAllowed(extra: LunchboxExtra, variant: LunchboxVariant) {
-  const allowedVariant = extras[extra].allowedVariant
-  return allowedVariant === 'both' || allowedVariant === variant
+function getVariantConfig(catalog: LunchboxCatalog | null, variant: LunchboxVariant) {
+  return catalog?.variants[variant] ?? FALLBACK_LUNCHBOX_VARIANTS[variant]
 }
 
-function getAvailableExtras(variant: LunchboxVariant): CartExtra[] {
-  return (Object.keys(extras) as LunchboxExtra[])
-    .filter((extra) => isExtraAllowed(extra, variant))
-    .map((extra) => ({
-      id: extra,
-      label: extras[extra].label,
-      price: extras[extra].price,
-    }))
+function getAvailableExtras(catalog: LunchboxCatalog | null, variant: LunchboxVariant): LunchboxExtraOption[] {
+  return catalog?.extras[variant] ?? FALLBACK_LUNCHBOX_EXTRAS[variant]
 }
 
-function getValidationError(draft: LunchboxDraft) {
+function getValidationError(catalog: LunchboxCatalog | null, draft: LunchboxDraft) {
   if (draft.quantity < MIN_QUANTITY) {
     return `El pedido mínimo es de ${MIN_QUANTITY} lunchboxes.`
   }
 
-  const invalidExtra = draft.extras.find((extra) => !isExtraAllowed(extra, draft.variant))
+  const availableExtraLabels = new Map(
+    getAvailableExtras(catalog, draft.variant).map((extra) => [extra.id, extra.label] as const),
+  )
+  const invalidExtra = draft.extras.find((extraId) => !availableExtraLabels.has(extraId))
   if (invalidExtra) {
-    return `${extras[invalidExtra].label} no está disponible para ${variants[draft.variant].label}.`
+    return `${availableExtraLabels.get(invalidExtra) ?? 'Este extra'} no está disponible para ${getVariantConfig(catalog, draft.variant).label}.`
   }
 
   return null
@@ -108,14 +79,49 @@ export default function LunchboxConfiguratorScreen() {
   const [draft, setDraft] = useState<LunchboxDraft>(initialDraft)
   const [error, setError] = useState('')
   const [addedMessage, setAddedMessage] = useState('')
+  const [catalog, setCatalog] = useState<LunchboxCatalog | null>(null)
   const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
 
-  const extrasTotal = useMemo(
-    () => draft.extras.reduce((total, extra) => total + extras[extra].price, 0),
-    [draft.extras],
+  useEffect(() => {
+    let cancelled = false
+
+    loadLunchboxCatalog()
+      .then((nextCatalog) => {
+        if (!cancelled) {
+          setCatalog(nextCatalog)
+        }
+      })
+      .catch((loadError) => {
+        console.error('LUNCHBOX CATALOG ERROR:', loadError)
+        if (!cancelled) {
+          setCatalog({
+            variants: FALLBACK_LUNCHBOX_VARIANTS,
+            extras: FALLBACK_LUNCHBOX_EXTRAS,
+          })
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const activeCatalog = catalog ?? {
+    variants: FALLBACK_LUNCHBOX_VARIANTS,
+    extras: FALLBACK_LUNCHBOX_EXTRAS,
+  }
+  const currentVariant = getVariantConfig(catalog, draft.variant)
+  const currentExtras = getAvailableExtras(catalog, draft.variant)
+  const currentExtrasById = useMemo(
+    () => new Map(currentExtras.map((extra) => [extra.id, extra] as const)),
+    [currentExtras],
   )
-  const unitPrice = variants[draft.variant].price + extrasTotal
+  const extrasTotal = useMemo(
+    () => draft.extras.reduce((total, extraId) => total + (currentExtrasById.get(extraId)?.price ?? 0), 0),
+    [draft.extras, currentExtrasById],
+  )
+  const unitPrice = currentVariant.price + extrasTotal
   const orderTotal = unitPrice * draft.quantity
 
   function clearFeedback() {
@@ -124,10 +130,12 @@ export default function LunchboxConfiguratorScreen() {
   }
 
   function updateVariant(variant: LunchboxVariant) {
+    const nextAllowedExtras = new Set(getAvailableExtras(catalog, variant).map((extra) => extra.id))
+
     setDraft((current) => ({
       ...current,
       variant,
-      extras: current.extras.filter((extra) => isExtraAllowed(extra, variant)),
+      extras: current.extras.filter((extraId) => nextAllowedExtras.has(extraId)),
     }))
     clearFeedback()
   }
@@ -140,16 +148,16 @@ export default function LunchboxConfiguratorScreen() {
     clearFeedback()
   }
 
-  function toggleExtra(extra: LunchboxExtra) {
-    if (!isExtraAllowed(extra, draft.variant)) {
+  function toggleExtra(extraId: string) {
+    if (!currentExtrasById.has(extraId)) {
       return
     }
 
     setDraft((current) => ({
       ...current,
-      extras: current.extras.includes(extra)
-        ? current.extras.filter((item) => item !== extra)
-        : [...current.extras, extra],
+      extras: current.extras.includes(extraId)
+        ? current.extras.filter((item) => item !== extraId)
+        : [...current.extras, extraId],
     }))
     clearFeedback()
   }
@@ -163,7 +171,7 @@ export default function LunchboxConfiguratorScreen() {
   }
 
   function addToCart() {
-    const validationError = getValidationError(draft)
+    const validationError = getValidationError(catalog, draft)
 
     if (validationError) {
       setError(validationError)
@@ -171,28 +179,33 @@ export default function LunchboxConfiguratorScreen() {
       return
     }
 
+    const availableExtras = getAvailableExtras(catalog, draft.variant)
+
     setError('')
     addItem({
       type: 'lunchbox',
       sku: draft.variant,
-      name: variants[draft.variant].label,
+      name: currentVariant.label,
       quantity: draft.quantity,
-      base_price: variants[draft.variant].price,
+      base_price: currentVariant.price,
       config: {
         variant: draft.variant,
         design: draft.design,
         complement: draft.complement,
-        availableExtras: getAvailableExtras(draft.variant),
+        availableExtras,
       },
       includes: [],
-      extras: draft.extras.map((extra) => ({
-        id: extra,
-        label: extras[extra].label,
-        price: extras[extra].price,
-      })) as CartExtra[],
+      extras: draft.extras
+        .map((extraId) => currentExtrasById.get(extraId))
+        .filter((extra): extra is LunchboxExtraOption => extra != null)
+        .map((extra) => ({
+          id: extra.id,
+          label: extra.label,
+          price: extra.price,
+        })) as CartExtra[],
     })
     setAddedMessage(
-      `${draft.quantity} ${variants[draft.variant].label} agregadas al carrito.`,
+      `${draft.quantity} ${currentVariant.label} agregadas al carrito.`,
     )
     setDraft(initialDraft)
     router.push('/cart')
@@ -301,7 +314,7 @@ export default function LunchboxConfiguratorScreen() {
           <h2 className="mt-2 text-2xl font-semibold">Elige tu caja</h2>
 
           <div className="mt-5 space-y-3">
-            {(Object.keys(variants) as LunchboxVariant[]).map((variant) => (
+            {(Object.keys(activeCatalog.variants) as LunchboxVariant[]).map((variant) => (
               <button
                 key={variant}
                 type="button"
@@ -313,10 +326,10 @@ export default function LunchboxConfiguratorScreen() {
                 }}
               >
                 <span className="block text-xl font-semibold leading-tight">
-                  {variants[variant].label}
+                  {activeCatalog.variants[variant].label}
                 </span>
                 <span className="mt-2 block text-lg font-bold" style={{ color: 'var(--gold)' }}>
-                  ${variants[variant].price} MXN
+                  ${activeCatalog.variants[variant].price} MXN
                 </span>
                 <span className="mt-2 block text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
                   {variant === 'lunchbox1'
@@ -381,34 +394,27 @@ export default function LunchboxConfiguratorScreen() {
                 Extras
               </p>
               <div className="mt-3 space-y-2">
-                {(Object.keys(extras) as LunchboxExtra[]).map((extra) => {
-                  const isAllowed = isExtraAllowed(extra, draft.variant)
-                  const isSelected = draft.extras.includes(extra)
-                  const unavailableText =
-                    extras[extra].allowedVariant === 'both'
-                      ? ''
-                      : `Solo para ${variants[extras[extra].allowedVariant].label}`
+                {currentExtras.map((extra) => {
+                  const isSelected = draft.extras.includes(extra.id)
 
                   return (
                     <button
-                      key={extra}
+                      key={extra.id}
                       type="button"
-                      disabled={!isAllowed}
-                      onClick={() => toggleExtra(extra)}
+                      onClick={() => toggleExtra(extra.id)}
                       className="flex min-h-[60px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left transition"
                       style={{
                         borderColor: isSelected ? 'var(--gold)' : 'var(--border)',
                         background: isSelected ? 'var(--gold-dim)' : 'var(--surface-2)',
-                        opacity: isAllowed ? 1 : 0.5,
-                        cursor: isAllowed ? 'pointer' : 'not-allowed',
+                        cursor: 'pointer',
                       }}
                     >
                       <span>
                         <span className="block text-sm font-semibold leading-5">
-                          {extras[extra].label}
+                          {extra.label}
                         </span>
                         <span className="mt-1 block text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          {isAllowed ? `+$${extras[extra].price} MXN` : unavailableText}
+                          +${extra.price} MXN
                         </span>
                       </span>
                       <span
@@ -486,7 +492,7 @@ export default function LunchboxConfiguratorScreen() {
       Resumen final
     </p>
     <dl className="mt-4 space-y-3 text-sm">
-      <SummaryRow label="Caja" value={variants[draft.variant].label} />
+      <SummaryRow label="Caja" value={currentVariant.label} />
       <SummaryRow label="Diseño" value={designs[draft.design]} />
       <SummaryRow
         label="Complemento"
@@ -500,7 +506,9 @@ export default function LunchboxConfiguratorScreen() {
         label="Extras"
         value={
           draft.extras.length
-            ? draft.extras.map((extra) => extras[extra].label).join(', ')
+            ? draft.extras
+                .map((extraId) => currentExtrasById.get(extraId)?.label ?? extraId)
+                .join(', ')
             : 'Sin extras'
         }
       />
