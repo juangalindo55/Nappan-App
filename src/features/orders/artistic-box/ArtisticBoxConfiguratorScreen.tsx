@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cart.store'
 import type { CartExtra } from '@/domain/cart.domain'
@@ -76,6 +77,7 @@ export default function ArtisticBoxConfiguratorScreen() {
   const [draft, setDraft] = useState<ArtisticDraft>(initialDraft)
   const [error, setError] = useState('')
   const [addedMessage, setAddedMessage] = useState('')
+  const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
 
   const extrasTotal = useMemo(
@@ -149,6 +151,7 @@ export default function ArtisticBoxConfiguratorScreen() {
     })
     setAddedMessage(`${draft.quantity} ${variants[draft.variant].label} agregada al carrito.`)
     setDraft(initialDraft)
+    router.push('/cart')
   }
 
   return (
@@ -440,6 +443,17 @@ export default function ArtisticBoxConfiguratorScreen() {
             <SummaryRow label="Cantidad" value={`${draft.quantity} piezas`} />
           </dl>
         </section>
+      </section>
+
+      <section className="sticky bottom-0 z-20 border-t px-4 py-3" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
+        <button
+          type="button"
+          onClick={addToCart}
+          style={{ background: 'var(--gold)', color: 'var(--bg-primary)' }}
+          className="w-full rounded-md px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
+        >
+          Agregar al carrito
+        </button>
       </section>
     </main>
   )

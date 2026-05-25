@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cart.store'
 import { listFitbarProducts, type FitbarProductRow } from './fitbar.service'
@@ -70,7 +71,7 @@ type FitbarQuantityMap = Record<string, number>
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function FitbarHeader({ total }: { total: number }) {
+function FitbarHeader({ total, canSubmit, onAdd }: { total: number; canSubmit: boolean; onAdd: () => void }) {
   const progress = Math.min((total / MIN_TOTAL) * 100, 100)
   const remaining = Math.max(MIN_TOTAL - total, 0)
 
@@ -125,6 +126,21 @@ function FitbarHeader({ total }: { total: number }) {
           />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onAdd}
+        disabled={!canSubmit}
+        className="mt-4 w-full rounded-xl px-4 py-3.5 text-sm font-bold transition active:scale-[0.99] disabled:opacity-60"
+        style={{
+          background: canSubmit ? '#D89B2B' : 'rgba(255,248,234,0.14)',
+          color: canSubmit ? '#2A1710' : 'rgba(255,248,234,0.55)',
+        }}
+      >
+        {canSubmit
+          ? `Agregar al carrito · $${total.toLocaleString('es-MX')} MXN`
+          : `Faltan $${remaining.toLocaleString('es-MX')} MXN para el mínimo`}
+      </button>
     </header>
   )
 }
@@ -404,6 +420,7 @@ export default function FitbarOrderScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
+  const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
 
   useEffect(() => {
@@ -475,6 +492,7 @@ export default function FitbarOrderScreen() {
 
     setFeedback('Selección agregada al carrito.')
     setQuantities(products.reduce<FitbarQuantityMap>((acc, p) => { acc[p.sku] = 0; return acc }, {}))
+    router.push('/cart')
   }
 
   return (
@@ -486,7 +504,7 @@ export default function FitbarOrderScreen() {
         paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <FitbarHeader total={total} />
+      <FitbarHeader total={total} canSubmit={canSubmit} onAdd={addSelectionToCart} />
       <CategoryTabs active={activeCategory} onChange={setActiveCategory} />
 
       <section className="px-4 pb-4 pt-4">
