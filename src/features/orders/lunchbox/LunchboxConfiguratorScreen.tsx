@@ -204,8 +204,8 @@ export default function LunchboxConfiguratorScreen() {
         paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))'
       }}
     >
-      <header className="px-4 pt-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <header className="px-4 pt-8 pb-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <div className="flex-1" />
           <Link
             href="/order"
@@ -217,18 +217,18 @@ export default function LunchboxConfiguratorScreen() {
           </Link>
         </div>
         <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
-          <div className="relative min-h-[148px] bg-[radial-gradient(circle_at_24%_18%,#D89B2B_0%,#8E2C20_36%,#FFF8EA_76%)] p-4">
+          <div className="relative min-h-[180px] bg-[radial-gradient(circle_at_24%_18%,#D89B2B_0%,#8E2C20_36%,#FFF8EA_76%)] p-6">
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
-            <div className="relative flex h-full min-h-[116px] flex-col justify-between">
+            <div className="relative flex h-full min-h-[148px] flex-col justify-between">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-primary)' }}>
                 Pedido para eventos
               </p>
               <div>
                 <h1 className="text-4xl font-semibold leading-none">
-                  Caja Lunchbox
+                  Cajas Lunchbox
                 </h1>
-                <p className="mt-2 max-w-[300px] text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
-                  Configura cajas para cumpleaños, colegios y celebraciones. Mínimo 20 piezas.
+                <p className="mt-3 max-w-[380px] text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
+                  Personaliza cajas para cumpleaños, colegios y cualquier celebración. Diseños únicos, extras deliciosos. Mínimo 20 piezas.
                 </p>
               </div>
             </div>
