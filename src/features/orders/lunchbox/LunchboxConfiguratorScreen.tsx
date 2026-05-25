@@ -290,49 +290,61 @@ export default function LunchboxConfiguratorScreen() {
         ) : null}
       </section>
 
-      <section className="space-y-3 px-4 pt-4">
-        <ConfigSection eyebrow="1" title="Tipo de caja">
-          <div className="grid grid-cols-2 gap-2">
+      <section className="space-y-6 px-4 pt-6">
+        <section className="rounded-lg border p-6" style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-secondary)' }}>
+            Paso 1
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Elige tu caja</h2>
+
+          <div className="mt-5 space-y-3">
             {(Object.keys(variants) as LunchboxVariant[]).map((variant) => (
               <button
                 key={variant}
                 type="button"
                 onClick={() => updateVariant(variant)}
-                className="min-h-[126px] rounded-lg border p-3 text-left transition active:scale-[0.99]"
+                className="w-full rounded-lg border p-5 text-left transition active:scale-[0.99]"
                 style={{
                   borderColor: draft.variant === variant ? 'var(--gold)' : 'var(--border)',
                   background: draft.variant === variant ? 'var(--gold-dim)' : 'var(--surface-2)',
                 }}
               >
-                <span className="block text-lg font-semibold leading-5">
+                <span className="block text-xl font-semibold leading-tight">
                   {variants[variant].label}
                 </span>
-                <span className="mt-2 block text-sm font-bold" style={{ color: 'var(--gold)' }}>
+                <span className="mt-2 block text-lg font-bold" style={{ color: 'var(--gold)' }}>
                   ${variants[variant].price} MXN
                 </span>
-                <span className="mt-2 block text-xs leading-4" style={{ color: 'var(--text-secondary)' }}>
-                  {variants[variant].note}
+                <span className="mt-2 block text-sm leading-5" style={{ color: 'var(--text-secondary)' }}>
+                  {variant === 'lunchbox1'
+                    ? 'La clásica. Perfecta para eventos. Agrega tus extras favoritos.'
+                    : 'La completa. Más antojo. Incluye opciones premium.'}
                 </span>
               </button>
             ))}
           </div>
-        </ConfigSection>
 
-        <ConfigSection eyebrow="2" title="Diseño del pancake">
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(designs) as LunchboxDesign[]).map((design) => (
-              <ChoiceButton
-                key={design}
-                label={designs[design]}
-                selected={draft.design === design}
-                onClick={() => {
-                  setDraft((current) => ({ ...current, design }))
-                  clearFeedback()
-                }}
-              />
-            ))}
+          <div className="mt-6 border-t pt-6" style={{ borderColor: 'var(--border)' }}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-secondary)' }}>
+              Diseño del pancake
+            </p>
+            <h3 className="mt-2 text-lg font-semibold">Elige un diseño</h3>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {(Object.keys(designs) as LunchboxDesign[]).map((design) => (
+                <ChoiceButton
+                  key={design}
+                  label={designs[design]}
+                  selected={draft.design === design}
+                  onClick={() => {
+                    setDraft((current) => ({ ...current, design }))
+                    clearFeedback()
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </ConfigSection>
+        </section>
 
         <ConfigSection eyebrow="3" title="Complemento">
           <div className="grid grid-cols-2 gap-2">
