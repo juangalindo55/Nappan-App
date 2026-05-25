@@ -218,9 +218,9 @@ export default function LunchboxConfiguratorScreen() {
         </div>
         <section className="overflow-hidden rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
           <div className="relative min-h-[180px] bg-[radial-gradient(circle_at_24%_18%,#D89B2B_0%,#8E2C20_36%,#FFF8EA_76%)] p-6">
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t" style={{ color: 'var(--bg-primary)' }} />
+            <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
             <div className="relative flex h-full min-h-[148px] flex-col justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: '#FFF8EA' }}>
                 Pedido para eventos
               </p>
               <div>
