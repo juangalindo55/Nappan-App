@@ -36,6 +36,19 @@
     return div.innerHTML;
   }
 
+  // Parses a YYYY-MM-DD date-only string in the local timezone
+  function parseLocalDateString(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+      const day = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+    return new Date(dateStr);
+  }
+
   function normalizePhone(phone) {
     return (phone || '').replace(/\D/g, '');
   }
@@ -298,7 +311,7 @@
 
       // Detail row
       if (isExpanded) {
-        const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
+        const deliveryDate = order.delivery_date ? parseLocalDateString(order.delivery_date).toLocaleDateString('es-MX') : 'No especificada';
         const deliveryTime = order.delivery_time || order.deliveryTime || 'No especificada';
         const phone = order.customer_phone || 'No proporcionado';
         const notes = order.notes || 'Sin notas';

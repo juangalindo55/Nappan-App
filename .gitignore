@@ -21,3 +21,4 @@ server.log
 
 # Git worktrees
 .worktrees/
+.vercel
